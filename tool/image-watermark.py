@@ -13,7 +13,7 @@ from pathlib import Path
 def print_header():
     """In header của tool"""
     print("=" * 60)
-    print("  TOOL THEM WATERMARK VAO ANH")
+    print("  TOOL THÊM WATERMARK VÀO ẢNH")
     print("=" * 60)
     print()
 
@@ -29,8 +29,8 @@ def check_dependencies():
         from PIL import Image
         return True
     except ImportError:
-        print("❌ Thieu thu vien Pillow!")
-        print("Cai dat: pip install Pillow")
+        print("❌ Thiếu thư viện Pillow!")
+        print("Cài đặt: pip install Pillow")
         return False
 
 
@@ -251,10 +251,10 @@ def batch_watermark(input_folder, output_folder, watermark_config):
     ]
     
     if not image_files:
-        print("❌ Khong tim thay anh nao!")
+        print("❌ Không tìm thấy ảnh nào!")
         return 0, 0
     
-    print(f"📸 Tim thay {len(image_files)} anh\n")
+    print(f"📸 Tìm thấy {len(image_files)} ảnh\n")
     
     success_count = 0
     error_count = 0
@@ -330,7 +330,7 @@ def save_template(template_name, config):
     with open(templates_file, 'w', encoding='utf-8') as f:
         json.dump(templates, f, indent=2, ensure_ascii=False)
     
-    print(f"✅ Da luu template: {template_name}")
+    print(f"✅ Đã lưu template: {template_name}")
 
 
 def load_templates():
@@ -354,10 +354,10 @@ def list_templates():
     templates = load_templates()
     
     if not templates:
-        print("Chua co template nao duoc luu.")
+        print("Chưa có template nào được lưu.")
         return None
     
-    print("\n===== TEMPLATES DA LUU =====")
+    print("\n===== TEMPLATES ĐÃ LƯU =====")
     template_list = list(templates.keys())
     
     for idx, name in enumerate(template_list, 1):
@@ -370,7 +370,7 @@ def list_templates():
         print(f"   Opacity: {config.get('opacity', 128)}")
         print()
     
-    choice = input("Chon template (Enter de bo qua): ").strip()
+    choice = input("Chọn template (Enter để bỏ qua): ").strip()
     
     if choice.isdigit() and 1 <= int(choice) <= len(template_list):
         template_name = template_list[int(choice) - 1]
@@ -395,16 +395,16 @@ def main():
     if not check_dependencies():
         return
     
-    print("===== CHE DO =====")
-    print("1. Text Watermark (chu)")
+    print("===== CHẾ ĐỘ =====")
+    print("1. Text Watermark (chữ)")
     print("2. Image Watermark (logo)")
-    print("3. Dung Template da luu")
-    print("0. Thoat")
+    print("3. Dùng Template đã lưu")
+    print("0. Thoát")
     
-    mode = input("\nChon che do (0-3): ").strip()
+    mode = input("\nChọn chế độ (0-3): ").strip()
     
     if mode == "0":
-        print("Thoat chuong trinh.")
+        print("Thoát chương trình.")
         return
     
     watermark_config = {}
@@ -413,8 +413,8 @@ def main():
         # Load template
         config = list_templates()
         if not config:
-            print("\n❌ Khong co template nao. Tao moi:")
-            mode = input("Chon che do (1=Text, 2=Image): ").strip()
+            print("\n❌ Không có template nào. Tạo mới:")
+            mode = input("Chọn chế độ (1=Text, 2=Image): ").strip()
         else:
             watermark_config = config
             mode = None  # Skip config input
@@ -422,9 +422,9 @@ def main():
     # Config watermark
     if mode == "1":
         # Text watermark
-        print("\n===== THIET LAP TEXT WATERMARK =====")
+        print("\n===== THIẾT LẬP TEXT WATERMARK =====")
         
-        text = input("Nhap text watermark (vd: © 2024 Your Name): ").strip()
+        text = input("Nhập text watermark (vd: © 2024 Your Name): ").strip()
         if not text:
             text = "© 2024"
         
@@ -433,28 +433,28 @@ def main():
         
     elif mode == "2":
         # Image watermark
-        print("\n===== THIET LAP IMAGE WATERMARK =====")
+        print("\n===== THIẾT LẬP IMAGE WATERMARK =====")
         
-        logo_path = input("Nhap duong dan logo/watermark (PNG trong suot): ").strip('"')
+        logo_path = input("Nhập đường dẫn logo/watermark (PNG trong suốt): ").strip('"')
         if not os.path.isfile(logo_path):
-            print("❌ File logo khong ton tai!")
+            print("❌ File logo không tồn tại!")
             return
         
         watermark_config['type'] = 'image'
         watermark_config['logo_path'] = logo_path
         
-        scale_input = input("Kich thuoc logo (% chieu rong anh, mac dinh 10): ").strip()
+        scale_input = input("Kích thước logo (% chiều rộng ảnh, mặc định 10): ").strip()
         scale = float(scale_input) / 100 if scale_input else 0.1
         watermark_config['scale'] = scale
     
     # Config chung (nếu chưa có trong template)
     if 'position' not in watermark_config:
-        print("\n===== VI TRI WATERMARK =====")
+        print("\n===== VỊ TRÍ WATERMARK =====")
         print("1. Top Left       2. Top Center       3. Top Right")
         print("4. Middle Left    5. Center           6. Middle Right")
         print("7. Bottom Left    8. Bottom Center    9. Bottom Right")
         
-        pos_choice = input("\nChon vi tri (1-9, mac dinh 9): ").strip()
+        pos_choice = input("\nChọn vị trí (1-9, mặc định 9): ").strip()
         
         positions = {
             '1': 'top-left', '2': 'top-center', '3': 'top-right',
@@ -466,17 +466,17 @@ def main():
         watermark_config['position'] = position
     
     if 'opacity' not in watermark_config:
-        opacity_input = input("\nDo trong suot (0-255, 0=trong suot, 255=dac, mac dinh 128): ").strip()
+        opacity_input = input("\nĐộ trong suốt (0-255, 0=trong suốt, 255=đặc, mặc định 128): ").strip()
         opacity = int(opacity_input) if opacity_input.isdigit() else 128
         opacity = max(0, min(255, opacity))
         watermark_config['opacity'] = opacity
     
     if watermark_config.get('type') == 'text' and 'font_size' not in watermark_config:
-        font_input = input("Kich thuoc chu (pixels, mac dinh 36): ").strip()
+        font_input = input("Kích thước chữ (pixels, mặc định 36): ").strip()
         font_size = int(font_input) if font_input.isdigit() else 36
         watermark_config['font_size'] = font_size
         
-        color_input = input("Mau chu (white/black, mac dinh white): ").strip().lower()
+        color_input = input("Màu chữ (white/black, mặc định white): ").strip().lower()
         color = (0, 0, 0) if color_input == 'black' else (255, 255, 255)
         watermark_config['color'] = color
     
@@ -484,19 +484,19 @@ def main():
         watermark_config['margin'] = 10
     
     # Input/Output folders
-    print("\n===== THU MUC ANH =====")
-    input_folder = input("Thu muc chua anh goc: ").strip('"')
+    print("\n===== THƯ MỤC ẢNH =====")
+    input_folder = input("Thư mục chứa ảnh gốc: ").strip('"')
     if not os.path.isdir(input_folder):
-        print("❌ Thu muc khong ton tai!")
+        print("❌ Thư mục không tồn tại!")
         return
     
-    output_folder = input("Thu muc output (Enter de tao 'watermarked' voi timestamp): ").strip('"')
+    output_folder = input("Thư mục output (Enter để tạo 'watermarked' với timestamp): ").strip('"')
     if not output_folder:
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         output_folder = os.path.join(input_folder, f"watermarked_{timestamp}")
     
     # Preview config
-    print("\n===== XAC NHAN CONFIG =====")
+    print("\n===== XÁC NHẬN CONFIG =====")
     print(f"Type: {watermark_config['type']}")
     if watermark_config['type'] == 'text':
         print(f"Text: {watermark_config['text']}")
@@ -507,29 +507,29 @@ def main():
     print(f"Position: {watermark_config['position']}")
     print(f"Opacity: {watermark_config['opacity']}")
     
-    confirm = input("\nBat dau xu ly? (Y/n): ").strip().lower()
+    confirm = input("\nBắt đầu xử lý? (Y/n): ").strip().lower()
     if confirm == 'n':
-        print("❌ Da huy.")
+        print("❌ Đã hủy.")
         return
     
     # Save template option
-    save_tpl = input("\nLuu config thanh template? (y/N): ").strip().lower()
+    save_tpl = input("\nLưu config thành template? (y/N): ").strip().lower()
     if save_tpl == 'y':
-        tpl_name = input("Nhap ten template: ").strip()
+        tpl_name = input("Nhập tên template: ").strip()
         if tpl_name:
             save_template(tpl_name, watermark_config)
     
     # Process
-    print(f"\n🚀 Bat dau them watermark...\n")
+    print(f"\n🚀 Bắt đầu thêm watermark...\n")
     
     success, errors = batch_watermark(input_folder, output_folder, watermark_config)
     
     # Summary
     print(f"\n{'='*60}")
-    print(f"✅ Hoan thanh!")
-    print(f"   - Thanh cong: {success} anh")
-    print(f"   - Loi: {errors} anh")
-    print(f"   - Thu muc output: {output_folder}")
+    print(f"✅ Hoàn thành!")
+    print(f"   - Thành công: {success} ảnh")
+    print(f"   - Lỗi: {errors} ảnh")
+    print(f"   - Thư mục output: {output_folder}")
     print(f"{'='*60}")
 
 
@@ -537,7 +537,7 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n❌ Da huy!")
+        print("\n\n❌ Đã hủy!")
     except Exception as e:
-        print(f"\n❌ Loi: {e}")
+        print(f"\n❌ Lỗi: {e}")
 

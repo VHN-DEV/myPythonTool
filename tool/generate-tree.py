@@ -10,7 +10,7 @@ from pathlib import Path
 
 def print_header():
     print("=" * 60)
-    print("  TOOL TAO CAY THU MUC")
+    print("  TOOL TẠO CÂY THƯ MỤC")
     print("=" * 60)
     print()
 
@@ -104,7 +104,7 @@ def generate_tree(directory, prefix="", ignore_list=None, max_depth=None, curren
                 tree_lines.extend(sub_tree)
     
     except PermissionError:
-        tree_lines.append(f"{prefix}[Khong co quyen truy cap]")
+        tree_lines.append(f"{prefix}[Không có quyền truy cập]")
     
     return tree_lines
 
@@ -113,12 +113,12 @@ def save_tree_to_file(tree_lines, output_file, header_info):
     """Lưu cây thư mục ra file"""
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write("=" * 60 + "\n")
-        f.write(f"  CAY THU MUC: {header_info}\n")
+        f.write(f"  CÂY THƯ MỤC: {header_info}\n")
         f.write("=" * 60 + "\n\n")
         for line in tree_lines:
             f.write(line + "\n")
         f.write("\n" + "=" * 60 + "\n")
-        f.write(f"Tong cong: {len(tree_lines)} muc\n")
+        f.write(f"Tổng cộng: {len(tree_lines)} mục\n")
 
 
 def count_stats(tree_lines):
@@ -132,31 +132,31 @@ def main():
     print_header()
     
     # Nhập thư mục
-    folder_input = input("Nhap duong dan thu muc (Enter de dung thu muc hien tai): ").strip('"')
+    folder_input = input("Nhập đường dẫn thư mục (Enter để dùng thư mục hiện tại): ").strip('"')
     if not folder_input:
         folder_input = "."
     
     if not os.path.isdir(folder_input):
-        print("❌ Thu muc khong ton tai!")
+        print("❌ Thư mục không tồn tại!")
         return
     
     folder_path = Path(folder_input).resolve()
     
     # Tùy chọn
-    ignore_input = input("\nCac thu muc/file can bo qua (cach nhau boi dau phay, Enter de mac dinh: node_modules, .git, __pycache__): ")
+    ignore_input = input("\nCác thư mục/file cần bỏ qua (cách nhau bởi dấu phẩy, Enter để mặc định: node_modules, .git, __pycache__): ")
     if ignore_input.strip():
         ignore_list = [item.strip() for item in ignore_input.split(',')]
     else:
         ignore_list = ['node_modules', '.git', '__pycache__', '.vscode', '.idea', 'venv', 'env', 'dist', 'build']
     
-    max_depth_input = input("Do sau toi da (Enter de khong gioi han): ").strip()
+    max_depth_input = input("Độ sâu tối đa (Enter để không giới hạn): ").strip()
     max_depth = int(max_depth_input) if max_depth_input else None
     
-    show_hidden_input = input("Hien thi file/folder an (bat dau bang .)? (y/N): ").strip().lower()
+    show_hidden_input = input("Hiển thị file/folder ẩn (bắt đầu bằng .)? (y/N): ").strip().lower()
     show_hidden = show_hidden_input == 'y'
     
     # Tạo cây
-    print(f"\n🌳 Dang tao cay thu muc...\n")
+    print(f"\n🌳 Đang tạo cây thư mục...\n")
     print("=" * 60)
     print(f"📂 {folder_path.name}/")
     print("=" * 60)
@@ -173,30 +173,30 @@ def main():
         print(line)
     
     if len(tree_lines) > 100:
-        print(f"\n... va {len(tree_lines) - 100} muc khac")
+        print(f"\n... và {len(tree_lines) - 100} mục khác")
     
     # Thống kê
     folders, files = count_stats(tree_lines)
     print("\n" + "=" * 60)
-    print(f"📊 Tong ket:")
-    print(f"   - Thu muc: {folders}")
+    print(f"📊 Tổng kết:")
+    print(f"   - Thư mục: {folders}")
     print(f"   - File: {files}")
-    print(f"   - Tong cong: {len(tree_lines)} muc")
+    print(f"   - Tổng cộng: {len(tree_lines)} mục")
     print("=" * 60)
     
     # Lưu ra file
-    save_input = input("\nLuu ket qua ra file? (Y/n): ").strip().lower()
+    save_input = input("\nLưu kết quả ra file? (Y/n): ").strip().lower()
     if save_input != 'n':
         output_file = f"tree_{folder_path.name}.txt"
         save_tree_to_file(tree_lines, output_file, folder_path.name)
-        print(f"\n✅ Da luu vao: {output_file}")
+        print(f"\n✅ Đã lưu vào: {output_file}")
 
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n❌ Da huy!")
+        print("\n\n❌ Đã hủy!")
     except Exception as e:
-        print(f"\n❌ Loi: {e}")
+        print(f"\n❌ Lỗi: {e}")
 

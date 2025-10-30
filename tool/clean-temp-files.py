@@ -11,7 +11,7 @@ from pathlib import Path
 
 def print_header():
     print("=" * 60)
-    print("  TOOL DON DEP FILE TAM VA CACHE")
+    print("  TOOL DỌN DẸP FILE TẠM VÀ CACHE")
     print("=" * 60)
     print()
 
@@ -134,11 +134,11 @@ def delete_items(items, item_type="file"):
             elif os.path.isdir(item_path):
                 shutil.rmtree(item_path)
             
-            print(f"✓ Xoa: {item_path} ({format_size(size)})")
+            print(f"✓ Xóa: {item_path} ({format_size(size)})")
             deleted_count += 1
             freed_space += size
         except Exception as e:
-            print(f"✗ Loi khi xoa {item_path}: {e}")
+            print(f"✗ Lỗi khi xóa {item_path}: {e}")
     
     return deleted_count, freed_space
 
@@ -147,59 +147,59 @@ def main():
     print_header()
     
     # Nhập thư mục
-    folder_input = input("Nhap duong dan thu muc can don dep (Enter de dung thu muc hien tai): ").strip('"')
+    folder_input = input("Nhập đường dẫn thư mục cần dọn dẹp (Enter để dùng thư mục hiện tại): ").strip('"')
     if not folder_input:
         folder_input = "."
     
     if not os.path.isdir(folder_input):
-        print("❌ Thu muc khong ton tai!")
+        print("❌ Thư mục không tồn tại!")
         return
     
     folder_path = Path(folder_input).resolve()
     
-    print(f"\n📂 Thu muc: {folder_path}")
-    print("\n===== TIM KIEM FILE RAC =====")
+    print(f"\n📂 Thư mục: {folder_path}")
+    print("\n===== TÌM KIẾM FILE RÁC =====")
     
     # Menu chọn
-    print("\n1. File tam (.tmp, .log, .bak, ...)")
-    print("2. Thu muc cache (__pycache__, node_modules, ...)")
-    print("3. File lon (>10MB)")
-    print("4. Thu muc rong")
-    print("5. Tat ca cac loai tren")
+    print("\n1. File tạm (.tmp, .log, .bak, ...)")
+    print("2. Thư mục cache (__pycache__, node_modules, ...)")
+    print("3. File lớn (>10MB)")
+    print("4. Thư mục rỗng")
+    print("5. Tất cả các loại trên")
     
-    choice = input("\nChon loai can don dep (1-5): ").strip()
+    choice = input("\nChọn loại cần dọn dẹp (1-5): ").strip()
     
     items_to_clean = []
     
-    print(f"\n🔍 Dang quet...\n")
+    print(f"\n🔍 Đang quét...\n")
     
     if choice in ["1", "5"]:
         temp_files = find_temp_files(folder_path)
         items_to_clean.extend(temp_files)
         total_size = sum(size for _, size in temp_files)
-        print(f"📄 Tim thay {len(temp_files)} file tam ({format_size(total_size)})")
+        print(f"📄 Tìm thấy {len(temp_files)} file tạm ({format_size(total_size)})")
     
     if choice in ["2", "5"]:
         cache_folders = find_cache_folders(folder_path)
         items_to_clean.extend(cache_folders)
         total_size = sum(size for _, size in cache_folders)
-        print(f"📁 Tim thay {len(cache_folders)} thu muc cache ({format_size(total_size)})")
+        print(f"📁 Tìm thấy {len(cache_folders)} thư mục cache ({format_size(total_size)})")
     
     if choice in ["3", "5"]:
-        min_size = input("Kich thuoc toi thieu (MB, mac dinh 10): ").strip()
+        min_size = input("Kích thước tối thiểu (MB, mặc định 10): ").strip()
         min_size = int(min_size) if min_size else 10
         large_files = find_large_files(folder_path, min_size)
         items_to_clean.extend(large_files)
         total_size = sum(size for _, size in large_files)
-        print(f"💾 Tim thay {len(large_files)} file lon (>{min_size}MB) ({format_size(total_size)})")
+        print(f"💾 Tìm thấy {len(large_files)} file lớn (>{min_size}MB) ({format_size(total_size)})")
     
     if choice in ["4", "5"]:
         empty_folders = find_empty_folders(folder_path)
         items_to_clean.extend([(path, 0) for path in empty_folders])
-        print(f"📂 Tim thay {len(empty_folders)} thu muc rong")
+        print(f"📂 Tìm thấy {len(empty_folders)} thư mục rỗng")
     
     if not items_to_clean:
-        print("\n✅ Khong tim thay gi can don dep!")
+        print("\n✅ Không tìm thấy gì cần dọn dẹp!")
         return
     
     # Tính tổng
@@ -207,41 +207,41 @@ def main():
     total_size = sum(size for _, size in items_to_clean)
     
     print(f"\n{'='*60}")
-    print(f"📊 Tong ket:")
-    print(f"   - So luong: {total_items} muc")
-    print(f"   - Dung luong: {format_size(total_size)}")
+    print(f"📊 Tổng kết:")
+    print(f"   - Số lượng: {total_items} mục")
+    print(f"   - Dung lượng: {format_size(total_size)}")
     print(f"{'='*60}")
     
     # Hiển thị danh sách (10 mục đầu)
-    print(f"\n📋 Danh sach (10 muc dau):")
+    print(f"\n📋 Danh sách (10 mục đầu):")
     for item_path, size in items_to_clean[:10]:
         print(f"   - {item_path} ({format_size(size)})")
     
     if len(items_to_clean) > 10:
-        print(f"   ... va {len(items_to_clean) - 10} muc khac")
+        print(f"   ... và {len(items_to_clean) - 10} mục khác")
     
     # Xác nhận xóa
-    print(f"\n⚠️  CANH BAO: Ban sap xoa {total_items} muc!")
-    confirm = input("\nXac nhan xoa? (YES de xac nhan): ")
+    print(f"\n⚠️  CẢNH BÁO: Bạn sắp xóa {total_items} mục!")
+    confirm = input("\nXác nhận xóa? (YES để xác nhận): ")
     
     if confirm == "YES":
-        print(f"\n🗑️  Dang xoa...\n")
+        print(f"\n🗑️  Đang xóa...\n")
         deleted_count, freed_space = delete_items(items_to_clean)
         
         print(f"\n{'='*60}")
-        print(f"✅ Hoan thanh!")
-        print(f"   - Da xoa: {deleted_count}/{total_items} muc")
-        print(f"   - Giai phong: {format_size(freed_space)}")
+        print(f"✅ Hoàn thành!")
+        print(f"   - Đã xóa: {deleted_count}/{total_items} mục")
+        print(f"   - Giải phóng: {format_size(freed_space)}")
         print(f"{'='*60}")
     else:
-        print("❌ Da huy.")
+        print("❌ Đã hủy.")
 
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n❌ Da huy!")
+        print("\n\n❌ Đã hủy!")
     except Exception as e:
-        print(f"\n❌ Loi: {e}")
+        print(f"\n❌ Lỗi: {e}")
 

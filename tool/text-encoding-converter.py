@@ -11,7 +11,7 @@ from pathlib import Path
 
 def print_header():
     print("=" * 60)
-    print("  TOOL CHUYEN DOI ENCODING")
+    print("  TOOL CHUYỂN ĐỔI ENCODING")
     print("=" * 60)
     print()
 
@@ -75,7 +75,7 @@ def convert_folder(folder_path, source_encoding, target_encoding, file_extension
     skipped_count = 0
     error_count = 0
     
-    print(f"\n🔄 Bat dau chuyen doi...\n")
+    print(f"\n🔄 Bắt đầu chuyển đổi...\n")
     
     if recursive:
         for root, dirs, files in os.walk(folder_path):
@@ -139,7 +139,7 @@ def convert_folder(folder_path, source_encoding, target_encoding, file_extension
 def detect_mode(folder_path, file_extensions, recursive=True):
     """Chế độ chỉ phát hiện encoding"""
     
-    print(f"\n🔍 Dang phat hien encoding...\n")
+    print(f"\n🔍 Đang phát hiện encoding...\n")
     
     encoding_stats = {}
     
@@ -168,11 +168,11 @@ def detect_mode(folder_path, file_extensions, recursive=True):
                 encoding_stats[encoding] = 0
             encoding_stats[encoding] += 1
         else:
-            print(f"⚠️  {os.path.basename(file_path)} - Khong phat hien duoc")
+            print(f"⚠️  {os.path.basename(file_path)} - Không phát hiện được")
     
     # Thống kê
     print(f"\n{'='*60}")
-    print(f"📊 Thong ke encoding:")
+    print(f"📊 Thống kê encoding:")
     for enc, count in sorted(encoding_stats.items(), key=lambda x: x[1], reverse=True):
         print(f"   {enc}: {count} file")
     print(f"{'='*60}")
@@ -185,59 +185,59 @@ def main():
     try:
         import chardet
     except ImportError:
-        print("❌ Can cai thu vien chardet: pip install chardet")
+        print("❌ Cần cài thư viện chardet: pip install chardet")
         return
     
     # Nhập thư mục
-    folder_input = input("Nhap duong dan thu muc: ").strip('"')
+    folder_input = input("Nhập đường dẫn thư mục: ").strip('"')
     if not folder_input or not os.path.isdir(folder_input):
-        print("❌ Thu muc khong ton tai!")
+        print("❌ Thư mục không tồn tại!")
         return
     
     # Loại file
-    ext_input = input("Chi xu ly file co duoi (vd: .txt .py .js - Enter de xu ly tat ca): ").strip()
+    ext_input = input("Chỉ xử lý file có đuôi (vd: .txt .py .js - Enter để xử lý tất cả): ").strip()
     file_extensions = [ext.strip() for ext in ext_input.split()] if ext_input else []
     
     # Đệ quy
-    recursive_input = input("Xu ly tat ca thu muc con? (Y/n): ").strip().lower()
+    recursive_input = input("Xử lý tất cả thư mục con? (Y/n): ").strip().lower()
     recursive = recursive_input != 'n'
     
     # Chế độ
-    print("\n===== CHE DO =====")
-    print("1. Phat hien encoding (khong thay doi file)")
-    print("2. Chuyen doi encoding")
+    print("\n===== CHẾ ĐỘ =====")
+    print("1. Phát hiện encoding (không thay đổi file)")
+    print("2. Chuyển đổi encoding")
     
-    mode = input("\nChon che do (1-2): ").strip()
+    mode = input("\nChọn chế độ (1-2): ").strip()
     
     if mode == "1":
         detect_mode(folder_input, file_extensions, recursive)
     
     elif mode == "2":
-        print("\n===== ENCODING NGUON =====")
-        print("Nhap encoding nguon (vd: utf-8, windows-1252, iso-8859-1)")
-        print("Hoac nhap 'auto' de tu dong phat hien")
-        source_enc = input("\nEncoding nguon: ").strip() or "auto"
+        print("\n===== ENCODING NGUỒN =====")
+        print("Nhập encoding nguồn (vd: utf-8, windows-1252, iso-8859-1)")
+        print("Hoặc nhập 'auto' để tự động phát hiện")
+        source_enc = input("\nEncoding nguồn: ").strip() or "auto"
         
-        print("\n===== ENCODING DICH =====")
-        print("Cac encoding pho bien:")
+        print("\n===== ENCODING ĐÍCH =====")
+        print("Các encoding phổ biến:")
         print("  - utf-8 (khuyên dùng)")
         print("  - utf-16")
         print("  - windows-1252 (Windows Western)")
         print("  - iso-8859-1 (Latin-1)")
-        target_enc = input("\nEncoding dich: ").strip() or "utf-8"
+        target_enc = input("\nEncoding đích: ").strip() or "utf-8"
         
         # Backup
-        backup_input = input("\nTao backup file goc (.bak)? (Y/n): ").strip().lower()
+        backup_input = input("\nTạo backup file gốc (.bak)? (Y/n): ").strip().lower()
         backup = backup_input != 'n'
         
         # Xác nhận
-        print(f"\n⚠️  CANH BAO: Ban sap thay doi encoding cua nhieu file!")
-        print(f"   Tu: {source_enc}")
+        print(f"\n⚠️  CẢNH BÁO: Bạn sắp thay đổi encoding của nhiều file!")
+        print(f"   Từ: {source_enc}")
         print(f"   Sang: {target_enc}")
         if backup:
-            print(f"   Backup: Co")
+            print(f"   Backup: Có")
         
-        confirm = input("\nXac nhan? (YES de xac nhan): ")
+        confirm = input("\nXác nhận? (YES để xác nhận): ")
         
         if confirm == "YES":
             converted, skipped, errors = convert_folder(
@@ -250,23 +250,23 @@ def main():
             )
             
             print(f"\n{'='*60}")
-            print(f"✅ Hoan thanh!")
-            print(f"   - Chuyen doi thanh cong: {converted} file")
-            print(f"   - Bo qua: {skipped} file")
-            print(f"   - Loi: {errors} file")
+            print(f"✅ Hoàn thành!")
+            print(f"   - Chuyển đổi thành công: {converted} file")
+            print(f"   - Bỏ qua: {skipped} file")
+            print(f"   - Lỗi: {errors} file")
             print(f"{'='*60}")
         else:
-            print("❌ Da huy.")
+            print("❌ Đã hủy.")
     
     else:
-        print("❌ Lua chon khong hop le!")
+        print("❌ Lựa chọn không hợp lệ!")
 
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n❌ Da huy!")
+        print("\n\n❌ Đã hủy!")
     except Exception as e:
-        print(f"\n❌ Loi: {e}")
+        print(f"\n❌ Lỗi: {e}")
 

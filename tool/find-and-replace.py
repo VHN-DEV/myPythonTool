@@ -11,7 +11,7 @@ from pathlib import Path
 
 def print_header():
     print("=" * 60)
-    print("  TOOL TIM VA THAY THE TEXT")
+    print("  TOOL TÌM VÀ THAY THẾ TEXT")
     print("=" * 60)
     print()
 
@@ -75,7 +75,7 @@ def replace_in_file(file_path, search_text, replace_text, case_sensitive=True, u
         return count
         
     except Exception as e:
-        print(f"   ❌ Loi: {e}")
+        print(f"   ❌ Lỗi: {e}")
         return 0
 
 
@@ -100,7 +100,7 @@ def get_files_to_process(folder_path, file_extensions, recursive=True):
 
 def find_mode(folder_path, search_text, file_extensions, case_sensitive, use_regex, recursive):
     """Chế độ chỉ tìm (không thay thế)"""
-    print(f"\n🔍 Dang tim kiem...\n")
+    print(f"\n🔍 Đang tìm kiếm...\n")
     
     files_list = get_files_to_process(folder_path, file_extensions, recursive)
     
@@ -116,16 +116,16 @@ def find_mode(folder_path, search_text, file_extensions, case_sensitive, use_reg
             for line_num, line_content in matches[:5]:  # Hiển thị tối đa 5 dòng đầu
                 print(f"   Line {line_num}: {line_content[:80]}...")
             if len(matches) > 5:
-                print(f"   ... va {len(matches) - 5} ket qua khac")
+                print(f"   ... và {len(matches) - 5} kết quả khác")
     
     print(f"\n{'='*60}")
-    print(f"✅ Tim thay {total_matches} ket qua trong {files_with_matches} file")
+    print(f"✅ Tìm thấy {total_matches} kết quả trong {files_with_matches} file")
     print(f"{'='*60}")
 
 
 def replace_mode(folder_path, search_text, replace_text, file_extensions, case_sensitive, use_regex, recursive):
     """Chế độ thay thế"""
-    print(f"\n🔄 Dang thay the...\n")
+    print(f"\n🔄 Đang thay thế...\n")
     
     files_list = get_files_to_process(folder_path, file_extensions, recursive)
     
@@ -137,10 +137,10 @@ def replace_mode(folder_path, search_text, replace_text, file_extensions, case_s
         if count > 0:
             files_modified += 1
             total_replacements += count
-            print(f"✓ {file_path} - Thay the {count} lan")
+            print(f"✓ {file_path} - Thay thế {count} lần")
     
     print(f"\n{'='*60}")
-    print(f"✅ Da thay the {total_replacements} lan trong {files_modified} file")
+    print(f"✅ Đã thay thế {total_replacements} lần trong {files_modified} file")
     print(f"{'='*60}")
 
 
@@ -148,38 +148,38 @@ def main():
     print_header()
     
     # Nhập thư mục
-    folder_input = input("Nhap duong dan thu muc: ").strip('"')
+    folder_input = input("Nhập đường dẫn thư mục: ").strip('"')
     if not folder_input or not os.path.isdir(folder_input):
-        print("❌ Thu muc khong ton tai!")
+        print("❌ Thư mục không tồn tại!")
         return
     
     # Chế độ đệ quy
-    recursive_input = input("Tim kiem trong tat ca thu muc con? (Y/n, mac dinh Yes): ").strip().lower()
+    recursive_input = input("Tìm kiếm trong tất cả thư mục con? (Y/n, mặc định Yes): ").strip().lower()
     recursive = recursive_input != 'n'
     
     # Loại file
-    ext_input = input("Chi xu ly file co duoi (vd: .txt .py .js - Enter de xu ly tat ca): ").strip()
+    ext_input = input("Chỉ xử lý file có đuôi (vd: .txt .py .js - Enter để xử lý tất cả): ").strip()
     file_extensions = [ext.strip() for ext in ext_input.split()] if ext_input else []
     
     # Text cần tìm
-    search_text = input("\nNhap text can tim: ")
+    search_text = input("\nNhập text cần tìm: ")
     if not search_text:
-        print("❌ Ban phai nhap text can tim!")
+        print("❌ Bạn phải nhập text cần tìm!")
         return
     
     # Tùy chọn
-    case_input = input("Phan biet chu hoa/thuong? (y/N, mac dinh No): ").strip().lower()
+    case_input = input("Phân biệt chữ hoa/thường? (y/N, mặc định No): ").strip().lower()
     case_sensitive = case_input == 'y'
     
-    regex_input = input("Su dung Regular Expression? (y/N, mac dinh No): ").strip().lower()
+    regex_input = input("Sử dụng Regular Expression? (y/N, mặc định No): ").strip().lower()
     use_regex = regex_input == 'y'
     
     # Chế độ: tìm hay thay thế
-    print("\n===== CHE DO =====")
-    print("1. Chi tim kiem (khong thay doi file)")
-    print("2. Tim va thay the")
+    print("\n===== CHẾ ĐỘ =====")
+    print("1. Chỉ tìm kiếm (không thay đổi file)")
+    print("2. Tìm và thay thế")
     
-    mode = input("\nChon che do (1-2): ").strip()
+    mode = input("\nChọn chế độ (1-2): ").strip()
     
     if mode == "1":
         find_mode(folder_path=folder_input, 
@@ -190,13 +190,13 @@ def main():
                  recursive=recursive)
     
     elif mode == "2":
-        replace_text = input("\nNhap text thay the: ")
+        replace_text = input("\nNhập text thay thế: ")
         
         # Xác nhận
-        print(f"\n⚠️  CANH BAO: Ban sap thay the trong nhieu file!")
-        print(f"   Tim: '{search_text}'")
-        print(f"   Thay bang: '{replace_text}'")
-        confirm = input("\nXac nhan thuc hien? (YES de xac nhan): ")
+        print(f"\n⚠️  CẢNH BÁO: Bạn sắp thay thế trong nhiều file!")
+        print(f"   Tìm: '{search_text}'")
+        print(f"   Thay bằng: '{replace_text}'")
+        confirm = input("\nXác nhận thực hiện? (YES để xác nhận): ")
         
         if confirm == "YES":
             replace_mode(folder_path=folder_input,
@@ -207,17 +207,17 @@ def main():
                         use_regex=use_regex,
                         recursive=recursive)
         else:
-            print("❌ Da huy thao tac.")
+            print("❌ Đã hủy thao tác.")
     
     else:
-        print("❌ Lua chon khong hop le!")
+        print("❌ Lựa chọn không hợp lệ!")
 
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n❌ Da huy!")
+        print("\n\n❌ Đã hủy!")
     except Exception as e:
-        print(f"\n❌ Loi: {e}")
+        print(f"\n❌ Lỗi: {e}")
 

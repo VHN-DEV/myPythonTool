@@ -13,7 +13,7 @@ from pathlib import Path
 
 def print_header():
     print("=" * 60)
-    print("  TOOL GIAI NEN FILE")
+    print("  TOOL GIẢI NÉN FILE")
     print("=" * 60)
     print()
 
@@ -77,7 +77,7 @@ def extract_archive(archive_path, extract_to):
                 archive.extractall(extract_to)
             success = True
         except ImportError:
-            error = "Can cai thu vien py7zr: pip install py7zr"
+            error = "Cần cài thư viện py7zr: pip install py7zr"
         except Exception as e:
             error = str(e)
     elif archive_ext == '.rar':
@@ -88,11 +88,11 @@ def extract_archive(archive_path, extract_to):
                 rar_ref.extractall(extract_to)
             success = True
         except ImportError:
-            error = "Can cai thu vien rarfile: pip install rarfile"
+            error = "Cần cài thư viện rarfile: pip install rarfile"
         except Exception as e:
             error = str(e)
     else:
-        error = f"Dinh dang '{archive_ext}' chua duoc ho tro"
+        error = f"Định dạng '{archive_ext}' chưa được hỗ trợ"
     
     # Tính dung lượng giải nén
     extracted_size = 0
@@ -123,46 +123,46 @@ def find_archives(folder_path):
 def main():
     print_header()
     
-    print("===== CHE DO =====")
-    print("1. Giai nen 1 file")
-    print("2. Giai nen tat ca file trong thu muc")
+    print("===== CHẾ ĐỘ =====")
+    print("1. Giải nén 1 file")
+    print("2. Giải nén tất cả file trong thư mục")
     
-    mode = input("\nChon che do (1-2): ").strip()
+    mode = input("\nChọn chế độ (1-2): ").strip()
     
     if mode == "1":
         # Giải nén 1 file
-        archive_input = input("\nNhap duong dan file nen: ").strip('"')
+        archive_input = input("\nNhập đường dẫn file nén: ").strip('"')
         if not archive_input or not os.path.isfile(archive_input):
-            print("❌ File khong ton tai!")
+            print("❌ File không tồn tại!")
             return
         
         archive_path = Path(archive_input)
         
         # Hỏi thư mục đích
-        extract_input = input(f"Giai nen vao thu muc (Enter de dung '{archive_path.stem}'): ").strip('"')
+        extract_input = input(f"Giải nén vào thư mục (Enter để dùng '{archive_path.stem}'): ").strip('"')
         if not extract_input:
             extract_to = archive_path.parent / archive_path.stem
         else:
             extract_to = Path(extract_input)
         
-        print(f"\n📦 Dang giai nen: {archive_path.name}")
+        print(f"\n📦 Đang giải nén: {archive_path.name}")
         
         success, error, extracted_size = extract_archive(archive_path, extract_to)
         
         if success:
             archive_size = os.path.getsize(archive_path)
-            print(f"✅ Giai nen thanh cong!")
-            print(f"   📁 Thu muc: {extract_to}")
-            print(f"   📊 Kich thuoc nen: {format_size(archive_size)}")
-            print(f"   📊 Kich thuoc giai nen: {format_size(extracted_size)}")
+            print(f"✅ Giải nén thành công!")
+            print(f"   📁 Thư mục: {extract_to}")
+            print(f"   📊 Kích thước nén: {format_size(archive_size)}")
+            print(f"   📊 Kích thước giải nén: {format_size(extracted_size)}")
         else:
-            print(f"❌ Loi: {error}")
+            print(f"❌ Lỗi: {error}")
     
     elif mode == "2":
         # Giải nén nhiều file
-        folder_input = input("\nNhap duong dan thu muc chua file nen: ").strip('"')
+        folder_input = input("\nNhập đường dẫn thư mục chứa file nén: ").strip('"')
         if not folder_input or not os.path.isdir(folder_input):
-            print("❌ Thu muc khong ton tai!")
+            print("❌ Thư mục không tồn tại!")
             return
         
         folder_path = Path(folder_input)
@@ -171,29 +171,29 @@ def main():
         archives = find_archives(folder_path)
         
         if not archives:
-            print("❌ Khong tim thay file nen nao!")
+            print("❌ Không tìm thấy file nén nào!")
             return
         
-        print(f"\n📦 Tim thay {len(archives)} file nen:")
+        print(f"\n📦 Tìm thấy {len(archives)} file nén:")
         for idx, archive in enumerate(archives, 1):
             archive_name = os.path.basename(archive)
             archive_size = os.path.getsize(archive)
             print(f"   {idx}. {archive_name} ({format_size(archive_size)})")
         
         # Hỏi thư mục đích chung
-        extract_base = input(f"\nGiai nen vao thu muc (Enter de dung thu muc hien tai): ").strip('"')
+        extract_base = input(f"\nGiải nén vào thư mục (Enter để dùng thư mục hiện tại): ").strip('"')
         if not extract_base:
             extract_base = folder_path
         else:
             extract_base = Path(extract_base)
         
         # Xác nhận
-        confirm = input(f"\nGiai nen {len(archives)} file? (Y/n): ").strip().lower()
+        confirm = input(f"\nGiải nén {len(archives)} file? (Y/n): ").strip().lower()
         if confirm == 'n':
-            print("❌ Da huy.")
+            print("❌ Đã hủy.")
             return
         
-        print(f"\n🚀 Bat dau giai nen...\n")
+        print(f"\n🚀 Bắt đầu giải nén...\n")
         
         success_count = 0
         total_extracted = 0
@@ -212,23 +212,23 @@ def main():
                 success_count += 1
                 total_extracted += extracted_size
             else:
-                print(f"❌ Loi: {error}")
+                print(f"❌ Lỗi: {error}")
         
         print(f"\n{'='*60}")
-        print(f"✅ Hoan thanh!")
-        print(f"   - Thanh cong: {success_count}/{len(archives)} file")
-        print(f"   - Tong kich thuoc: {format_size(total_extracted)}")
+        print(f"✅ Hoàn thành!")
+        print(f"   - Thành công: {success_count}/{len(archives)} file")
+        print(f"   - Tổng kích thước: {format_size(total_extracted)}")
         print(f"{'='*60}")
     
     else:
-        print("❌ Lua chon khong hop le!")
+        print("❌ Lựa chọn không hợp lệ!")
 
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n❌ Da huy!")
+        print("\n\n❌ Đã hủy!")
     except Exception as e:
-        print(f"\n❌ Loi: {e}")
+        print(f"\n❌ Lỗi: {e}")
 

@@ -13,7 +13,7 @@ from pathlib import Path
 def print_header():
     """In header của tool"""
     print("=" * 60)
-    print("  TOOL XU LY PDF")
+    print("  TOOL XỬ LÝ PDF")
     print("=" * 60)
     print()
 
@@ -28,15 +28,15 @@ def check_dependencies():
     try:
         import PyPDF2
     except ImportError:
-        print("❌ Thieu thu vien PyPDF2!")
-        print("Cai dat: pip install PyPDF2")
+        print("❌ Thiếu thư viện PyPDF2!")
+        print("Cài đặt: pip install PyPDF2")
         return False
     
     try:
         from PIL import Image
     except ImportError:
-        print("❌ Thieu thu vien Pillow!")
-        print("Cai dat: pip install Pillow")
+        print("❌ Thiếu thư viện Pillow!")
+        print("Cài đặt: pip install Pillow")
         return False
     
     return True

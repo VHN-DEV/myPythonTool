@@ -15,7 +15,7 @@ from pathlib import Path
 def print_header():
     """In header của script"""
     print("=" * 50)
-    print("  SCRIPT COPY FILE THAY DOI THEO COMMIT")
+    print("  SCRIPT COPY FILE THAY ĐỔI THEO COMMIT")
     print("=" * 50)
     print()
 
@@ -33,10 +33,10 @@ def get_project_path():
     - Kiểm tra có phải là Git repository không
     - Trả về Path object nếu hợp lệ
     """
-    project_path_input = input("Nhap duong dan du an (vi du: C:\\xampp\\htdocs\\mitsuheavy-ecommerce): ").strip()
+    project_path_input = input("Nhập đường dẫn dự án (ví dụ: C:\\xampp\\htdocs\\mitsuheavy-ecommerce): ").strip()
 
     if not project_path_input:
-        print("❌ Loi: Ban phai nhap duong dan du an!")
+        print("❌ Lỗi: Bạn phải nhập đường dẫn dự án!")
         sys.exit(1)
 
     # Chuyển đổi sang Path object
@@ -44,22 +44,22 @@ def get_project_path():
 
     # Kiểm tra đường dẫn có tồn tại không
     if not project_path.exists():
-        print(f"❌ Loi: Duong dan '{project_path}' khong ton tai!")
+        print(f"❌ Lỗi: Đường dẫn '{project_path}' không tồn tại!")
         sys.exit(1)
 
     # Kiểm tra có phải là thư mục không
     if not project_path.is_dir():
-        print(f"❌ Loi: '{project_path}' khong phai la thu muc!")
+        print(f"❌ Lỗi: '{project_path}' không phải là thư mục!")
         sys.exit(1)
 
     # Kiểm tra có phải là Git repository không
     git_dir = project_path / ".git"
     if not git_dir.exists():
-        print(f"❌ Loi: '{project_path}' khong phai la Git repository!")
-        print("💡 Dam bao thu muc da duoc khoi tao Git: git init")
+        print(f"❌ Lỗi: '{project_path}' không phải là Git repository!")
+        print("💡 Đảm bảo thư mục đã được khởi tạo Git: git init")
         sys.exit(1)
 
-    print(f"✓ Du an hop le: {project_path}")
+    print(f"✓ Dự án hợp lệ: {project_path}")
     print()
     return project_path
 
@@ -76,16 +76,16 @@ def get_user_input():
     - Nhận input commit kết thúc (mặc định là HEAD)
     """
     # Nhập commit bắt đầu
-    commit_start = input("Nhap commit ID bat dau (vi du: 9d172f6): ").strip()
+    commit_start = input("Nhập commit ID bắt đầu (ví dụ: 9d172f6): ").strip()
     if not commit_start:
-        print("❌ Loi: Ban phai nhap commit ID bat dau!")
+        print("❌ Lỗi: Bạn phải nhập commit ID bắt đầu!")
         sys.exit(1)
 
     # Nhập commit kết thúc
-    commit_end_input = input("Nhap commit ID ket thuc (Enter de chon HEAD - commit moi nhat): ").strip()
+    commit_end_input = input("Nhập commit ID kết thúc (Enter để chọn HEAD - commit mới nhất): ").strip()
     if not commit_end_input:
         commit_end = "HEAD"
-        print("✓ Su dung commit ket thuc: HEAD (commit moi nhat)")
+        print("✓ Sử dụng commit kết thúc: HEAD (commit mới nhất)")
     else:
         commit_end = commit_end_input
 
@@ -167,7 +167,7 @@ def get_changed_files(commit_start, commit_end, project_path):
     ], cwd=project_path)
 
     if not success:
-        print(f"❌ Loi khi lay danh sach file: {output}")
+        print(f"❌ Lỗi khi lấy danh sách file: {output}")
         sys.exit(1)
 
     if not output:
@@ -191,12 +191,12 @@ def create_export_folder(folder_name):
 
     # Xóa thư mục cũ
     if export_path.exists():
-        print(f"🗑️  Dang xoa thu muc cu...")
+        print(f"🗑️  Đang xóa thư mục cũ...")
         shutil.rmtree(export_path)
 
     # Tạo thư mục mới
     export_path.mkdir(parents=True, exist_ok=True)
-    print(f"✓ Tao thu muc: {folder_name}\n")
+    print(f"✓ Tạo thư mục: {folder_name}\n")
 
 
 def copy_files(changed_files, output_folder, project_path):
@@ -238,7 +238,7 @@ def copy_files(changed_files, output_folder, project_path):
             print(f"✓ [OK] {file_path}")
             copied_count += 1
         else:
-            print(f"⚠️  [SKIP] {file_path} (file khong ton tai)")
+            print(f"⚠️  [SKIP] {file_path} (file không tồn tại)")
             skipped_count += 1
 
     return copied_count, skipped_count
@@ -279,12 +279,12 @@ def print_summary(copied_count, skipped_count, output_folder, list_file):
     - Hướng dẫn cách upload lên server
     """
     print("\n" + "=" * 50)
-    print("✓ Hoan tat!")
-    print(f"- Da copy: {copied_count} file")
-    print(f"- Bo qua: {skipped_count} file")
-    print(f"- Thu muc xuat: {output_folder}")
-    print(f"- Danh sach file: {list_file}")
-    print("\n🚀 Ban co the upload toan bo thu muc '{}' len server bang FileZilla!".format(output_folder))
+    print("✓ Hoàn tất!")
+    print(f"- Đã copy: {copied_count} file")
+    print(f"- Bỏ qua: {skipped_count} file")
+    print(f"- Thư mục xuất: {output_folder}")
+    print(f"- Danh sách file: {list_file}")
+    print("\n🚀 Bạn có thể upload toàn bộ thư mục '{}' lên server bằng FileZilla!".format(output_folder))
     print("=" * 50)
     print()
 
@@ -307,36 +307,36 @@ def main():
     commit_start, commit_end = get_user_input()
 
     # Bước 3: Kiểm tra commit ID hợp lệ
-    print("🔍 Kiem tra commit ID...")
+    print("🔍 Kiểm tra commit ID...")
     if not verify_commit(commit_start, project_path):
-        print(f"❌ Loi: Commit ID bat dau '{commit_start}' khong ton tai!")
-        print("💡 Ban co the xem danh sach commit bang lenh: git log --oneline -20")
+        print(f"❌ Lỗi: Commit ID bắt đầu '{commit_start}' không tồn tại!")
+        print("💡 Bạn có thể xem danh sách commit bằng lệnh: git log --oneline -20")
         sys.exit(1)
 
     if commit_end != "HEAD":
         if not verify_commit(commit_end, project_path):
-            print(f"❌ Loi: Commit ID ket thuc '{commit_end}' khong ton tai!")
-            print("💡 Ban co the xem danh sach commit bang lenh: git log --oneline -20")
+            print(f"❌ Lỗi: Commit ID kết thúc '{commit_end}' không tồn tại!")
+            print("💡 Bạn có thể xem danh sách commit bằng lệnh: git log --oneline -20")
             sys.exit(1)
 
-    print("✓ Commit ID hop le!\n")
+    print("✓ Commit ID hợp lệ!\n")
 
     # Bước 4: Lấy danh sách file thay đổi
-    print(f"📂 Dang lay danh sach file thay doi tu commit {commit_start} den {commit_end}...")
+    print(f"📂 Đang lấy danh sách file thay đổi từ commit {commit_start} đến {commit_end}...")
     changed_files = get_changed_files(commit_start, commit_end, project_path)
 
     if not changed_files:
-        print("❌ Khong co file nao thay doi!")
+        print("❌ Không có file nào thay đổi!")
         sys.exit(0)
 
-    print(f"✓ Tim thay {len(changed_files)} file da thay doi\n")
+    print(f"✓ Tìm thấy {len(changed_files)} file đã thay đổi\n")
 
     # Bước 5: Tạo thư mục export (ở vị trí hiện tại, không phải trong dự án)
     output_folder = "changed-files-export"
     create_export_folder(output_folder)
 
     # Bước 6: Copy files
-    print("📋 Dang copy file...\n")
+    print("📋 Đang copy file...\n")
     copied_count, skipped_count = copy_files(changed_files, output_folder, project_path)
 
     # Bước 7: Lưu danh sách file
@@ -351,9 +351,9 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n❌ Script da bi huy boi nguoi dung!")
+        print("\n\n❌ Script đã bị hủy bởi người dùng!")
         sys.exit(1)
     except Exception as e:
-        print(f"\n❌ Loi: {e}")
+        print(f"\n❌ Lỗi: {e}")
         sys.exit(1)
 

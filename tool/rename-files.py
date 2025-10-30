@@ -11,7 +11,7 @@ from pathlib import Path
 
 def print_header():
     print("=" * 60)
-    print("  TOOL DOI TEN HANG LOAT FILE")
+    print("  TOOL ĐỔI TÊN HÀNG LOẠT FILE")
     print("=" * 60)
     print()
 
@@ -144,79 +144,79 @@ def main():
     print_header()
     
     # Nhập đường dẫn thư mục
-    folder_input = input("Nhap duong dan thu muc chua file: ").strip('"')
+    folder_input = input("Nhập đường dẫn thư mục chứa file: ").strip('"')
     if not folder_input or not os.path.isdir(folder_input):
-        print("❌ Thu muc khong ton tai!")
+        print("❌ Thư mục không tồn tại!")
         return
     
     # Hiển thị menu chức năng
-    print("\n===== CHON CHUC NANG =====")
-    print("1. Them prefix (tien to) vao dau ten file")
-    print("2. Them suffix (hau to) vao cuoi ten file")
-    print("3. Thay the text trong ten file")
-    print("4. Doi ten file theo so thu tu")
-    print("5. Doi phan mo rong file")
-    print("6. Chuyen tat ca sang chu thuong")
-    print("7. Xoa hoac thay the khoang trang")
-    print("0. Thoat")
+    print("\n===== CHỌN CHỨC NĂNG =====")
+    print("1. Thêm prefix (tiền tố) vào đầu tên file")
+    print("2. Thêm suffix (hậu tố) vào cuối tên file")
+    print("3. Thay thế text trong tên file")
+    print("4. Đổi tên file theo số thứ tự")
+    print("5. Đổi phần mở rộng file")
+    print("6. Chuyển tất cả sang chữ thường")
+    print("7. Xóa hoặc thay thế khoảng trắng")
+    print("0. Thoát")
     
-    choice = input("\nChon chuc nang (0-7): ").strip()
+    choice = input("\nChọn chức năng (0-7): ").strip()
     
     if choice == "0":
-        print("Thoat chuong trinh.")
+        print("Thoát chương trình.")
         return
     
     # Hỏi loại file cần xử lý
-    ext_input = input("\nChi xu ly file co duoi (vd: .jpg .png - Enter de xu ly tat ca): ").strip()
+    ext_input = input("\nChỉ xử lý file có đuôi (vd: .jpg .png - Enter để xử lý tất cả): ").strip()
     file_extensions = [ext.strip() for ext in ext_input.split()] if ext_input else []
     
-    print(f"\n📂 Thu muc: {folder_input}")
-    print("🔄 Bat dau doi ten...\n")
+    print(f"\n📂 Thư mục: {folder_input}")
+    print("🔄 Bắt đầu đổi tên...\n")
     
     count = 0
     
     if choice == "1":
-        prefix = input("Nhap prefix (tien to): ")
+        prefix = input("Nhập prefix (tiền tố): ")
         count = rename_add_prefix(folder_input, prefix, file_extensions)
     
     elif choice == "2":
-        suffix = input("Nhap suffix (hau to): ")
+        suffix = input("Nhập suffix (hậu tố): ")
         count = rename_add_suffix(folder_input, suffix, file_extensions)
     
     elif choice == "3":
-        old_text = input("Nhap text can thay the: ")
-        new_text = input("Nhap text moi: ")
+        old_text = input("Nhập text cần thay thế: ")
+        new_text = input("Nhập text mới: ")
         count = rename_replace_text(folder_input, old_text, new_text, file_extensions)
     
     elif choice == "4":
-        base_name = input("Nhap ten co so (vd: image): ")
-        start_num = int(input("Bat dau tu so (vd: 1): ") or "1")
+        base_name = input("Nhập tên cơ sở (vd: image): ")
+        start_num = int(input("Bắt đầu từ số (vd: 1): ") or "1")
         count = rename_sequential(folder_input, base_name, start_num, file_extensions)
     
     elif choice == "5":
-        old_ext = input("Nhap duoi cu (vd: txt): ")
-        new_ext = input("Nhap duoi moi (vd: md): ")
+        old_ext = input("Nhập đuôi cũ (vd: txt): ")
+        new_ext = input("Nhập đuôi mới (vd: md): ")
         count = rename_change_extension(folder_input, old_ext, new_ext)
     
     elif choice == "6":
         count = rename_to_lowercase(folder_input, file_extensions)
     
     elif choice == "7":
-        replacement = input("Thay khoang trang bang gi? (vd: _ hoac - , Enter de xoa): ")
+        replacement = input("Thay khoảng trắng bằng gì? (vd: _ hoặc - , Enter để xóa): ")
         count = rename_remove_spaces(folder_input, replacement, file_extensions)
     
     else:
-        print("❌ Lua chon khong hop le!")
+        print("❌ Lựa chọn không hợp lệ!")
         return
     
-    print(f"\n✅ Hoan thanh! Da doi ten {count} file.")
+    print(f"\n✅ Hoàn thành! Đã đổi tên {count} file.")
 
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n❌ Da huy!")
+        print("\n\n❌ Đã hủy!")
     except Exception as e:
-        print(f"\n❌ Loi: {e}")
+        print(f"\n❌ Lỗi: {e}")
 

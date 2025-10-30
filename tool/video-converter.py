@@ -14,7 +14,7 @@ from pathlib import Path
 def print_header():
     """In header của tool"""
     print("=" * 60)
-    print("  TOOL CHUYEN DOI VA XU LY VIDEO")
+    print("  TOOL CHUYỂN ĐỔI VÀ XỬ LÝ VIDEO")
     print("=" * 60)
     print()
 
@@ -28,10 +28,10 @@ def check_dependencies():
     """
     try:
         import moviepy.editor as mp
-        print("✅ Thu vien moviepy: OK")
+        print("✅ Thư viện moviepy: OK")
     except ImportError:
-        print("❌ Thieu thu vien moviepy!")
-        print("Cai dat: pip install moviepy")
+        print("❌ Thiếu thư viện moviepy!")
+        print("Cài đặt: pip install moviepy")
         return False
     
     # Check ffmpeg
@@ -40,13 +40,13 @@ def check_dependencies():
         ffmpeg_path = get_setting("FFMPEG_BINARY")
         print(f"✅ FFmpeg: OK ({ffmpeg_path})")
     except Exception as e:
-        print("⚠️  FFmpeg chua duoc cau hinh dung!")
-        print("\nHuong dan cai FFmpeg:")
-        print("Windows: Tai tai https://www.gyan.dev/ffmpeg/builds/")
-        print("        Giai nen va them vao PATH")
+        print("⚠️  FFmpeg chưa được cấu hình đúng!")
+        print("\nHướng dẫn cài FFmpeg:")
+        print("Windows: Tải tại https://www.gyan.dev/ffmpeg/builds/")
+        print("        Giải nén và thêm vào PATH")
         print("Linux:   sudo apt-get install ffmpeg")
         print("macOS:   brew install ffmpeg")
-        print("\nSau khi cai, chay lai tool.")
+        print("\nSau khi cài, chạy lại tool.")
         return False
     
     return True
@@ -542,23 +542,23 @@ def main():
     
     # Kiểm tra dependencies
     if not check_dependencies():
-        print("\n💡 Sau khi cai dat, chay lai tool.")
+        print("\n💡 Sau khi cài đặt, chạy lại tool.")
         return
     
-    print("\n===== CHUC NANG =====")
-    print("1. Chuyen doi dinh dang (Convert Format)")
-    print("2. Nen video (Compress)")
-    print("3. Cat video (Trim)")
-    print("4. Trich xuat audio (Extract Audio)")
-    print("5. Thay doi resolution")
-    print("6. Xem thong tin video")
-    print("7. Chuyen doi hang loat (Batch Convert)")
-    print("0. Thoat")
+    print("\n===== CHỨC NĂNG =====")
+    print("1. Chuyển đổi định dạng (Convert Format)")
+    print("2. Nén video (Compress)")
+    print("3. Cắt video (Trim)")
+    print("4. Trích xuất audio (Extract Audio)")
+    print("5. Thay đổi resolution")
+    print("6. Xem thông tin video")
+    print("7. Chuyển đổi hàng loạt (Batch Convert)")
+    print("0. Thoát")
     
-    choice = input("\nChon chuc nang (0-7): ").strip()
+    choice = input("\nChọn chức năng (0-7): ").strip()
     
     if choice == "0":
-        print("Thoat chuong trinh.")
+        print("Thoát chương trình.")
         return
     
     elif choice == "1":
@@ -790,7 +790,7 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n❌ Da huy!")
+        print("\n\n❌ Đã hủy!")
     except Exception as e:
-        print(f"\n❌ Loi: {e}")
+        print(f"\n❌ Lỗi: {e}")
 
