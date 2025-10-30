@@ -35,6 +35,7 @@ class ToolManager:
         
         # Ánh xạ tên file sang tên hiển thị tiếng Việt
         self.tool_names = {
+            "ssh-manager.py": "Quản lý và kết nối SSH Server nhanh chóng",
             "backup-folder.py": "Sao lưu và nén thư mục (có timestamp)",
             "clean-temp-files.py": "Dọn dẹp file tạm, cache và file rác",
             "compress-images.py": "Nén và chỉnh sửa ảnh (resize, đổi format)",
@@ -47,13 +48,13 @@ class ToolManager:
             "image-watermark.py": "Thêm watermark vào ảnh (text/logo hàng loạt)",
             "pdf-tools.py": "Xử lý PDF (merge, split, compress, convert)",
             "rename-files.py": "Đổi tên file hàng loạt (prefix/suffix/số thứ tự)",
-            "ssh-manager.py": "Quản lý và kết nối SSH Server nhanh chóng",
             "text-encoding-converter.py": "Chuyển đổi encoding file text (UTF-8, ANSI...)",
             "video-converter.py": "Xử lý video (convert, compress, trim, extract audio)"
         }
         
         # Tags cho mỗi tool (để search)
         self.tool_tags = {
+            "ssh-manager.py": ["ssh", "server", "ket noi", "remote", "terminal"],
             "backup-folder.py": ["backup", "sao luu", "nen", "zip", "tar"],
             "clean-temp-files.py": ["clean", "don dep", "temp", "cache", "rac"],
             "compress-images.py": ["image", "anh", "nen", "resize", "compress"],
@@ -66,7 +67,6 @@ class ToolManager:
             "image-watermark.py": ["watermark", "anh", "logo", "copyright"],
             "pdf-tools.py": ["pdf", "merge", "split", "compress"],
             "rename-files.py": ["rename", "doi ten", "batch"],
-            "ssh-manager.py": ["ssh", "server", "ket noi", "remote", "terminal"],
             "text-encoding-converter.py": ["encoding", "utf8", "text", "convert"],
             "video-converter.py": ["video", "convert", "compress", "mp4"]
         }

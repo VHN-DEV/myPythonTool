@@ -10,17 +10,49 @@ Lý do: Dễ dàng truy cập và quản lý tools
 import os
 import sys
 
-# Fix Windows console encoding - Simple way
+# Fix Windows console encoding - Improved
 if sys.platform == 'win32':
     try:
-        import codecs
+        # Thiết lập UTF-8 cho console output
         sys.stdout.reconfigure(encoding='utf-8', errors='replace')
         sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+        
+        # Thiết lập UTF-8 cho console input (quan trọng cho EOFError)
+        sys.stdin.reconfigure(encoding='utf-8', errors='replace')
     except Exception:
-        pass
+        # Fallback: sử dụng wrapper
+        import io
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+        sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8', errors='replace')
 
 # Import ToolManager từ module riêng
 from .tool_manager import ToolManager
+
+
+def safe_print(text, fallback_text=None):
+    """
+    In text an toàn với fallback cho encoding errors
+    
+    Args:
+        text: Text cần in (có thể chứa emoji/unicode)
+        fallback_text: Text dự phòng nếu không in được (ASCII)
+    
+    Giải thích:
+    - Cố gắng in text gốc với emoji
+    - Nếu lỗi encoding, dùng fallback
+    - Nếu không có fallback, bỏ qua emoji
+    """
+    try:
+        print(text)
+    except UnicodeEncodeError:
+        if fallback_text:
+            print(fallback_text)
+        else:
+            # Loại bỏ emoji và in lại
+            import re
+            ascii_text = re.sub(r'[^\x00-\x7F]+', '', text)
+            print(ascii_text)
 
 
 def main():
@@ -195,12 +227,31 @@ def main():
                 print(f"❌ Lệnh không hợp lệ: {command}")
                 print("💡 Nhập 'h' hoặc 'help' để xem hướng dẫn")
         
+        except EOFError:
+            # Xử lý EOF error (input stream bị đóng hoặc Ctrl+D/Ctrl+Z)
+            try:
+                print("\n\nInput stream da dong. Thoat chuong trinh...")
+            except Exception:
+                pass  # Nếu không print được, thôi
+            break
+        
         except KeyboardInterrupt:
-            print("\n\n👋 Tạm biệt!")
+            # Xử lý Ctrl+C
+            try:
+                print("\n\nTam biet!")
+            except Exception:
+                pass
             break
         
         except Exception as e:
-            print(f"\n❌ Lỗi: {e}")
+            # Xử lý các lỗi khác
+            try:
+                print(f"\nLoi: {e}")
+                import traceback
+                traceback.print_exc()
+            except Exception:
+                # Nếu không print được do encoding, dùng ASCII
+                print(f"\nError: {str(e)}")
 
 
 if __name__ == "__main__":

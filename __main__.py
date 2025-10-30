@@ -13,13 +13,19 @@ Cách dùng:
 import sys
 import os
 
-# Fix Windows console encoding - Simple way
+# Fix Windows console encoding - Improved
 if sys.platform == 'win32':
     try:
+        # Thiết lập UTF-8 cho console (output và input)
         sys.stdout.reconfigure(encoding='utf-8', errors='replace')
         sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+        sys.stdin.reconfigure(encoding='utf-8', errors='replace')
     except Exception:
-        pass
+        # Fallback: sử dụng wrapper
+        import io
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+        sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8', errors='replace')
 
 # Đảm bảo thư mục hiện tại trong sys.path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -35,12 +41,32 @@ if __name__ == "__main__":
         # Chạy menu
         main()
     
+    except EOFError:
+        # Xử lý EOF error (input stream bị đóng)
+        try:
+            print("\n\nInput stream đã đóng. Thoát chương trình...")
+        except Exception:
+            pass
+        sys.exit(0)
+    
     except KeyboardInterrupt:
-        print("\n\n👋 Tạm biệt!")
+        # Xử lý Ctrl+C
+        try:
+            print("\n\nTạm biệt!")
+        except Exception:
+            pass
+        sys.exit(0)
     
     except Exception as e:
-        print(f"\n❌ Lỗi: {e}")
-        import traceback
-        traceback.print_exc()
+        # Xử lý các lỗi khác với encoding safety
+        try:
+            print(f"\nLỗi: {e}")
+            import traceback
+            traceback.print_exc()
+        except UnicodeEncodeError:
+            # Nếu không in được emoji, dùng ASCII
+            print(f"\nLỗi: {str(e)}")
+            import traceback
+            traceback.print_exc()
         sys.exit(1)
 
