@@ -55,7 +55,7 @@ classifiers = [
 Homepage = "https://github.com/yourusername/myPythonTool"
 Documentation = "https://github.com/yourusername/myPythonTool/blob/main/README.md"
 Repository = "https://github.com/yourusername/myPythonTool"
-Changelog = "https://github.com/yourusername/myPythonTool/blob/main/CHANGELOG.md"
+Changelog = "https://github.com/yourusername/myPythonTool/blob/main/docs/CHANGELOG.md"
 
 # Entry points - Tạo command "myptool"
 # Khi gõ "myptool" ở bất kỳ đâu, sẽ chạy hàm main() trong menu/__init__.py

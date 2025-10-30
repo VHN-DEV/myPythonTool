@@ -30,7 +30,8 @@ class ToolManager:
             tool_dir: Thư mục chứa tools
         """
         self.tool_dir = Path(tool_dir)
-        self.config_file = Path("tool_config.json")
+        # Config file nằm trong thư mục menu
+        self.config_file = Path(__file__).parent / "tool_config.json"
         self.config = self._load_config()
         
         # Ánh xạ tên file sang tên hiển thị tiếng Việt

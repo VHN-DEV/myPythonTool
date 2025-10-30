@@ -19,13 +19,11 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
 # Virtual Environment
 venv/
-env/
 ENV/
-.venv
+env/
 
 # IDE
 .vscode/
@@ -33,29 +31,23 @@ ENV/
 *.swp
 *.swo
 *~
+
+# OS
 .DS_Store
+Thumbs.db
 
 # Logs
+logs/
 *.log
 
-# Config riêng
-ssh_config.json
+# Output
+output/
 
-# Temp files
-*.tmp
-*.bak
-*.backup
+# Config riêng (có thể chứa thông tin nhạy cảm)
+tool/ssh-manager/ssh_config.json
 
-# Test
-.pytest_cache/
-.coverage
-htmlcov/
+# Backup metadata
+backup_metadata.json
 
-# myPythonTool specific
-compressed_*/
-organized_*/
-backup_*/
-tree_*.txt
-duplicate_report*.txt
-changed-files-export/
-*.zip.bak
+# Templates
+watermark_templates.json

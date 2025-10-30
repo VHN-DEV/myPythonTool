@@ -7,9 +7,7 @@
 
 > Bộ công cụ Python đa năng giúp tự động hóa các tác vụ thường gặp khi làm việc với file và thư mục. Giao diện tiếng Việt thân thiện, dễ sử dụng!
 
----
-
-> 👋 **Mới clone về?** Đọc [BẮT_ĐẦU_TẠI_ĐÂY.md](BẮT_ĐẦU_TẠI_ĐÂY.md) để biết nên làm gì trước!
+> 👋 **Mới bắt đầu?** Xem [Quick Start](#-quick-start) hoặc đọc [INSTALL.md](docs/INSTALL.md) để cài đặt!
 
 ---
 
@@ -104,7 +102,7 @@ pip install -e .
 myptool
 ```
 
-📖 **Chi tiết:** Xem [INSTALL.md](INSTALL.md) để biết thêm cách cài đặt khác
+📖 **Chi tiết:** Xem [INSTALL.md](docs/INSTALL.md) để biết thêm cách cài đặt khác
 
 ---
 
@@ -1437,9 +1435,9 @@ Có ý tưởng tool mới? Tạo [Issue](https://github.com/VHN-DEV/myPythonToo
 
 ### Hỗ trợ
 
-- 📖 Đọc [HUONG_DAN.txt](HUONG_DAN.txt) cho hướng dẫn chi tiết
-- 📝 Xem [QUICK_REFERENCE.md](QUICK_REFERENCE.md) cho cheat sheet
-- 📜 Đọc [CHANGELOG.md](CHANGELOG.md) để biết phiên bản mới nhất
+- 📜 [CHANGELOG.md](docs/CHANGELOG.md) - Lịch sử thay đổi và phiên bản mới nhất
+- 📖 [INSTALL.md](docs/INSTALL.md) - Hướng dẫn cài đặt chi tiết
+- 🛠️ [tool/README.md](tool/README.md) - Hướng dẫn cấu trúc tool
 
 ---
 

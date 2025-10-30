@@ -161,7 +161,7 @@ del C:\Windows\System32\myptool.bat
 
 ## 📚 Xem thêm
 
-- **Tài liệu đầy đủ:** [README.md](README.md)
+- **Tài liệu đầy đủ:** [README.md](../README.md)
 - **Lịch sử thay đổi:** [CHANGELOG.md](CHANGELOG.md)
 
 ---
