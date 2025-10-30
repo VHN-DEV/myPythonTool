@@ -1,5 +1,16 @@
 # myPythonTool - Git Ignore File
 
+# Runtime files - Không commit
+logs/
+output/
+tool_config.json
+backup_metadata.json
+watermark_templates.json
+*.log
+
+# Test files - Không commit
+test_*.py
+
 # Python
 __pycache__/
 *.py[cod]
