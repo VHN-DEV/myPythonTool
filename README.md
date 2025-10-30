@@ -9,6 +9,10 @@
 
 ---
 
+> 👋 **Mới clone về?** Đọc [BẮT_ĐẦU_TẠI_ĐÂY.md](BẮT_ĐẦU_TẠI_ĐÂY.md) để biết nên làm gì trước!
+
+---
+
 ## 📑 Mục lục
 
 - [🎯 Giới thiệu](#-giới-thiệu)
@@ -76,23 +80,55 @@
 
 ## 🚀 Quick Start
 
-### Bước 1: Clone repository
+### Cách 1: Cài đặt toàn cục (Khuyến nghị) ⭐
+
+Sau khi cài đặt, bạn có thể chạy `myptool` từ bất kỳ đâu!
+
+#### Bước 1: Clone repository
 
 ```bash
 git clone https://github.com/VHN-DEV/myPythonTool.git
 cd myPythonTool
 ```
 
-### Bước 2: Cài đặt thư viện
+#### Bước 2: Cài đặt
+
+```bash
+pip install -e .
+```
+
+#### Bước 3: Chạy từ bất kỳ đâu! 🎉
+
+```bash
+# Có thể chạy từ bất kỳ thư mục nào
+myptool
+```
+
+📖 **Chi tiết:** Xem [INSTALL.md](INSTALL.md) để biết thêm cách cài đặt khác
+
+---
+
+### Cách 2: Chạy trực tiếp (Không cài đặt)
+
+#### Bước 1: Clone repository
+
+```bash
+git clone https://github.com/VHN-DEV/myPythonTool.git
+cd myPythonTool
+```
+
+#### Bước 2: Cài đặt thư viện
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Bước 3: Chạy menu
+#### Bước 3: Chạy menu
 
 ```bash
-python menu.py
+python .
+# Hoặc
+python __main__.py
 ```
 
 ### Menu sẽ hiển thị:

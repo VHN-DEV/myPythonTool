@@ -1,0 +1,41 @@
+# MANIFEST.in - Chỉ định file nào được include khi build package
+#
+# Mục đích:
+#   Đảm bảo các file không phải .py cũng được đóng gói
+#   khi cài đặt bằng pip install
+#
+# Giải thích:
+#   - include: Bao gồm file cụ thể
+#   - recursive-include: Bao gồm file trong thư mục và thư mục con
+#   - global-exclude: Loại trừ file không cần thiết
+
+# Documentation files
+include README.md
+include INSTALL.md
+include CHANGELOG.md
+include LICENSE
+include HƯỚNG_DẪN_CÀI_ĐẶT_NHANH.txt
+
+# Requirements
+include requirements.txt
+
+# Config files
+include *.json
+include *.example.json
+
+# Scripts
+include run.bat
+include run.sh
+include myptool.bat
+
+# Include all files in tool, menu, utils directories
+recursive-include tool *.py
+recursive-include menu *.py *.md
+recursive-include utils *.py
+
+# Exclude compiled Python files
+global-exclude __pycache__
+global-exclude *.py[co]
+global-exclude *.swp
+global-exclude .DS_Store
+
