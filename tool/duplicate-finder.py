@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils import (
     print_header, format_size, get_user_input, confirm_action,
-    ProgressBar, log_info, log_error, setup_logger, safe_delete
+    ProgressBar, log_info, log_error, setup_logger, safe_delete, normalize_path
 )
 
 
@@ -495,10 +495,15 @@ def main_interactive():
     print_header("TOOL TÌM FILE TRÙNG LẶP")
     
     # Nhập thư mục
-    folder_input = get_user_input("Nhập đường dẫn thư mục")
-    if not folder_input or not os.path.isdir(folder_input):
-        print("❌ Thư mục không tồn tại!")
+    print("💡 Mẹo: Bạn có thể kéo thả thư mục vào terminal để nhập đường dẫn")
+    folder_input_raw = get_user_input("Nhập đường dẫn thư mục")
+    folder_input = normalize_path(folder_input_raw)
+    
+    if not os.path.isdir(folder_input):
+        print(f"❌ Thư mục không tồn tại: {folder_input}")
         return
+    
+    print(f"✅ Đã chọn: {folder_input}\n")
     
     # Tùy chọn
     recursive_input = get_user_input("Tìm trong tất cả thư mục con? (Y/n)", default="y")

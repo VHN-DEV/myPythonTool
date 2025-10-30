@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import (
     print_header, format_size, get_user_input, confirm_action,
     get_folder_size, ensure_directory_exists, ProgressBar,
-    log_info, log_error, setup_logger
+    log_info, log_error, setup_logger, normalize_path
 )
 
 
@@ -394,16 +394,22 @@ def main_interactive():
         return
     
     # Nhập thư mục nguồn
-    source_input = get_user_input("Nhập đường dẫn thư mục cần backup")
-    if not source_input or not os.path.isdir(source_input):
-        print("❌ Thư mục không tồn tại!")
+    print("💡 Mẹo: Bạn có thể kéo thả thư mục vào terminal để nhập đường dẫn")
+    source_input_raw = get_user_input("Nhập đường dẫn thư mục cần backup")
+    source_input = normalize_path(source_input_raw)
+    
+    if not os.path.isdir(source_input):
+        print(f"❌ Thư mục không tồn tại: {source_input}")
         return
     
+    print(f"✅ Đã chọn: {source_input}\n")
+    
     # Nhập vị trí backup
-    backup_input = get_user_input(
+    backup_input_raw = get_user_input(
         "Nhập vị trí lưu backup (Enter để lưu tại thư mục hiện tại)",
         default="."
     )
+    backup_input = normalize_path(backup_input_raw)
     
     # Khởi tạo BackupManager
     manager = BackupManager(source_input, backup_input)

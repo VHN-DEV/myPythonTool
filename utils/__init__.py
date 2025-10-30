@@ -11,5 +11,5 @@ from .progress import *
 from .logger import *
 
 __all__ = ['format_size', 'print_header', 'get_user_input', 'confirm_action', 
-           'ProgressBar', 'setup_logger', 'log_info', 'log_error', 'log_warning']
+           'normalize_path', 'ProgressBar', 'setup_logger', 'log_info', 'log_error', 'log_warning']
 

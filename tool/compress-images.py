@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import (
     print_header, format_size, get_user_input, confirm_action,
     get_file_list, ensure_directory_exists, ProgressBar, 
-    log_info, log_error, setup_logger
+    log_info, log_error, setup_logger, normalize_path
 )
 
 # Kiểm tra thư viện PIL
@@ -319,20 +319,26 @@ def main_interactive():
     print_header("TOOL NÉN VÀ CHỈNH SỬA ẢNH")
     
     # Nhập thư mục input
-    input_dir = get_user_input("Nhập đường dẫn thư mục chứa ảnh")
+    print("💡 Mẹo: Bạn có thể kéo thả thư mục vào terminal để nhập đường dẫn")
+    input_dir_raw = get_user_input("Nhập đường dẫn thư mục chứa ảnh")
+    input_dir = normalize_path(input_dir_raw)
+    
     if not os.path.isdir(input_dir):
-        print("❌ Thư mục không tồn tại!")
+        print(f"❌ Thư mục không tồn tại: {input_dir}")
         return
+    
+    print(f"✅ Đã chọn: {input_dir}\n")
     
     # Nhập thư mục output
     default_output = os.path.join(
         input_dir,
         f"compressed_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
     )
-    output_dir = get_user_input(
+    output_dir_raw = get_user_input(
         "Nhập đường dẫn thư mục đầu ra (Enter để mặc định)",
         default=default_output
     )
+    output_dir = normalize_path(output_dir_raw)
     
     # Quality
     quality_input = get_user_input("Nhập quality (1-100, mặc định 70)", default="70")

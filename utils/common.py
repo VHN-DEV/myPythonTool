@@ -78,6 +78,7 @@ def get_user_input(prompt: str, default: Optional[str] = None,
     Giải thích:
     - Hiển thị giá trị default trong prompt
     - Tự động xóa dấu ngoặc kép (khi kéo thả file vào terminal)
+    - Xử lý đường dẫn Windows với backslash
     - Trả về default nếu user không nhập gì
     """
     if default:
@@ -88,12 +89,53 @@ def get_user_input(prompt: str, default: Optional[str] = None,
     user_input = input(prompt_text).strip()
     
     if strip_quotes:
-        user_input = user_input.strip('"').strip("'")
+        # Xóa dấu ngoặc kép và ngoặc đơn ở đầu/cuối
+        user_input = user_input.strip('"').strip("'").strip()
     
     if not user_input and default:
         return default
     
     return user_input
+
+
+def normalize_path(path: str) -> str:
+    """
+    Chuẩn hóa đường dẫn (xử lý kéo thả trên Windows)
+    
+    Args:
+        path: Đường dẫn cần chuẩn hóa
+    
+    Returns:
+        str: Đường dẫn đã chuẩn hóa
+    
+    Giải thích:
+    - Xóa dấu ngoặc kép/đơn ở đầu cuối
+    - Xử lý khoảng trắng thừa
+    - Chuyển đổi về đường dẫn tuyệt đối
+    - Xử lý backslash trên Windows
+    
+    Mục đích: 
+    - Hỗ trợ kéo thả folder vào terminal
+    - Xử lý đúng các đường dẫn có khoảng trắng
+    """
+    # Bước 1: Xóa khoảng trắng ở đầu cuối
+    path = path.strip()
+    
+    # Bước 2: Xóa dấu ngoặc kép/đơn
+    if (path.startswith('"') and path.endswith('"')) or \
+       (path.startswith("'") and path.endswith("'")):
+        path = path[1:-1]
+    
+    # Bước 3: Xóa khoảng trắng thừa lần nữa sau khi xóa ngoặc
+    path = path.strip()
+    
+    # Bước 4: Chuyển về đường dẫn tuyệt đối và chuẩn hóa
+    path = os.path.abspath(os.path.expanduser(path))
+    
+    # Bước 5: Chuẩn hóa separators (\ thành / hoặc ngược lại tùy OS)
+    path = os.path.normpath(path)
+    
+    return path
 
 
 def confirm_action(message: str, require_yes: bool = False) -> bool:
