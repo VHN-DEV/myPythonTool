@@ -66,16 +66,16 @@ def merge_pdfs(input_files, output_file):
     import PyPDF2
     
     try:
-        print(f"\n📦 Dang gop {len(input_files)} file PDF...\n")
+        print(f"\n📦 Đang gộp {len(input_files)} file PDF...\n")
         
         merger = PyPDF2.PdfMerger()
         
         for idx, pdf_file in enumerate(input_files, 1):
             if not os.path.exists(pdf_file):
-                print(f"⚠️  File khong ton tai: {pdf_file}")
+                print(f"⚠️  File không tồn tại: {pdf_file}")
                 continue
             
-            print(f"   [{idx}/{len(input_files)}] Dang xu ly: {os.path.basename(pdf_file)}")
+            print(f"   [{idx}/{len(input_files)}] Đang xử lý: {os.path.basename(pdf_file)}")
             merger.append(pdf_file)
         
         # Tạo thư mục output nếu chưa có
@@ -86,14 +86,14 @@ def merge_pdfs(input_files, output_file):
         
         output_size = os.path.getsize(output_file)
         
-        print(f"\n✅ Gop thanh cong!")
+        print(f"\n✅ Gộp thành công!")
         print(f"   📄 File output: {output_file}")
-        print(f"   📊 Kich thuoc: {format_size(output_size)}")
+        print(f"   📊 Kích thước: {format_size(output_size)}")
         
         return True
         
     except Exception as e:
-        print(f"\n❌ Loi khi gop PDF: {e}")
+        print(f"\n❌ Lỗi khi gộp PDF: {e}")
         return False
 
 
@@ -114,13 +114,13 @@ def split_pdf(input_file, output_folder, mode='all', page_ranges=None):
     import PyPDF2
     
     try:
-        print(f"\n✂️  Dang tach PDF...\n")
+        print(f"\n✂️  Đang tách PDF...\n")
         
         reader = PyPDF2.PdfReader(input_file)
         total_pages = len(reader.pages)
         
         print(f"   📄 File: {os.path.basename(input_file)}")
-        print(f"   📊 Tong so trang: {total_pages}\n")
+        print(f"   📊 Tổng số trang: {total_pages}\n")
         
         # Tạo thư mục output
         os.makedirs(output_folder, exist_ok=True)
@@ -140,14 +140,14 @@ def split_pdf(input_file, output_folder, mode='all', page_ranges=None):
                 
                 print(f"   ✓ Trang {page_num + 1}/{total_pages}: {os.path.basename(output_file)}")
             
-            print(f"\n✅ Tach thanh cong {total_pages} trang!")
+            print(f"\n✅ Tách thành công {total_pages} trang!")
             
         elif mode == 'range' and page_ranges:
             # Tách theo range
             for idx, (start, end) in enumerate(page_ranges, 1):
                 # Validate range
                 if start < 1 or end > total_pages or start > end:
-                    print(f"⚠️  Range khong hop le: {start}-{end}")
+                    print(f"⚠️  Range không hợp lệ: {start}-{end}")
                     continue
                 
                 writer = PyPDF2.PdfWriter()
@@ -162,14 +162,14 @@ def split_pdf(input_file, output_folder, mode='all', page_ranges=None):
                 
                 print(f"   ✓ Range {start}-{end}: {os.path.basename(output_file)}")
             
-            print(f"\n✅ Tach thanh cong {len(page_ranges)} range!")
+            print(f"\n✅ Tách thành công {len(page_ranges)} range!")
         
         print(f"   📁 Thu muc output: {output_folder}")
         
         return True
         
     except Exception as e:
-        print(f"\n❌ Loi khi tach PDF: {e}")
+        print(f"\n❌ Lỗi khi tách PDF: {e}")
         return False
 
 
@@ -190,7 +190,7 @@ def compress_pdf(input_file, output_file, compression_level='medium'):
     import PyPDF2
     
     try:
-        print(f"\n📦 Dang nen PDF...\n")
+        print(f"\n📦 Đang nén PDF...\n")
         
         reader = PyPDF2.PdfReader(input_file)
         writer = PyPDF2.PdfWriter()
@@ -215,7 +215,7 @@ def compress_pdf(input_file, output_file, compression_level='medium'):
         compressed_size = os.path.getsize(output_file)
         reduction = ((original_size - compressed_size) / original_size) * 100
         
-        print(f"✅ Nen thanh cong!")
+        print(f"✅ Nén thành công!")
         print(f"   📄 File goc: {format_size(original_size)}")
         print(f"   📄 File nen: {format_size(compressed_size)}")
         print(f"   💯 Giam: {reduction:.1f}%")
@@ -223,7 +223,7 @@ def compress_pdf(input_file, output_file, compression_level='medium'):
         return True
         
     except Exception as e:
-        print(f"\n❌ Loi khi nen PDF: {e}")
+        print(f"\n❌ Lỗi khi nén PDF: {e}")
         return False
 
 
@@ -244,13 +244,13 @@ def pdf_to_images(input_file, output_folder, image_format='PNG', dpi=200):
     try:
         from pdf2image import convert_from_path
     except ImportError:
-        print("❌ Thieu thu vien pdf2image!")
-        print("Cai dat: pip install pdf2image")
-        print("Luu y: Can cai them poppler-utils")
+        print("❌ Thiếu thư viện pdf2image!")
+        print("Cài đặt: pip install pdf2image")
+        print("Lưu ý: Cần cài thêm poppler-utils")
         return False
     
     try:
-        print(f"\n🖼️  Dang chuyen PDF sang anh...\n")
+        print(f"\n🖼️  Dang chuyển PDF sang ảnh...\n")
         print(f"   DPI: {dpi}")
         print(f"   Format: {image_format}\n")
         
@@ -273,15 +273,15 @@ def pdf_to_images(input_file, output_folder, image_format='PNG', dpi=200):
             size = os.path.getsize(output_file)
             print(f"   ✓ Trang {idx}/{len(images)}: {os.path.basename(output_file)} ({format_size(size)})")
         
-        print(f"\n✅ Chuyen doi thanh cong {len(images)} trang!")
-        print(f"   📁 Thu muc output: {output_folder}")
+        print(f"\n✅ Chuyển đổi thành công {len(images)} trang!")
+        print(f"   📁 Thư mục output: {output_folder}")
         
         return True
         
     except Exception as e:
-        print(f"\n❌ Loi khi chuyen doi: {e}")
+        print(f"\n❌ Lỗi khi chuyển đổi: {e}")
         if "poppler" in str(e).lower():
-            print("\n💡 Luu y: Tool nay can cai them Poppler")
+            print("\n💡 Lưu ý: Tool này cần cài thêm Poppler")
             print("   Windows: Download tai https://github.com/oschwartz10612/poppler-windows/releases")
             print("   Linux: sudo apt-get install poppler-utils")
             print("   macOS: brew install poppler")
@@ -305,7 +305,7 @@ def rotate_pdf(input_file, output_file, rotation=90, pages='all'):
     import PyPDF2
     
     try:
-        print(f"\n🔄 Dang xoay PDF {rotation}°...\n")
+        print(f"\n🔄 Đang xoay PDF {rotation}°...\n")
         
         reader = PyPDF2.PdfReader(input_file)
         writer = PyPDF2.PdfWriter()
@@ -325,13 +325,13 @@ def rotate_pdf(input_file, output_file, rotation=90, pages='all'):
         with open(output_file, 'wb') as output:
             writer.write(output)
         
-        print(f"\n✅ Xoay thanh cong!")
+        print(f"\n✅ Xoay thành công!")
         print(f"   📄 File output: {output_file}")
         
         return True
         
     except Exception as e:
-        print(f"\n❌ Loi khi xoay PDF: {e}")
+        print(f"\n❌ Lỗi khi xoay PDF: {e}")
         return False
 
 
@@ -350,7 +350,7 @@ def extract_text_from_pdf(input_file, output_file=None):
     import PyPDF2
     
     try:
-        print(f"\n📝 Dang trich xuat text...\n")
+        print(f"\n📝 Dang trích xuất text...\n")
         
         reader = PyPDF2.PdfReader(input_file)
         total_pages = len(reader.pages)
@@ -363,18 +363,18 @@ def extract_text_from_pdf(input_file, output_file=None):
             
             if text.strip():
                 all_text.append(f"=== Trang {page_num + 1} ===\n{text}\n")
-                print(f"   ✓ Trang {page_num + 1}: {len(text)} ky tu")
+                print(f"   ✓ Trang {page_num + 1}: {len(text)} ký tự")
             else:
-                print(f"   ⚠️  Trang {page_num + 1}: Khong co text")
+                print(f"   ⚠️  Trang {page_num + 1}: Không có text")
         
         if output_file:
             with open(output_file, 'w', encoding='utf-8') as f:
                 f.write('\n'.join(all_text))
             
-            print(f"\n✅ Trich xuat thanh cong!")
+            print(f"\n✅ Trích xuất thành công!")
             print(f"   📄 File output: {output_file}")
         else:
-            print(f"\n✅ Trich xuat thanh cong!")
+            print(f"\n✅ Trích xuất thành công!")
             print("\n" + "="*60)
             print('\n'.join(all_text[:500]))  # Hiển thị 500 ký tự đầu
             if len('\n'.join(all_text)) > 500:
@@ -383,7 +383,7 @@ def extract_text_from_pdf(input_file, output_file=None):
         return True
         
     except Exception as e:
-        print(f"\n❌ Loi khi trich xuat text: {e}")
+        print(f"\n❌ Lỗi khi trích xuất text: {e}")
         return False
 
 
@@ -401,12 +401,12 @@ def get_pdf_info(input_file):
     try:
         reader = PyPDF2.PdfReader(input_file)
         
-        print(f"\n📄 Thong tin PDF: {os.path.basename(input_file)}")
+        print(f"\n📄 Thông tin PDF: {os.path.basename(input_file)}")
         print("=" * 60)
         
         # Basic info
-        print(f"So trang: {len(reader.pages)}")
-        print(f"Kich thuoc: {format_size(os.path.getsize(input_file))}")
+        print(f"Số trang: {len(reader.pages)}")
+        print(f"Kích thước: {format_size(os.path.getsize(input_file))}")
         
         # Metadata
         if reader.metadata:
@@ -420,14 +420,14 @@ def get_pdf_info(input_file):
             page = reader.pages[0]
             width = float(page.mediabox.width) * 0.352778  # Convert to mm
             height = float(page.mediabox.height) * 0.352778
-            print(f"\nKich thuoc trang: {width:.0f}mm x {height:.0f}mm")
+            print(f"\nKích thước trang: {width:.0f}mm x {height:.0f}mm")
         
         print("=" * 60)
         
         return True
         
     except Exception as e:
-        print(f"\n❌ Loi khi doc thong tin PDF: {e}")
+        print(f"\n❌ Lỗi khi đọc thông tin PDF: {e}")
         return False
 
 
@@ -447,28 +447,28 @@ def main():
         return
     
     print("===== CHUC NANG =====")
-    print("1. Gop PDF (Merge)")
-    print("2. Tach PDF (Split)")
+    print("1. Gộp PDF (Merge)")
+    print("2. Tách PDF (Split)")
     print("3. Nen PDF (Compress)")
-    print("4. PDF sang Anh (PDF to Images)")
+    print("4. PDF sang ẢNH (PDF to Images)")
     print("5. Xoay PDF (Rotate)")
-    print("6. Trich xuat Text")
-    print("7. Xem thong tin PDF")
-    print("0. Thoat")
+    print("6. Trích xuất Text")
+    print("7. Xem thông tin PDF")
+    print("0. Thoát")
     
-    choice = input("\nChon chuc nang (0-7): ").strip()
+    choice = input("\nChọn chức năng (0-7): ").strip()
     
     if choice == "0":
-        print("Thoat chuong trinh.")
+        print("Thoát chương trình.")
         return
     
     elif choice == "1":
         # Merge PDFs
-        print("\n===== GOP PDF =====")
+        print("\n===== GỘP PDF =====")
         
-        folder_input = input("Nhap duong dan thu muc chua PDF: ").strip('"')
+        folder_input = input("Nhập đường dẫn thư mục chứa PDF: ").strip('"')
         if not os.path.isdir(folder_input):
-            print("❌ Thu muc khong ton tai!")
+            print("❌ Thư mục không tồn tại!")
             return
         
         # Tìm tất cả PDF trong thư mục
@@ -479,17 +479,17 @@ def main():
         ]
         
         if not pdf_files:
-            print("❌ Khong tim thay file PDF nao!")
+            print("❌ Không tìm thấy file PDF nào!")
             return
         
         pdf_files.sort()
         
-        print(f"\nTim thay {len(pdf_files)} file PDF:")
+        print(f"\nTìm thấy {len(pdf_files)} file PDF:")
         for idx, pdf in enumerate(pdf_files, 1):
             size = format_size(os.path.getsize(pdf))
             print(f"  {idx}. {os.path.basename(pdf)} ({size})")
         
-        output_name = input("\nNhap ten file output (vd: merged.pdf): ").strip()
+        output_name = input("\nNhập tên file output (vd: merged.pdf): ").strip()
         if not output_name.endswith('.pdf'):
             output_name += '.pdf'
         
@@ -499,27 +499,27 @@ def main():
     
     elif choice == "2":
         # Split PDF
-        print("\n===== TACH PDF =====")
+        print("\n===== TÁCH PDF =====")
         
-        input_file = input("Nhap duong dan file PDF: ").strip('"')
+        input_file = input("Nhập đường dẫn file PDF: ").strip('"')
         if not os.path.isfile(input_file):
-            print("❌ File khong ton tai!")
+            print("❌ File không tồn tại!")
             return
         
-        output_folder = input("Thu muc output (Enter de tao thu muc 'split'): ").strip('"')
+        output_folder = input("Thư mục output (Enter để tạo thư mục 'split'): ").strip('"')
         if not output_folder:
             output_folder = os.path.join(os.path.dirname(input_file), 'split')
         
-        print("\n1. Tach tung trang (moi trang 1 file)")
-        print("2. Tach theo range (vd: 1-5, 6-10)")
+        print("\n1. Tách từng trang (mỗi trang 1 file)")
+        print("2. Tách theo range (vd: 1-5, 6-10)")
         
-        split_mode = input("\nChon che do (1-2): ").strip()
+        split_mode = input("\nChọn chế độ (1-2): ").strip()
         
         if split_mode == "1":
             split_pdf(input_file, output_folder, mode='all')
         
         elif split_mode == "2":
-            range_input = input("Nhap range (vd: 1-5, 6-10, 11-15): ").strip()
+            range_input = input("Nhập range (vd: 1-5, 6-10, 11-15): ").strip()
             ranges = []
             
             for r in range_input.split(','):
@@ -531,18 +531,18 @@ def main():
             if ranges:
                 split_pdf(input_file, output_folder, mode='range', page_ranges=ranges)
             else:
-                print("❌ Range khong hop le!")
+                print("❌ Range không hợp lệ!")
     
     elif choice == "3":
         # Compress PDF
-        print("\n===== NEN PDF =====")
+        print("\n===== NÉN PDF =====")
         
-        input_file = input("Nhap duong dan file PDF: ").strip('"')
+        input_file = input("Nhập đường dẫn file PDF: ").strip('"')
         if not os.path.isfile(input_file):
-            print("❌ File khong ton tai!")
+            print("❌ File không tồn tại!")
             return
         
-        output_file = input("Ten file output (Enter de them '_compressed'): ").strip('"')
+        output_file = input("Tên file output (Enter để thêm '_compressed'): ").strip('"')
         if not output_file:
             base = Path(input_file).stem
             ext = Path(input_file).suffix
@@ -555,22 +555,22 @@ def main():
     
     elif choice == "4":
         # PDF to Images
-        print("\n===== PDF SANG ANH =====")
+        print("\n===== PDF SANG ẢNH =====")
         
-        input_file = input("Nhap duong dan file PDF: ").strip('"')
+        input_file = input("Nhập đường dẫn file PDF: ").strip('"')
         if not os.path.isfile(input_file):
-            print("❌ File khong ton tai!")
+            print("❌ File không tồn tại!")
             return
         
-        output_folder = input("Thu muc output (Enter de tao thu muc 'images'): ").strip('"')
+        output_folder = input("Thư mục output (Enter để tạo thư mục 'images'): ").strip('"')
         if not output_folder:
             output_folder = os.path.join(os.path.dirname(input_file), 'images')
         
-        format_choice = input("Dinh dang anh (PNG/JPEG, mac dinh PNG): ").strip().upper()
+        format_choice = input("Định dạng ảnh (PNG/JPEG, mặc định PNG): ").strip().upper()
         if format_choice not in ['PNG', 'JPEG']:
             format_choice = 'PNG'
         
-        dpi_input = input("DPI (72-300, mac dinh 200): ").strip()
+        dpi_input = input("DPI (72-300, mặc định 200): ").strip()
         dpi = int(dpi_input) if dpi_input and dpi_input.isdigit() else 200
         
         pdf_to_images(input_file, output_folder, format_choice, dpi)
@@ -579,15 +579,15 @@ def main():
         # Rotate PDF
         print("\n===== XOAY PDF =====")
         
-        input_file = input("Nhap duong dan file PDF: ").strip('"')
+        input_file = input("Nhập đường dẫn file PDF: ").strip('"')
         if not os.path.isfile(input_file):
-            print("❌ File khong ton tai!")
+            print("❌ File không tồn tại!")
             return
         
-        rotation_input = input("Goc xoay (90/180/270, mac dinh 90): ").strip()
+        rotation_input = input("Góc xoay (90/180/270, mặc định 90): ").strip()
         rotation = int(rotation_input) if rotation_input in ['90', '180', '270'] else 90
         
-        output_file = input("Ten file output (Enter de them '_rotated'): ").strip('"')
+        output_file = input("Tên file output (Enter để thêm '_rotated'): ").strip('"')
         if not output_file:
             base = Path(input_file).stem
             ext = Path(input_file).suffix
@@ -600,17 +600,17 @@ def main():
     
     elif choice == "6":
         # Extract text
-        print("\n===== TRICH XUAT TEXT =====")
+        print("\n===== TRÍCH XUẤT TEXT =====")
         
-        input_file = input("Nhap duong dan file PDF: ").strip('"')
+        input_file = input("Nhập đường dẫn file PDF: ").strip('"')
         if not os.path.isfile(input_file):
-            print("❌ File khong ton tai!")
+            print("❌ File không tồn tại!")
             return
         
         save_choice = input("Luu ra file? (y/N): ").strip().lower()
         
         if save_choice == 'y':
-            output_file = input("Ten file output (Enter de dung 'extracted_text.txt'): ").strip()
+            output_file = input("Tên file output (Enter để dùng 'extracted_text.txt'): ").strip()
             if not output_file:
                 output_file = os.path.join(
                     os.path.dirname(input_file),
@@ -622,24 +622,24 @@ def main():
     
     elif choice == "7":
         # Get PDF info
-        print("\n===== THONG TIN PDF =====")
+        print("\n===== THÔNG TIN PDF =====")
         
-        input_file = input("Nhap duong dan file PDF: ").strip('"')
+        input_file = input("Nhập đường dẫn file PDF: ").strip('"')
         if not os.path.isfile(input_file):
-            print("❌ File khong ton tai!")
+            print("❌ File không tồn tại!")
             return
         
         get_pdf_info(input_file)
     
     else:
-        print("❌ Lua chon khong hop le!")
+        print("❌ Lựa chọn không hợp lệ!")
 
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n❌ Da huy!")
+        print("\n\n❌ Đã hủy!")
     except Exception as e:
-        print(f"\n❌ Loi: {e}")
+        print(f"\n❌ Lỗi: {e}")
 

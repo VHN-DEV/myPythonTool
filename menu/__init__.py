@@ -230,7 +230,7 @@ def main():
         except EOFError:
             # Xử lý EOF error (input stream bị đóng hoặc Ctrl+D/Ctrl+Z)
             try:
-                print("\n\nInput stream da dong. Thoat chuong trinh...")
+                print("\n\nInput stream đã đóng. Thoát chương trình...")
             except Exception:
                 pass  # Nếu không print được, thôi
             break
@@ -238,7 +238,7 @@ def main():
         except KeyboardInterrupt:
             # Xử lý Ctrl+C
             try:
-                print("\n\nTam biet!")
+                print("\n\nTạm biệt!")
             except Exception:
                 pass
             break
@@ -246,12 +246,12 @@ def main():
         except Exception as e:
             # Xử lý các lỗi khác
             try:
-                print(f"\nLoi: {e}")
+                print(f"\nLỗi: {e}")
                 import traceback
                 traceback.print_exc()
             except Exception:
                 # Nếu không print được do encoding, dùng ASCII
-                print(f"\nError: {str(e)}")
+                print(f"\nLỗi: {str(e)}")
 
 
 if __name__ == "__main__":

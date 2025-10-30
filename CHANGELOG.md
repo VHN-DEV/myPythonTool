@@ -4,6 +4,97 @@ Tất cả các thay đổi quan trọng của dự án sẽ được ghi lại 
 
 ---
 
+## [2.2.0] - 2025-10-30
+
+### 🗂️ Major Restructure - Tổ chức lại cấu trúc thư mục tools
+
+Bản cập nhật này tổ chức lại cấu trúc thư mục để mỗi tool có thư mục riêng, giúp quản lý tốt hơn khi tool có nhiều file hoặc tài liệu.
+
+#### 📁 Cấu trúc mới
+
+**Trước đây:**
+```
+tool/
+  backup-folder.py
+  clean-temp-files.py
+  compress-images.py
+  ...
+  README_SSH.md
+```
+
+**Bây giờ:**
+```
+tool/
+  backup-folder/
+    __init__.py
+    backup-folder.py
+    README.md
+  clean-temp-files/
+    __init__.py
+    clean-temp-files.py
+  ...
+  ssh-manager/
+    __init__.py
+    ssh-manager.py
+    README.md
+  README.md
+```
+
+#### ✨ Lợi ích
+
+- ✅ **Tổ chức tốt hơn**: Mỗi tool có thư mục riêng, tránh lộn xộn
+- ✅ **Mở rộng dễ dàng**: Có thể thêm nhiều file cho mỗi tool:
+  - README.md: Hướng dẫn chi tiết cho tool
+  - config.json: Cấu hình riêng
+  - helpers.py: Các hàm phụ trợ
+  - tests.py: Unit tests
+- ✅ **Quản lý tốt hơn**: Dễ tìm kiếm và bảo trì
+- ✅ **Tương thích ngược**: Vẫn hỗ trợ cấu trúc cũ
+
+#### 🔧 Changes
+
+**Tool Manager - Enhanced:**
+- Cập nhật `menu/tool_manager.py` với logic tìm kiếm tool mới
+- `get_tool_list()`: Tìm tools trong cả thư mục con và file trực tiếp
+- `_find_tool_path()`: Hàm mới tìm đường dẫn chính xác của tool
+- Ưu tiên cấu trúc mới nhưng vẫn hỗ trợ cấu trúc cũ
+
+**Documentation:**
+- ✨ NEW: `tool/README.md` - Hướng dẫn cấu trúc và cách thêm tool mới
+- ✨ NEW: `tool/backup-folder/README.md` - Hướng dẫn chi tiết tool
+- ✨ NEW: `tool/compress-images/README.md` - Hướng dẫn chi tiết tool
+- ✨ NEW: `tool/find-and-replace/README.md` - Hướng dẫn chi tiết tool
+- 🔄 MOVED: `tool/README_SSH.md` → `tool/ssh-manager/README.md`
+
+**All Tools:**
+- 🗂️ RESTRUCTURED: 15 tools di chuyển vào thư mục riêng
+- ✨ NEW: `__init__.py` cho mỗi tool
+- ✅ Hoạt động 100% như cũ, không breaking changes
+
+#### 📦 Migration
+
+Tự động migrate tools từ cấu trúc cũ sang mới:
+```bash
+python migrate_tools.py
+```
+
+#### 🎯 Hướng dẫn thêm tool mới
+
+1. Tạo thư mục: `tool/ten-tool-moi/`
+2. Tạo file chính: `tool/ten-tool-moi/ten-tool-moi.py`
+3. Tạo `__init__.py` và README.md (optional)
+4. Tool tự động xuất hiện trong menu!
+
+#### 📊 Statistics
+
+- 📁 15 tools được tổ chức lại thành 15 thư mục
+- 📄 15 `__init__.py` files được tạo
+- 📚 4 README.md files được thêm
+- ✅ 0 breaking changes
+- ⚡ 100% backward compatible
+
+---
+
 ## [2.1.0] - 2025-10-30
 
 ### 🔧 Refactoring - Tối ưu cấu trúc code

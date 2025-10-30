@@ -123,17 +123,34 @@ class ToolManager:
             list: Danh sách tên file tool (priority tools trước, sau đó alphabet)
         
         Giải thích:
-        - Bước 1: Lấy tất cả file .py trong thư mục tool
+        - Bước 1: Lấy tất cả file .py trong thư mục tool (bao gồm cả trong thư mục con)
         - Bước 2: Tách ra priority tools và tools thường
         - Bước 3: Sắp xếp priority tools theo thứ tự định sẵn
         - Bước 4: Sắp xếp tools thường theo alphabet
         - Bước 5: Ghép lại: priority + alphabet
+        
+        Lý do tìm trong thư mục con:
+        - Hỗ trợ cấu trúc mới: mỗi tool có thư mục riêng
+        - Ví dụ: tool/backup-folder/backup-folder.py
         """
         if not self.tool_dir.exists():
             return []
         
-        # Lấy tất cả file .py
-        all_tools = [f for f in os.listdir(self.tool_dir) if f.endswith('.py')]
+        all_tools = []
+        
+        # Duyệt qua các thư mục con trong tool/
+        for item in os.listdir(self.tool_dir):
+            item_path = self.tool_dir / item
+            
+            # Nếu là thư mục, tìm file .py chính trong đó
+            if item_path.is_dir():
+                # Tìm file có tên giống thư mục
+                main_file = item_path / f"{item}.py"
+                if main_file.exists():
+                    all_tools.append(f"{item}.py")
+            # Nếu là file .py (để tương thích với cấu trúc cũ)
+            elif item.endswith('.py'):
+                all_tools.append(item)
         
         # Tách priority tools và tools thường
         priority = []
@@ -239,13 +256,18 @@ class ToolManager:
             int: Exit code
         
         Giải thích:
-        - Chạy tool bằng subprocess
+        - Tìm và chạy tool từ thư mục tool/ hoặc thư mục con
         - Lưu vào recent
         - Hiển thị thông báo
-        """
-        tool_path = self.tool_dir / tool
         
-        if not tool_path.exists():
+        Lý do xử lý cả 2 cấu trúc:
+        - Cấu trúc cũ: tool/backup-folder.py
+        - Cấu trúc mới: tool/backup-folder/backup-folder.py
+        """
+        # Tìm đường dẫn thực tế của tool
+        tool_path = self._find_tool_path(tool)
+        
+        if not tool_path or not tool_path.exists():
             print(f"❌ Tool không tồn tại: {tool}")
             return 1
         
@@ -272,6 +294,38 @@ class ToolManager:
         except Exception as e:
             print(f"\n❌ Lỗi khi chạy tool: {e}")
             return 1
+    
+    def _find_tool_path(self, tool: str) -> Optional[Path]:
+        """
+        Tìm đường dẫn thực tế của tool
+        
+        Args:
+            tool: Tên file tool (vd: backup-folder.py)
+        
+        Returns:
+            Path: Đường dẫn đầy đủ đến file tool, hoặc None nếu không tìm thấy
+        
+        Giải thích:
+        - Bước 1: Thử tìm trong thư mục con (cấu trúc mới)
+        - Bước 2: Nếu không có, thử tìm trực tiếp (cấu trúc cũ)
+        
+        Lý do:
+        - Hỗ trợ cả 2 cấu trúc để dễ migration
+        - Ưu tiên cấu trúc mới (thư mục con)
+        """
+        tool_name = tool.replace('.py', '')
+        
+        # Thử cấu trúc mới: tool/backup-folder/backup-folder.py
+        new_structure_path = self.tool_dir / tool_name / tool
+        if new_structure_path.exists():
+            return new_structure_path
+        
+        # Thử cấu trúc cũ: tool/backup-folder.py
+        old_structure_path = self.tool_dir / tool
+        if old_structure_path.exists():
+            return old_structure_path
+        
+        return None
     
     def display_menu(self, tools: Optional[List[str]] = None, title: str = "DANH SÁCH TOOL"):
         """
