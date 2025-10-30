@@ -4,6 +4,203 @@ Tất cả các thay đổi quan trọng của dự án sẽ được ghi lại 
 
 ---
 
+## [2.0.0] - 2025-10-30
+
+### 🚀 Major Overhaul - Tối ưu hóa và Nâng cấp toàn diện
+
+Đây là bản cập nhật lớn với việc refactor và tối ưu hóa toàn bộ codebase, thêm nhiều tính năng mới và cải thiện performance đáng kể.
+
+#### ✨ Tính năng mới
+
+**Utils Package - Thư viện tiện ích chung:**
+- `utils/common.py` - Các hàm tiện ích dùng chung
+  - `format_size()` - Format dung lượng dễ đọc
+  - `print_header()` - In header đẹp
+  - `get_user_input()` - Lấy input với validation
+  - `confirm_action()` - Xác nhận thao tác nguy hiểm
+  - `validate_path()` - Kiểm tra path hợp lệ
+  - `get_file_list()` - Lấy danh sách file với filter
+  - `get_folder_size()` - Tính dung lượng thư mục
+  - `safe_delete()` - Xóa file/folder an toàn
+  - `parse_size_string()` - Parse chuỗi size (vd: "10MB")
+
+- `utils/progress.py` - Progress tracking
+  - `ProgressBar` class - Progress bar đẹp với ETA
+  - `Spinner` class - Spinner animation
+  - `simple_progress()` - Progress generator đơn giản
+
+- `utils/logger.py` - Logging system
+  - `setup_logger()` - Setup logger với config linh hoạt
+  - `log_info()`, `log_error()`, `log_warning()` - Wrapper functions
+  - Tự động ghi log ra file với rotation
+  - Log format rõ ràng, dễ đọc
+
+**Config System:**
+- `config.py` - Cấu hình tập trung
+  - Tất cả settings ở một nơi
+  - Dễ customize và maintain
+  - Load/save config từ/ra file JSON
+  - Auto-create directories cần thiết
+  - Constants cho paths, extensions, defaults
+
+**Menu System Upgrade:**
+- `menu.py` - Menu nâng cao
+  - ⭐ Favorites system - Đánh dấu tools yêu thích
+  - 📚 Recent tools - Lịch sử tools đã dùng
+  - 🔍 Search tools - Tìm kiếm theo keyword/tags
+  - Config persistence - Lưu settings
+  - Better UI với box drawing characters
+  - Shortcuts cho các thao tác thường dùng
+
+#### 🔧 Tools được tối ưu hóa
+
+**compress-images.py v2.0:**
+- ⚡ Multiprocessing - Xử lý song song nhiều ảnh
+- 📊 Progress bar với ETA
+- 🎯 CLI mode với argparse
+- 📝 Logging đầy đủ
+- ✅ Better error handling
+- 🔄 Refactor code structure
+- 🎨 RGB conversion cho JPEG
+- 📐 Smart resize với aspect ratio
+
+**backup-folder.py v2.0:**
+- 📋 BackupManager class - OOP design
+- 📊 Progress bar cho copy files
+- 💾 Metadata tracking - Lưu lịch sử backup
+- 🔍 List previous backups
+- 🔄 Restore from backup
+- ⚙️ CLI mode với argparse
+- 🚫 Better exclude patterns
+- 📝 Logging đầy đủ
+
+**duplicate-finder.py v2.0:**
+- ⚡ Multiprocessing cho hash calculation
+- 🎯 Smart algorithm - Filter theo size trước
+- 📊 Progress bar với ETA
+- 🗑️ Multiple delete modes:
+  - Giữ file đầu tiên
+  - Giữ file mới nhất
+  - Giữ file cũ nhất
+- 📝 Export report ra file
+- ⚙️ CLI mode với argparse
+- 📈 Better statistics display
+
+#### 🎨 Cải thiện UX
+
+**Progress Tracking:**
+- Progress bar với ETA cho tất cả thao tác lâu
+- Spinner animation cho thao tác không biết thời gian
+- Real-time status updates
+- Format đẹp, dễ đọc
+
+**Error Handling:**
+- Try-catch đầy đủ
+- Error messages chi tiết hơn
+- Graceful degradation
+- Logging errors để debug
+
+**Input Validation:**
+- Validate paths, sizes, numbers
+- Clear error messages
+- Default values hợp lý
+- Strip quotes tự động
+
+**Confirmations:**
+- Confirm cho thao tác nguy hiểm
+- Require "YES" cho thao tác rất nguy hiểm
+- Preview trước khi thực hiện
+- Dry-run mode (sẽ thêm sau)
+
+#### 🚀 Performance
+
+**Multiprocessing:**
+- Compress images song song
+- Hash files song song cho duplicate finder
+- Auto-detect số CPU cores
+- Configurable max workers
+
+**Optimizations:**
+- Smart filtering (size trước, hash sau)
+- Buffer size optimization
+- Chunk reading cho file lớn
+- Early exit khi có thể
+
+**Memory Management:**
+- Không load toàn bộ file vào RAM
+- Stream processing
+- Generator cho iteration
+- Cleanup resources properly
+
+#### 📚 Documentation
+
+**Code Documentation:**
+- Docstrings đầy đủ cho tất cả functions/classes
+- Type hints cho parameters và returns
+- Giải thích logic phức tạp
+- Examples trong docstring
+
+**User Documentation:**
+- Help command trong menu
+- CLI --help cho mỗi tool
+- Clear error messages
+- CHANGELOG.md chi tiết
+
+#### 🛠️ Technical Improvements
+
+**Code Quality:**
+- DRY principle - Không lặp code
+- OOP design cho tools phức tạp
+- Separation of concerns
+- Consistent naming conventions
+- Better project structure
+
+**Maintainability:**
+- Centralized config
+- Shared utilities
+- Modular design
+- Easy to extend
+
+**Testing Ready:**
+- Testable functions
+- Separated logic và I/O
+- Clear interfaces
+- Mock-friendly design
+
+#### 🐛 Bug Fixes
+
+- Fix encoding issues khi đọc file
+- Fix progress bar không hiển thị đúng
+- Fix memory leak khi xử lý nhiều file
+- Fix crash khi file không có quyền truy cập
+- Fix path handling trên Windows
+
+#### 📦 Dependencies
+
+Không thêm dependency mới, tất cả utils đều pure Python.
+
+#### ⚠️ Breaking Changes
+
+**Menu System:**
+- Command shortcuts đã thay đổi
+- Config file format mới (tool_config.json)
+
+**Tools:**
+- Một số tool có thêm CLI arguments
+- Log files giờ lưu trong thư mục `logs/`
+- Output mặc định trong thư mục `output/`
+
+#### 🔮 Roadmap (Coming Soon)
+
+- [ ] Tối ưu file-organizer.py với undo feature
+- [ ] Nâng cấp find-and-replace.py với preview
+- [ ] Thêm batch preview cho image-watermark.py
+- [ ] Unit tests cho utils
+- [ ] Configuration UI
+- [ ] Plugin system
+
+---
+
 ## [1.1.0] - 2024-10-30
 
 ### 🎉 Major Update - 3 Tools mới cao cấp

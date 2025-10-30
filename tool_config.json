@@ -1,0 +1,10 @@
+{
+  "favorites": [],
+  "recent": [
+    "compress-images.py"
+  ],
+  "settings": {
+    "show_descriptions": true,
+    "max_recent": 10
+  }
+}
