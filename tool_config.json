@@ -1,7 +1,20 @@
 {
   "favorites": [],
   "recent": [
-    "compress-images.py"
+    "backup-folder.py",
+    "clean-temp-files.py",
+    "compress-images.py",
+    "copy-changed-files.py",
+    "duplicate-finder.py",
+    "extract-archive.py",
+    "file-organizer.py",
+    "find-and-replace.py",
+    "image-watermark.py",
+    "pdf-tools.py",
+    "rename-files.py",
+    "ssh-manager.py",
+    "text-encoding-converter.py",
+    "video-converter.py"
   ],
   "settings": {
     "show_descriptions": true,
