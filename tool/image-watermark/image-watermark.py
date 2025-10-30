@@ -10,6 +10,51 @@ import datetime
 from pathlib import Path
 
 
+def get_templates_file():
+    """
+    Lấy đường dẫn file templates
+    
+    Return:
+        Path: Đường dẫn file watermark_templates.json
+    
+    Giải thích:
+    - Bước 1: Tìm templates trong thư mục tool (cấu trúc mới)
+    - Bước 2: Nếu không tìm thấy, tìm ở project root (cấu trúc cũ - backward compatible)
+    
+    Lý do:
+    - Ưu tiên cấu trúc mới: templates nằm cùng thư mục tool
+    - Vẫn hỗ trợ cấu trúc cũ để dễ migration
+    """
+    # Lấy thư mục chứa file image-watermark.py (tool/image-watermark/)
+    script_dir = Path(__file__).resolve().parent
+    
+    # Cấu trúc mới: templates trong cùng thư mục tool
+    templates_in_tool_dir = script_dir / "watermark_templates.json"
+    
+    # Nếu file tồn tại ở vị trí mới, dùng nó
+    if templates_in_tool_dir.exists():
+        return templates_in_tool_dir
+    
+    # Backward compatibility: Tìm ở project root (cấu trúc cũ)
+    # Lùi 2 cấp lên project root (tool/image-watermark/ -> tool/ -> project/)
+    project_root = script_dir.parent.parent
+    
+    # Kiểm tra xem có phải project root không (có file setup.py hoặc pyproject.toml)
+    if not (project_root / "setup.py").exists() and not (project_root / "pyproject.toml").exists():
+        # Nếu không phải, fallback về current directory
+        project_root = Path.cwd()
+    
+    # Đường dẫn tuyệt đối đến watermark_templates.json ở project root
+    templates_in_root = project_root / "watermark_templates.json"
+    
+    # Nếu file tồn tại ở root, dùng nó (backward compatible)
+    if templates_in_root.exists():
+        return templates_in_root
+    
+    # Mặc định: trả về vị trí mới (trong thư mục tool)
+    return templates_in_tool_dir
+
+
 def print_header():
     """In header của tool"""
     print("=" * 60)
@@ -312,11 +357,11 @@ def save_template(template_name, config):
     """
     import json
     
-    templates_file = 'watermark_templates.json'
+    templates_file = get_templates_file()
     
     # Load templates hiện có
     templates = {}
-    if os.path.exists(templates_file):
+    if templates_file.exists():
         try:
             with open(templates_file, 'r', encoding='utf-8') as f:
                 templates = json.load(f)
@@ -337,9 +382,9 @@ def load_templates():
     """Load tất cả templates đã lưu"""
     import json
     
-    templates_file = 'watermark_templates.json'
+    templates_file = get_templates_file()
     
-    if not os.path.exists(templates_file):
+    if not templates_file.exists():
         return {}
     
     try:

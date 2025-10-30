@@ -50,7 +50,26 @@ tool/
 
 4. (Optional) Thêm README.md để hướng dẫn sử dụng
 
-5. Tool sẽ tự động xuất hiện trong menu chính!
+5. (Optional) Thêm file config riêng nếu cần:
+   ```
+   tool/ten-tool-moi/config.json
+   tool/ten-tool-moi/settings.json
+   ```
+
+6. Tool sẽ tự động xuất hiện trong menu chính!
+
+## File Config của Tool
+
+Mỗi tool có thể có file config riêng trong thư mục của nó:
+
+- **ssh-manager**: `ssh_config.json` - Danh sách SSH servers
+- **image-watermark**: `watermark_templates.json` - Templates watermark đã lưu
+- **backup-folder**: `backup_metadata.json` - Lịch sử backup (lưu trong thư mục backup)
+
+**Lợi ích:**
+- Config được tổ chức cùng tool sử dụng nó
+- Dễ backup/restore từng tool với config riêng
+- Không lộn xộn ở project root
 
 ## Lưu ý
 

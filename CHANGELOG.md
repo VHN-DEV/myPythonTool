@@ -8,7 +8,7 @@ Tất cả các thay đổi quan trọng của dự án sẽ được ghi lại 
 
 ### 🗂️ Major Restructure - Tổ chức lại cấu trúc thư mục tools
 
-Bản cập nhật này tổ chức lại cấu trúc thư mục để mỗi tool có thư mục riêng, giúp quản lý tốt hơn khi tool có nhiều file hoặc tài liệu.
+Bản cập nhật này tổ chức lại cấu trúc thư mục để mỗi tool có thư mục riêng, bao gồm cả việc di chuyển file config riêng của từng tool vào thư mục tương ứng.
 
 #### 📁 Cấu trúc mới
 
@@ -85,11 +85,35 @@ python migrate_tools.py
 3. Tạo `__init__.py` và README.md (optional)
 4. Tool tự động xuất hiện trong menu!
 
+#### 📁 Config Files Migration
+
+**File config được di chuyển vào thư mục tool:**
+
+1. **ssh-manager:**
+   - 🔄 MOVED: `ssh_config.json` → `tool/ssh-manager/ssh_config.json`
+   - 🔄 MOVED: `ssh_config.example.json` → `tool/ssh-manager/ssh_config.example.json`
+   - ✨ Cập nhật `get_config_file()` với backward compatibility
+
+2. **image-watermark:**
+   - ✨ Cập nhật `get_templates_file()` để lưu templates trong thư mục tool
+   - 📝 `watermark_templates.json` sẽ được tạo trong `tool/image-watermark/`
+   - ✅ Vẫn hỗ trợ file cũ ở root nếu tồn tại
+
+3. **backup-folder:**
+   - ✅ Đã lưu `backup_metadata.json` trong thư mục backup (không cần di chuyển)
+
+**Lợi ích:**
+- ✅ Config được tổ chức cùng tool sử dụng nó
+- ✅ Dễ backup/restore từng tool với config riêng
+- ✅ Không lộn xộn ở project root
+- ✅ 100% backward compatible - tự động tìm config ở vị trí cũ nếu chưa migrate
+
 #### 📊 Statistics
 
 - 📁 15 tools được tổ chức lại thành 15 thư mục
 - 📄 15 `__init__.py` files được tạo
 - 📚 4 README.md files được thêm
+- 🔄 2 config files được di chuyển (ssh_config.json, ssh_config.example.json)
 - ✅ 0 breaking changes
 - ⚡ 100% backward compatible
 

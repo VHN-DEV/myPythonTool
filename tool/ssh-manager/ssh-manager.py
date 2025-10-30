@@ -60,15 +60,27 @@ def get_config_file():
         Path: Đường dẫn file ssh_config.json
     
     Giải thích:
-    - File config lưu trong thư mục gốc project (không phụ thuộc current directory)
+    - Bước 1: Tìm config trong thư mục tool (cấu trúc mới)
+    - Bước 2: Nếu không tìm thấy, tìm ở project root (cấu trúc cũ - backward compatible)
     - Tự động tạo nếu chưa có
-    - Tìm project root bằng cách kiểm tra file marker (setup.py, pyproject.toml)
+    
+    Lý do:
+    - Ưu tiên cấu trúc mới: config nằm cùng thư mục tool
+    - Vẫn hỗ trợ cấu trúc cũ để dễ migration
     """
-    # Lấy thư mục chứa file ssh-manager.py (tool/)
+    # Lấy thư mục chứa file ssh-manager.py (tool/ssh-manager/)
     script_dir = Path(__file__).resolve().parent
     
-    # Lùi 1 cấp lên project root (D:\myPythonTool)
-    project_root = script_dir.parent
+    # Cấu trúc mới: config trong cùng thư mục tool
+    config_in_tool_dir = script_dir / "ssh_config.json"
+    
+    # Nếu file tồn tại ở vị trí mới, dùng nó
+    if config_in_tool_dir.exists():
+        return config_in_tool_dir
+    
+    # Backward compatibility: Tìm ở project root (cấu trúc cũ)
+    # Lùi 2 cấp lên project root (tool/ssh-manager/ -> tool/ -> project/)
+    project_root = script_dir.parent.parent
     
     # Kiểm tra xem có phải project root không (có file setup.py hoặc pyproject.toml)
     if not (project_root / "setup.py").exists() and not (project_root / "pyproject.toml").exists():
@@ -80,10 +92,15 @@ def get_config_file():
                 project_root = parent
                 break
     
-    # Đường dẫn tuyệt đối đến ssh_config.json
-    config_file = project_root / "ssh_config.json"
+    # Đường dẫn tuyệt đối đến ssh_config.json ở project root
+    config_in_root = project_root / "ssh_config.json"
     
-    return config_file
+    # Nếu file tồn tại ở root, dùng nó (backward compatible)
+    if config_in_root.exists():
+        return config_in_root
+    
+    # Mặc định: trả về vị trí mới (trong thư mục tool)
+    return config_in_tool_dir
 
 
 def load_servers():
@@ -526,10 +543,14 @@ def show_help():
     if default_key:
         key_info = f"\n[i] Key mac dinh duoc phat hien: {default_key}"
     
+    # Lấy đường dẫn config file
+    config_file = get_config_file()
+    config_location = config_file.relative_to(Path.cwd()) if config_file.is_relative_to(Path.cwd()) else config_file
+    
     print(f"""
 📖 QUẢN LÝ CẤU HÌNH:
 
-Tool lưu cấu hình trong file: ssh_config.json
+Tool lưu cấu hình trong file: {config_location}
 
 Các lệnh quản lý:
   a - Thêm server mới
@@ -551,8 +572,8 @@ Các lệnh quản lý:
 
 - KHONG bao gio luu password trong config
 - Su dung SSH key thay vi password
-- Bao ve file ssh_config.json (chmod 600)
-- Them ssh_config.json vao .gitignore
+- Bao ve file config (chmod 600 hoac chi doc)
+- Them file config vao .gitignore neu can
 
 [*] YEU CAU:
 

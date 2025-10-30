@@ -32,9 +32,17 @@ python tool/ssh-manager.py
 
 ## ⚙️ Quản Lý Server (v2.0)
 
-### **Cấu hình được lưu trong file:** `ssh_config.json`
+### **📁 Cấu hình được lưu trong file:** `ssh_config.json`
+
+**Vị trí:** `tool/ssh-manager/ssh_config.json` (trong cùng thư mục với tool)
 
 Tool tự động tạo file này khi chạy lần đầu. Bạn có thể quản lý server bằng menu hoặc chỉnh sửa file JSON trực tiếp.
+
+**Lợi ích của vị trí mới:**
+- ✅ Config được tổ chức cùng tool
+- ✅ Dễ backup/restore cả tool và config
+- ✅ Không lộn xộn ở project root
+- ✅ Vẫn tương thích với file config cũ (nếu tồn tại ở root)
 
 ### **1️⃣ Thêm Server Mới**
 
@@ -120,7 +128,7 @@ Chọn số để SSH hoặc lệnh: v
 
 ===== FILE CONFIG =====
 
-Đường dẫn: D:\myPythonTool\ssh_config.json
+Đường dẫn: D:\myPythonTool\tool\ssh-manager\ssh_config.json
 
 Nội dung:
 ------------------------------------------------------------
@@ -143,7 +151,9 @@ Nội dung:
 
 ### **5️⃣ Chỉnh Sửa File JSON Trực Tiếp**
 
-Bạn có thể mở file `ssh_config.json` và chỉnh sửa:
+Bạn có thể mở file `tool/ssh-manager/ssh_config.json` và chỉnh sửa:
+
+**Mẫu file:** Xem `ssh_config.example.json` trong cùng thư mục
 
 ```json
 {
@@ -241,10 +251,12 @@ s remote       # Tìm theo keyword "remote"
 
 ## 📝 Lưu Ý
 
-- ✅ **v2.0:** Tất cả thay đổi được lưu vĩnh viễn vào `ssh_config.json`
-- ⚠️ File `ssh_config.json` đã được thêm vào `.gitignore` (không commit)
+- ✅ **v2.2:** File config giờ lưu trong `tool/ssh-manager/ssh_config.json`
+- ✅ **v2.0:** Tất cả thay đổi được lưu vĩnh viễn vào file config
+- ⚠️ Nên thêm `tool/ssh-manager/ssh_config.json` vào `.gitignore` nếu chứa thông tin nhạy cảm
 - 💡 Backup file config trước khi chỉnh sửa trực tiếp
 - 🔐 Không lưu password trong config (để null)
+- 🔄 Tool vẫn tìm file config cũ ở root nếu tồn tại (backward compatible)
 
 ## 🚀 Use Cases
 
