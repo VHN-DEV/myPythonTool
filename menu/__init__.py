@@ -15,6 +15,15 @@ from pathlib import Path
 from datetime import datetime
 from typing import List, Dict, Optional
 
+# Fix Windows console encoding - Simple way
+if sys.platform == 'win32':
+    try:
+        import codecs
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+
 
 class ToolManager:
     """
@@ -279,9 +288,9 @@ class ToolManager:
     def show_help(self):
         """Hiển thị help"""
         print("""
-╔══════════════════════════════════════════════════════════╗
-║                  HƯỚNG DẪN SỬ DỤNG                       ║
-╚══════════════════════════════════════════════════════════╝
+============================================================
+                  HUONG DAN SU DUNG                       
+============================================================
 
 📋 LỆNH CƠ BẢN:
    [số]         - Chạy tool theo số thứ tự
@@ -326,7 +335,9 @@ def main():
     - Dispatch đến các chức năng tương ứng
     """
     # Khởi tạo ToolManager
-    tool_dir = os.path.join(os.path.dirname(__file__), "tool")
+    # __file__ là menu/__init__.py, cần lùi 1 cấp lên project root
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    tool_dir = os.path.join(project_root, "tool")
     manager = ToolManager(tool_dir)
     
     # Lấy danh sách tools
@@ -338,12 +349,12 @@ def main():
     
     # Hiển thị banner
     print("""
-╔══════════════════════════════════════════════════════════╗
-║                  MY PYTHON TOOLS                         ║
-║              Bộ công cụ Python tiện ích                  ║
-║                                                          ║
-║         Nhập 'h' hoặc 'help' để xem hướng dẫn            ║
-╚══════════════════════════════════════════════════════════╝
+============================================================
+                  MY PYTHON TOOLS                         
+              Bo cong cu Python tien ich                 
+                                                          
+         Nhap 'h' hoac 'help' de xem huong dan          
+============================================================
     """)
     
     # Hiển thị menu lần đầu
