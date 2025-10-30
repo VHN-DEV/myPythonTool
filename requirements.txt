@@ -7,6 +7,10 @@ Pillow>=10.0.0
 # Tool text-encoding-converter
 chardet>=5.0.0
 
+# Tool pdf-tools
+PyPDF2>=3.0.0
+pdf2image>=1.16.0    # Cần cài thêm poppler-utils (xem hướng dẫn trong README)
+
 # Tool extract-archive (tùy chọn)
 # Bỏ comment nếu cần hỗ trợ thêm định dạng nén
 # py7zr>=0.20.0        # Hỗ trợ .7z

@@ -31,6 +31,7 @@ def main():
         "file-organizer.py": "Sắp xếp file (theo loại/ngày/extension)",
         "find-and-replace.py": "Tìm và thay thế text trong nhiều file",
         "generate-tree.py": "Tạo sơ đồ cây thư mục dự án",
+        "pdf-tools.py": "Xử lý PDF (merge, split, compress, convert)",
         "rename-files.py": "Đổi tên file hàng loạt (prefix/suffix/số thứ tự)",
         "text-encoding-converter.py": "Chuyển đổi encoding file text (UTF-8, ANSI...)"
     }
