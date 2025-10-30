@@ -1,0 +1,228 @@
+╔══════════════════════════════════════════════════════════════════════════╗
+║                    HƯỚNG DẪN SỬ DỤNG myPythonTool                        ║
+║                     Bộ Công Cụ Python Tiện Ích                           ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│ BƯỚC 1: CÀI ĐẶT                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+1. Cài đặt Python (nếu chưa có):
+   - Tải tại: https://www.python.org/downloads/
+   - Phiên bản: 3.7 trở lên
+
+2. Cài đặt thư viện:
+   pip install -r requirements.txt
+
+3. Hoàn tất!
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│ BƯỚC 2: CHẠY CHƯƠNG TRÌNH                                                │
+└──────────────────────────────────────────────────────────────────────────┘
+
+Cách 1: Chạy menu chính (khuyên dùng)
+   python menu.py
+
+Cách 2: Chạy tool riêng lẻ
+   python tool/compress-images.py
+   python tool/rename-files.py
+   ... (tên tool khác)
+
+Cách 3: SSH menu
+   python menu-ssh.py
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│ DANH SÁCH 11 CÔNG CỤ                                                     │
+└──────────────────────────────────────────────────────────────────────────┘
+
+[1] COMPRESS-IMAGES.PY - Nén và chuyển đổi ảnh
+    ✓ Nén ảnh giảm dung lượng
+    ✓ Resize ảnh theo kích thước
+    ✓ Chuyển đổi định dạng (JPG, PNG, WEBP)
+    
+    Ví dụ: Nén 100 ảnh từ 5MB xuống 500KB, resize về 1920px
+
+[2] COPY-CHANGED-FILES.PY - Copy file Git đã thay đổi
+    ✓ Copy file thay đổi theo commit
+    ✓ Giữ nguyên cấu trúc thư mục
+    ✓ Dễ upload lên server
+    
+    Ví dụ: Copy tất cả file đã sửa từ commit 9d172f6 đến nay
+
+[3] RENAME-FILES.PY - Đổi tên hàng loạt file
+    ✓ 7 chế độ đổi tên khác nhau
+    ✓ Thêm prefix/suffix
+    ✓ Đổi tên theo số thứ tự
+    
+    Ví dụ: Đổi tên 200 ảnh thành photo_001.jpg, photo_002.jpg...
+
+[4] BACKUP-FOLDER.PY - Backup thư mục
+    ✓ Backup với timestamp tự động
+    ✓ Nén file để tiết kiệm dung lượng
+    ✓ Có thể loại trừ folder không cần
+    
+    Ví dụ: Backup dự án thành my-project_backup_20241029_143500.zip
+
+[5] FIND-AND-REPLACE.PY - Tìm và thay thế text
+    ✓ Tìm text trong nhiều file
+    ✓ Thay thế hàng loạt
+    ✓ Hỗ trợ Regular Expression
+    
+    Ví dụ: Thay tất cả "var" thành "let" trong 50 file JS
+
+[6] GENERATE-TREE.PY - Tạo cây thư mục
+    ✓ Hiển thị cấu trúc dự án
+    ✓ Icon đẹp cho từng loại file
+    ✓ Xuất ra file text
+    
+    Ví dụ: Tạo sơ đồ cây cho dự án để đưa vào README
+
+[7] CLEAN-TEMP-FILES.PY - Dọn dẹp file rác
+    ✓ Xóa file tạm (.tmp, .log, .bak)
+    ✓ Xóa cache (node_modules, __pycache__)
+    ✓ Tìm file lớn và thư mục rỗng
+    
+    Ví dụ: Dọn dẹp ổ C giải phóng 5GB dung lượng
+
+[8] EXTRACT-ARCHIVE.PY - Giải nén file
+    ✓ Giải nén ZIP, RAR, 7Z, TAR
+    ✓ Giải nén hàng loạt
+    ✓ Tự động tạo thư mục
+    
+    Ví dụ: Giải nén 20 file zip cùng lúc
+
+[9] DUPLICATE-FINDER.PY - Tìm file trùng lặp
+    ✓ Tìm file trùng bằng hash (chính xác 100%)
+    ✓ Hiển thị dung lượng lãng phí
+    ✓ Xóa file trùng tự động
+    
+    Ví dụ: Tìm và xóa 500 ảnh trùng lặp, tiết kiệm 2GB
+
+[10] FILE-ORGANIZER.PY - Sắp xếp file tự động
+     ✓ Sắp xếp theo loại (ảnh, video, document...)
+     ✓ Sắp xếp theo extension
+     ✓ Sắp xếp theo ngày tháng
+     
+     Ví dụ: Sắp xếp 1000 file trong Downloads vào các folder gọn gàng
+
+[11] TEXT-ENCODING-CONVERTER.PY - Chuyển đổi encoding
+     ✓ Tự động phát hiện encoding
+     ✓ Chuyển sang UTF-8
+     ✓ Backup file gốc
+     
+     Ví dụ: Chuyển 100 file PHP từ Windows-1252 sang UTF-8
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│ VÍ DỤ THỰC TẾ                                                            │
+└──────────────────────────────────────────────────────────────────────────┘
+
+Tình huống 1: Cần upload code lên server
+→ Dùng: copy-changed-files.py
+→ Lấy commit ID từ lần deploy trước
+→ Tool tự động copy tất cả file đã sửa
+→ Upload folder "changed-files-export" lên server
+
+Tình huống 2: Thư mục Downloads quá lộn xộn
+→ Dùng: file-organizer.py
+→ Chọn chế độ sắp xếp theo loại
+→ Tool tự động chia vào folder Images, Videos, Documents...
+
+Tình huống 3: Website load chậm vì ảnh quá nặng
+→ Dùng: compress-images.py
+→ Chọn quality 80, resize về 1920px
+→ Tất cả ảnh tự động nén và resize
+
+Tình huống 4: Cần đổi tên 200 ảnh
+→ Dùng: rename-files.py
+→ Chọn chế độ đổi tên theo số thứ tự
+→ Tất cả ảnh thành photo_001.jpg, photo_002.jpg...
+
+Tình huống 5: Ổ đĩa sắp đầy
+→ Dùng: clean-temp-files.py + duplicate-finder.py
+→ Xóa file rác, cache
+→ Tìm và xóa file trùng lặp
+→ Giải phóng vài GB dung lượng
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│ MẸO & LƯU Ý                                                              │
+└──────────────────────────────────────────────────────────────────────────┘
+
+✓ LUÔN BACKUP trước khi dùng tool xóa/di chuyển file
+✓ Kiểm tra KỸ danh sách trước khi xác nhận
+✓ Dùng chế độ COPY thay vì MOVE khi chưa chắc chắn
+✓ Test với VÀI FILE trước, rồi mới chạy hàng loạt
+✓ Đọc kỹ hướng dẫn trong file README.md để biết chi tiết
+
+⚠ CẢNH BÁO:
+- Tool XÓA FILE không thể khôi phục
+- Cẩn thận với tool find-and-replace trên file code
+- Không chia sẻ file menu-ssh.py nếu chứa password
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│ CẤU TRÚC THỦ MỤC                                                         │
+└──────────────────────────────────────────────────────────────────────────┘
+
+myPythonTool/
+├── menu.py                          ← CHẠY FILE NÀY
+├── menu-ssh.py                      ← Menu SSH
+├── requirements.txt                 ← Danh sách thư viện
+├── README.md                        ← Hướng dẫn chi tiết
+├── HUONG_DAN.txt                    ← File này
+└── tool/
+    ├── compress-images.py           ← Tool 1
+    ├── copy-changed-files.py        ← Tool 2
+    ├── rename-files.py              ← Tool 3
+    ├── backup-folder.py             ← Tool 4
+    ├── find-and-replace.py          ← Tool 5
+    ├── generate-tree.py             ← Tool 6
+    ├── clean-temp-files.py          ← Tool 7
+    ├── extract-archive.py           ← Tool 8
+    ├── duplicate-finder.py          ← Tool 9
+    ├── file-organizer.py            ← Tool 10
+    └── text-encoding-converter.py   ← Tool 11
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│ KHẮC PHỤC SỰ CỐ                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+Lỗi: ModuleNotFoundError
+→ Chưa cài thư viện. Chạy: pip install -r requirements.txt
+
+Lỗi: Permission denied
+→ Chạy với quyền Administrator
+→ Hoặc file đang được mở bởi chương trình khác
+
+Lỗi: UnicodeDecodeError
+→ Dùng tool text-encoding-converter để phát hiện encoding
+
+Tool chạy chậm
+→ Dùng min_size để bỏ qua file nhỏ
+→ Tắt recursive nếu không cần quét thư mục con
+
+Menu không hiển thị tool
+→ Kiểm tra file .py có trong thư mục tool/ không
+→ Đảm bảo file có phần mở rộng .py
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│ HỖ TRỢ & LIÊN HỆ                                                         │
+└──────────────────────────────────────────────────────────────────────────┘
+
+Xem hướng dẫn chi tiết: Mở file README.md
+Gặp lỗi: Kiểm tra phần FAQ trong README.md
+Thêm tool mới: Tạo file .py trong thư mục tool/
+
+
+╔══════════════════════════════════════════════════════════════════════════╗
+║                      CHÚC BẠN SỬ DỤNG HIỆU QUẢ! 🚀                       ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+Phiên bản: 1.0
+Cập nhật: 2024-10-29
+
