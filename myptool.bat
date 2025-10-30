@@ -2,6 +2,9 @@
 REM ============================================================
 REM myPythonTool - Batch wrapper để chạy từ bất kỳ đâu
 REM ============================================================
+
+REM Set console to UTF-8 to support Vietnamese and emoji
+chcp 65001 >nul 2>&1
 REM 
 REM Mục đích: 
 REM   Cho phép chạy myPythonTool từ bất kỳ thư mục nào
@@ -48,11 +51,11 @@ if not exist "%TOOL_DIR%" (
     exit /b 1
 )
 
-REM Chạy tool
+REM Chạy tool với encoding UTF-8
 if defined PYTHON_EXE (
-    "%PYTHON_EXE%" "%TOOL_DIR%" %*
+    "%PYTHON_EXE%" -X utf8 "%TOOL_DIR%\__main__.py" %*
 ) else (
-    python "%TOOL_DIR%" %*
+    python -X utf8 "%TOOL_DIR%\__main__.py" %*
 )
 
 REM Lưu exit code

@@ -70,6 +70,14 @@ class ToolManager:
             "text-encoding-converter.py": ["encoding", "utf8", "text", "convert"],
             "video-converter.py": ["video", "convert", "compress", "mp4"]
         }
+        
+        # Tools ưu tiên hiển thị lên đầu danh sách
+        # Mục đích: Các tools hay dùng nhất hoặc quan trọng nhất sẽ hiển thị trước
+        # Lý do: Dễ dàng truy cập nhanh các tools thường xuyên sử dụng
+        self.priority_tools = [
+            "ssh-manager.py",  # Tool SSH Manager - hay dùng nhất
+            # Có thể thêm các tools khác vào đây để ưu tiên
+        ]
     
     def _load_config(self) -> Dict:
         """
@@ -112,14 +120,39 @@ class ToolManager:
         Lấy danh sách file .py trong thư mục tool
         
         Returns:
-            list: Danh sách tên file tool
+            list: Danh sách tên file tool (priority tools trước, sau đó alphabet)
+        
+        Giải thích:
+        - Bước 1: Lấy tất cả file .py trong thư mục tool
+        - Bước 2: Tách ra priority tools và tools thường
+        - Bước 3: Sắp xếp priority tools theo thứ tự định sẵn
+        - Bước 4: Sắp xếp tools thường theo alphabet
+        - Bước 5: Ghép lại: priority + alphabet
         """
         if not self.tool_dir.exists():
             return []
         
-        tools = [f for f in os.listdir(self.tool_dir) if f.endswith('.py')]
-        tools.sort()  # Sắp xếp theo alphabet
-        return tools
+        # Lấy tất cả file .py
+        all_tools = [f for f in os.listdir(self.tool_dir) if f.endswith('.py')]
+        
+        # Tách priority tools và tools thường
+        priority = []
+        regular = []
+        
+        for tool in all_tools:
+            if tool in self.priority_tools:
+                priority.append(tool)
+            else:
+                regular.append(tool)
+        
+        # Sắp xếp priority tools theo thứ tự định sẵn
+        priority.sort(key=lambda x: self.priority_tools.index(x))
+        
+        # Sắp xếp tools thường theo alphabet
+        regular.sort()
+        
+        # Ghép lại: priority + regular
+        return priority + regular
     
     def search_tools(self, query: str) -> List[str]:
         """
