@@ -4,12 +4,95 @@
 Package utils - Các hàm tiện ích dùng chung cho tất cả tools
 
 Mục đích: Tránh code lặp lại, dễ maintain và mở rộng
+
+Cấu trúc:
+- format.py: Format và hiển thị
+- validation.py: Validation và xử lý input
+- file_ops.py: Thao tác file/folder
+- progress.py: Progress bar
+- logger.py: Logging system
 """
 
-from .common import *
-from .progress import *
-from .logger import *
+# Import từ các module mới
+from .format import (
+    format_size,
+    print_header,
+    print_separator,
+    pluralize
+)
 
-__all__ = ['format_size', 'print_header', 'get_user_input', 'confirm_action', 
-           'normalize_path', 'ProgressBar', 'setup_logger', 'log_info', 'log_error', 'log_warning']
+from .validation import (
+    get_user_input,
+    normalize_path,
+    confirm_action,
+    validate_path,
+    parse_size_string
+)
+
+from .file_ops import (
+    get_file_list,
+    get_folder_size,
+    safe_delete,
+    ensure_directory_exists,
+    create_backup_name,
+    get_available_space
+)
+
+from .progress import (
+    ProgressBar,
+    Spinner,
+    simple_progress
+)
+
+from .logger import (
+    setup_logger,
+    get_logger,
+    log_info,
+    log_error,
+    log_warning,
+    log_debug,
+    log_success,
+    log_operation
+)
+
+# Backward compatibility: Import từ common nếu ai đó vẫn import trực tiếp
+# from .common import *  # DEPRECATED - sẽ xóa trong tương lai
+
+__all__ = [
+    # Format functions
+    'format_size',
+    'print_header',
+    'print_separator',
+    'pluralize',
+    
+    # Validation functions
+    'get_user_input',
+    'normalize_path',
+    'confirm_action',
+    'validate_path',
+    'parse_size_string',
+    
+    # File operations
+    'get_file_list',
+    'get_folder_size',
+    'safe_delete',
+    'ensure_directory_exists',
+    'create_backup_name',
+    'get_available_space',
+    
+    # Progress
+    'ProgressBar',
+    'Spinner',
+    'simple_progress',
+    
+    # Logger
+    'setup_logger',
+    'get_logger',
+    'log_info',
+    'log_error',
+    'log_warning',
+    'log_debug',
+    'log_success',
+    'log_operation'
+]
 

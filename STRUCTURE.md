@@ -83,15 +83,13 @@ run.bat        # Double-click
 
 ---
 
-## 📦 Menu Package
+## 📦 Menu Package (v2.1 - Refactored)
 
-### `menu/__init__.py` - Menu Chính
+### `menu/__init__.py` - Menu Chính (Refactored)
 **Chức năng:**
-- ⭐ Favorites system
-- 📚 Recent tools
-- 🔍 Search tools
-- Config persistence
-- Tool management
+- Entry point cho menu system
+- Main menu loop
+- Command dispatcher
 
 **Usage:**
 ```bash
@@ -99,6 +97,20 @@ python menu.py
 # hoặc
 python -m menu
 ```
+
+### `menu/tool_manager.py` ✨ NEW - ToolManager Class
+**Chức năng:**
+- ⭐ Favorites system
+- 📚 Recent tools
+- 🔍 Search tools
+- Config persistence
+- Tool management
+- Run tools
+
+**Class:** `ToolManager`
+- Quản lý tất cả tools
+- Lưu/load config
+- Search & filter tools
 
 ### `menu/ssh.py` - Menu SSH
 **Chức năng:**
@@ -114,20 +126,31 @@ python -m menu.ssh
 
 ---
 
-## 🛠️ Utils Package
+## 🛠️ Utils Package (v2.1 - Refactored)
 
-### `utils/common.py`
-**Functions (15+):**
+### `utils/format.py` ✨ NEW
+**Functions (4):**
 - `format_size()` - Format dung lượng
 - `print_header()` - Header đẹp
+- `print_separator()` - Đường phân cách
+- `pluralize()` - Pluralize strings
+
+### `utils/validation.py` ✨ NEW
+**Functions (5):**
 - `get_user_input()` - Input validation
 - `confirm_action()` - Confirmation
 - `validate_path()` - Path validation
+- `normalize_path()` - Chuẩn hóa đường dẫn
+- `parse_size_string()` - Parse size strings
+
+### `utils/file_ops.py` ✨ NEW
+**Functions (6):**
 - `get_file_list()` - List files with filters
 - `get_folder_size()` - Calculate folder size
 - `safe_delete()` - Safe delete files/folders
-- `parse_size_string()` - Parse size strings
-- ... và nhiều hơn
+- `ensure_directory_exists()` - Tạo thư mục
+- `create_backup_name()` - Tạo tên backup
+- `get_available_space()` - Dung lượng trống
 
 ### `utils/progress.py`
 **Classes:**
@@ -254,17 +277,22 @@ ssh_main()
 
 ---
 
-## 📊 File Statistics
+## 📊 File Statistics (v2.1)
 
 | Category | Files | Lines | Status |
 |----------|-------|-------|--------|
-| Menu | 2 | ~500 | ✅ Reorganized |
-| Utils | 3 | ~1,100 | ✨ New |
-| Config | 1 | ~400 | ✨ New |
-| Tools (upgraded) | 3 | ~2,000 | 🔄 Upgraded |
+| Menu | 3 | ~510 | 🔄 Refactored (v2.1) |
+| Utils | 6 | ~850 | 🔄 Refactored (v2.1) |
+| Config | 1 | ~400 | ✅ OK |
+| Tools (upgraded) | 3 | ~2,000 | 🔄 Upgraded v2.0 |
 | Tools (other) | 11 | ~2,500 | ✅ OK |
-| Entry points | 3 | ~100 | ✨ New |
-| **Total** | **23** | **~6,600** | ✅ |
+| Entry points | 3 | ~100 | ✅ OK |
+| **Total** | **27** | **~6,360** | ✅ |
+
+**Improvements v2.1:**
+- ⬇️ Giảm avg lines/file: ~300 → ~160 (-47%)
+- ⬆️ Tăng số modules: 5 → 8 (+3 files)
+- ✅ Better organization & maintainability
 
 ---
 
