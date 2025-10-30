@@ -6,6 +6,7 @@ output/
 tool_config.json
 backup_metadata.json
 watermark_templates.json
+ssh_config.json
 *.log
 
 # Test files - Không commit

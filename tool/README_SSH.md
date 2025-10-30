@@ -1,8 +1,16 @@
-# 🔌 SSH Manager Tool
+# 🔌 SSH Manager Tool v2.0
 
 ## 📖 Giới Thiệu
 
-Tool quản lý và kết nối nhanh đến các SSH server đã cấu hình sẵn.
+Tool quản lý và kết nối nhanh đến các SSH server. 
+
+**✨ Tính năng mới v2.0:**
+- 💾 Lưu cấu hình vào file JSON
+- ➕ Thêm server mới
+- ❌ Xóa server
+- ✏️ Sửa thông tin server
+- 🔍 Xem file config
+- 🔐 Bảo mật với SSH key
 
 ## 🚀 Cách Sử Dụng
 
@@ -22,71 +30,168 @@ Sau đó chọn số **13** để chạy SSH Manager.
 python tool/ssh-manager.py
 ```
 
-## ⚙️ Cấu Hình Server
+## ⚙️ Quản Lý Server (v2.0)
 
-Mở file `tool/ssh-manager.py` và tìm hàm `get_servers_config()`:
+### **Cấu hình được lưu trong file:** `ssh_config.json`
 
-```python
-def get_servers_config():
-    servers = [
-        {
-            "name": "Tên server của bạn",
-            "user": "username",
-            "host": "192.168.1.100",   # IP hoặc domain
-            "port": 22,                 # Port SSH
-            "password": None,           # Để None
-            "ssh_key": None             # Đường dẫn key (nếu có)
-        }
-    ]
-    return servers
+Tool tự động tạo file này khi chạy lần đầu. Bạn có thể quản lý server bằng menu hoặc chỉnh sửa file JSON trực tiếp.
+
+### **1️⃣ Thêm Server Mới**
+
+Trong menu SSH Manager, nhập **a** (add):
+
+```
+Chọn số để SSH hoặc lệnh: a
+
+===== THEM SERVER MOI =====
+
+Tên server (vd: My VPS): Production VPS
+Username SSH: root
+Host/IP: vps.mycompany.com
+Port SSH (mặc định 22): 22
+Mô tả (tùy chọn): Server production - quan trọng
+Sử dụng SSH key? (y/N): y
+💡 Key mặc định: C:\Users\Asus\.ssh\id_rsa
+Đường dẫn SSH key (Enter = mặc định): [Enter]
+
+✅ Đã thêm và lưu server mới!
 ```
 
-### **Ví dụ cấu hình:**
+**💡 Lưu ý:** Tool tự động phát hiện SSH key mặc định tại `C:\Users\Asus\.ssh\id_rsa`. Chỉ cần nhấn Enter để sử dụng!
 
-**1. Server với SSH Key:**
-```python
+### **2️⃣ Xóa Server**
+
+Trong menu SSH Manager, nhập **d** (delete):
+
+```
+Chọn số để SSH hoặc lệnh: d
+
+===== XOA SERVER =====
+
+1. [🔑 Key] Production VPS - Server production
+   root@vps.mycompany.com:22
+2. [🔐 Pass] Dev Server
+   dev@192.168.1.50:2222
+
+0. Hủy bỏ
+
+Chọn server cần xóa (số): 2
+
+⚠️  BẠN SẮP XÓA SERVER: Dev Server
+Xác nhận xóa? (YES để xác nhận): YES
+
+✅ Đã xóa server: Dev Server
+```
+
+### **3️⃣ Sửa Server**
+
+Trong menu SSH Manager, nhập **e** (edit):
+
+```
+Chọn số để SSH hoặc lệnh: e
+
+===== CHINH SUA SERVER =====
+
+1. [🔑 Key] Production VPS
+   root@vps.mycompany.com:22
+
+Chọn server cần sửa (số): 1
+
+📝 Đang sửa: Production VPS
+(Nhấn Enter để giữ nguyên giá trị cũ)
+
+Tên [Production VPS]: Production VPS v2
+User [root]: admin
+Host [vps.mycompany.com]: [Enter]
+Port [22]: [Enter]
+Mô tả [Server production]: Updated server
+SSH Key hiện tại: C:\Users\Me\.ssh\id_rsa
+Thay đổi SSH key? (y/N): n
+
+✅ Đã lưu thay đổi!
+```
+
+### **4️⃣ Xem File Config**
+
+Trong menu SSH Manager, nhập **v** (view):
+
+```
+Chọn số để SSH hoặc lệnh: v
+
+===== FILE CONFIG =====
+
+Đường dẫn: D:\myPythonTool\ssh_config.json
+
+Nội dung:
+------------------------------------------------------------
 {
-    "name": "Production VPS",
-    "user": "root",
-    "host": "vps.mycompany.com",
-    "port": 22,
-    "password": None,
-    "ssh_key": r"C:\Users\You\.ssh\id_rsa"
+  "version": "1.0",
+  "servers": [
+    {
+      "name": "Production VPS",
+      "user": "root",
+      "host": "vps.mycompany.com",
+      "port": 22,
+      "password": null,
+      "ssh_key": "C:\\Users\\Me\\.ssh\\id_rsa",
+      "description": "Server production"
+    }
+  ]
 }
+------------------------------------------------------------
 ```
 
-**2. Server nhập password thủ công:**
-```python
-{
-    "name": "Dev Server",
-    "user": "developer",
-    "host": "192.168.1.50",
-    "port": 2222,
-    "password": None,  # Sẽ hỏi khi kết nối
-    "ssh_key": None
-}
-```
+### **5️⃣ Chỉnh Sửa File JSON Trực Tiếp**
 
-**3. Server localhost:**
-```python
+Bạn có thể mở file `ssh_config.json` và chỉnh sửa:
+
+```json
 {
-    "name": "WSL Ubuntu",
-    "user": "myuser",
-    "host": "localhost",
-    "port": 22,
-    "password": None,
-    "ssh_key": None
+  "version": "1.0",
+  "servers": [
+    {
+      "name": "Production VPS",
+      "user": "root",
+      "host": "vps.mycompany.com",
+      "port": 22,
+      "password": null,
+      "ssh_key": "C:\\Users\\You\\.ssh\\id_rsa",
+      "description": "Server production - quan trọng"
+    },
+    {
+      "name": "Dev Server",
+      "user": "developer",
+      "host": "192.168.1.50",
+      "port": 2222,
+      "password": null,
+      "ssh_key": null,
+      "description": "Server development"
+    }
+  ]
 }
 ```
 
 ## 🎯 Tính Năng
 
+### **Quản lý cấu hình:**
+- ✅ Lưu cấu hình vào file JSON (`ssh_config.json`)
+- ✅ Thêm server mới (lưu vĩnh viễn)
+- ✅ Xóa server với xác nhận
+- ✅ Sửa thông tin server
+- ✅ Xem và kiểm tra file config
+
+### **Kết nối SSH:**
 - ✅ Kết nối nhanh bằng SSH key
-- ✅ Kết nối với password
-- ✅ Thêm server mới (tạm thời trong phiên)
+- ✅ Kết nối với password (nhập thủ công)
 - ✅ Hiển thị phương thức xác thực rõ ràng
-- ✅ Hướng dẫn cấu hình chi tiết
-- ✅ Tìm kiếm tool: `s ssh` trong menu
+- ✅ Validate SSH key trước khi kết nối
+- ✅ Hỗ trợ custom port
+
+### **Trải nghiệm:**
+- ✅ Menu thân thiện tiếng Việt
+- ✅ Hướng dẫn chi tiết trong tool
+- ✅ Tìm kiếm: `s ssh` trong menu chính
+- ✅ Icon phân biệt Key/Password
 
 ## 🔐 Bảo Mật
 
@@ -136,9 +241,10 @@ s remote       # Tìm theo keyword "remote"
 
 ## 📝 Lưu Ý
 
-- Cấu hình server trong hàm `get_servers_config()` chỉ tồn tại trong code
-- Server thêm bằng lệnh `a` chỉ tồn tại trong phiên chạy hiện tại
-- Để lưu vĩnh viễn, cần thêm vào code
+- ✅ **v2.0:** Tất cả thay đổi được lưu vĩnh viễn vào `ssh_config.json`
+- ⚠️ File `ssh_config.json` đã được thêm vào `.gitignore` (không commit)
+- 💡 Backup file config trước khi chỉnh sửa trực tiếp
+- 🔐 Không lưu password trong config (để null)
 
 ## 🚀 Use Cases
 
