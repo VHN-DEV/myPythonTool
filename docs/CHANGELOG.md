@@ -14,7 +14,7 @@ Bản cập nhật này tổ chức lại cấu trúc thư mục để mỗi too
 
 **Trước đây:**
 ```
-tool/
+tools/
   backup-folder.py
   clean-temp-files.py
   compress-images.py
@@ -24,7 +24,7 @@ tool/
 
 **Bây giờ:**
 ```
-tool/
+tools/
   backup-folder/
     __init__.py
     backup-folder.py
@@ -54,17 +54,17 @@ tool/
 #### 🔧 Changes
 
 **Tool Manager - Enhanced:**
-- Cập nhật `menu/tool_manager.py` với logic tìm kiếm tool mới
+- Cập nhật `menus/tool_manager.py` với logic tìm kiếm tool mới
 - `get_tool_list()`: Tìm tools trong cả thư mục con và file trực tiếp
 - `_find_tool_path()`: Hàm mới tìm đường dẫn chính xác của tool
 - Ưu tiên cấu trúc mới nhưng vẫn hỗ trợ cấu trúc cũ
 
 **Documentation:**
-- ✨ NEW: `tool/README.md` - Hướng dẫn cấu trúc và cách thêm tool mới
-- ✨ NEW: `tool/backup-folder/README.md` - Hướng dẫn chi tiết tool
-- ✨ NEW: `tool/compress-images/README.md` - Hướng dẫn chi tiết tool
-- ✨ NEW: `tool/find-and-replace/README.md` - Hướng dẫn chi tiết tool
-- 🔄 MOVED: `tool/README_SSH.md` → `tool/ssh-manager/README.md`
+- ✨ NEW: `tools/README.md` - Hướng dẫn cấu trúc và cách thêm tool mới
+- ✨ NEW: `tools/backup-folder/README.md` - Hướng dẫn chi tiết tool
+- ✨ NEW: `tools/compress-images/README.md` - Hướng dẫn chi tiết tool
+- ✨ NEW: `tools/find-and-replace/README.md` - Hướng dẫn chi tiết tool
+- 🔄 MOVED: `tools/README_SSH.md` → `tools/ssh-manager/README.md`
 
 **All Tools:**
 - 🗂️ RESTRUCTURED: 15 tools di chuyển vào thư mục riêng
@@ -80,8 +80,8 @@ python migrate_tools.py
 
 #### 🎯 Hướng dẫn thêm tool mới
 
-1. Tạo thư mục: `tool/ten-tool-moi/`
-2. Tạo file chính: `tool/ten-tool-moi/ten-tool-moi.py`
+1. Tạo thư mục: `tools/ten-tool-moi/`
+2. Tạo file chính: `tools/ten-tool-moi/ten-tool-moi.py`
 3. Tạo `__init__.py` và README.md (optional)
 4. Tool tự động xuất hiện trong menu!
 
@@ -90,13 +90,13 @@ python migrate_tools.py
 **File config được di chuyển vào thư mục tool:**
 
 1. **ssh-manager:**
-   - 🔄 MOVED: `ssh_config.json` → `tool/ssh-manager/ssh_config.json`
-   - 🔄 MOVED: `ssh_config.example.json` → `tool/ssh-manager/ssh_config.example.json`
+   - 🔄 MOVED: `ssh_config.json` → `tools/ssh-manager/ssh_config.json`
+   - 🔄 MOVED: `ssh_config.example.json` → `tools/ssh-manager/ssh_config.example.json`
    - ✨ Cập nhật `get_config_file()` với backward compatibility
 
 2. **image-watermark:**
    - ✨ Cập nhật `get_templates_file()` để lưu templates trong thư mục tool
-   - 📝 `watermark_templates.json` sẽ được tạo trong `tool/image-watermark/`
+   - 📝 `watermark_templates.json` sẽ được tạo trong `tools/image-watermark/`
    - ✅ Vẫn hỗ trợ file cũ ở root nếu tồn tại
 
 3. **backup-folder:**
@@ -152,15 +152,15 @@ Bản cập nhật này tập trung vào việc refactor và tối ưu cấu tr�
 
 #### 📦 Menu Package - Refactored
 
-**Tách `menu/__init__.py` (510 dòng) thành 2 files:**
+**Tách `menus/__init__.py` (510 dòng) thành 2 files:**
 
-1. **`menu/tool_manager.py`** (290 dòng) - ToolManager Class
+1. **`menus/tool_manager.py`** (290 dòng) - ToolManager Class
    - Quản lý tools, favorites, recent
    - Search & filter tools
    - Config persistence
    - Run tools
 
-2. **`menu/__init__.py`** (220 dòng) - Main Menu
+2. **`menus/__init__.py`** (220 dòng) - Main Menu
    - Entry point clean và gọn gàng
    - Main menu loop
    - Command dispatcher
@@ -184,9 +184,9 @@ Bản cập nhật này tập trung vào việc refactor và tối ưu cấu tr�
 - ✨ NEW: `utils/format.py` (88 dòng)
 - ✨ NEW: `utils/validation.py` (175 dòng)
 - ✨ NEW: `utils/file_ops.py` (155 dòng)
-- ✨ NEW: `menu/tool_manager.py` (290 dòng)
+- ✨ NEW: `menus/tool_manager.py` (290 dòng)
 - 🔄 UPDATED: `utils/__init__.py` - Export từ các modules mới
-- 🔄 UPDATED: `menu/__init__.py` - Chỉ giữ main function
+- 🔄 UPDATED: `menus/__init__.py` - Chỉ giữ main function
 - ❌ REMOVED: `utils/common.py` - Đã tách thành 3 modules
 - 📄 NEW: `REFACTORING.md` - Documentation chi tiết
 

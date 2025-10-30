@@ -1,5 +1,10 @@
 {
-  "favorites": [],
+  "favorites": [
+    "ssh-manager.py",
+    "compress-images.py",
+    "copy-changed-files.py",
+    "video-converter.py"
+  ],
   "recent": [
     "backup-folder.py",
     "clean-temp-files.py",

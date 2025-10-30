@@ -19,6 +19,6 @@ myptool
 ## Tài liệu khác
 
 - **README.md** (root): Tài liệu chính của project
-- **tool/README.md**: Hướng dẫn cấu trúc thư mục tool
-- **tool/*/README.md**: Hướng dẫn chi tiết cho từng tool
+- **tools/README.md**: Hướng dẫn cấu trúc thư mục tools
+- **tools/*/README.md**: Hướng dẫn chi tiết cho từng tool
 

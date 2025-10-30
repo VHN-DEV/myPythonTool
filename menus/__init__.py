@@ -65,16 +65,16 @@ def main():
     - Dispatch đến các chức năng tương ứng
     """
     # Khởi tạo ToolManager
-    # __file__ là menu/__init__.py, cần lùi 1 cấp lên project root
+    # __file__ là menus/__init__.py, cần lùi 1 cấp lên project root
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    tool_dir = os.path.join(project_root, "tool")
+    tool_dir = os.path.join(project_root, "tools")
     manager = ToolManager(tool_dir)
     
     # Lấy danh sách tools
     tools = manager.get_tool_list()
     
     if not tools:
-        print("❌ Không tìm thấy tool nào trong thư mục tool/")
+        print("❌ Không tìm thấy tool nào trong thư mục tools/")
         return
     
     # Hiển thị banner

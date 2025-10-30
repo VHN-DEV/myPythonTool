@@ -5,7 +5,7 @@
 Mỗi tool nằm trong một thư mục riêng để dễ quản lý và mở rộng:
 
 ```
-tool/
+tools/
 ├── backup-folder/
 │   ├── __init__.py
 │   ├── backup-folder.py          # File chính của tool
@@ -31,9 +31,9 @@ tool/
 
 ## Cách thêm tool mới
 
-1. Tạo thư mục mới trong `tool/`:
+1. Tạo thư mục mới trong `tools/`:
    ```
-   tool/ten-tool-moi/
+   tools/ten-tool-moi/
    ```
 
 2. Tạo file `__init__.py`:
@@ -45,15 +45,15 @@ tool/
 
 3. Tạo file chính có tên giống thư mục:
    ```
-   tool/ten-tool-moi/ten-tool-moi.py
+   tools/ten-tool-moi/ten-tool-moi.py
    ```
 
 4. (Optional) Thêm README.md để hướng dẫn sử dụng
 
 5. (Optional) Thêm file config riêng nếu cần:
    ```
-   tool/ten-tool-moi/config.json
-   tool/ten-tool-moi/settings.json
+   tools/ten-tool-moi/config.json
+   tools/ten-tool-moi/settings.json
    ```
 
 6. Tool sẽ tự động xuất hiện trong menu chính!
@@ -75,5 +75,5 @@ Mỗi tool có thể có file config riêng trong thư mục của nó:
 
 - Tên file chính phải giống tên thư mục (vd: `backup-folder/backup-folder.py`)
 - Hệ thống tự động phát hiện và load tool từ cấu trúc này
-- Vẫn tương thích với cấu trúc cũ (file .py nằm trực tiếp trong tool/)
+- Vẫn tương thích với cấu trúc cũ (file .py nằm trực tiếp trong tools/)
 

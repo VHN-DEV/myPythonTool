@@ -232,7 +232,7 @@ python -c "import PIL, chardet; print('✅ Cài đặt thành công!')"
 **Cách sử dụng:**
 
 ```bash
-python tool/compress-images.py
+python tools/compress-images.py
 ```
 
 **Ví dụ thực tế:**
@@ -279,7 +279,7 @@ Nhập chiều cao (px, Enter để bỏ qua): [Enter]
 **Cách sử dụng:**
 
 ```bash
-python tool/copy-changed-files.py
+python tools/copy-changed-files.py
 ```
 
 **Ví dụ thực tế:**
@@ -341,7 +341,7 @@ Nhập commit ID kết thúc (Enter = HEAD): [Enter]
 **Cách sử dụng:**
 
 ```bash
-python tool/rename-files.py
+python tools/rename-files.py
 ```
 
 **Ví dụ 1: Đổi tên theo số thứ tự**
@@ -401,7 +401,7 @@ Nhập prefix (tiền tố): [Backup]_
 **Cách sử dụng:**
 
 ```bash
-python tool/backup-folder.py
+python tools/backup-folder.py
 ```
 
 **Ví dụ:**
@@ -452,7 +452,7 @@ Nhập các pattern cần loại trừ (cách nhau bởi dấu phẩy): node_mod
 **Cách sử dụng:**
 
 ```bash
-python tool/find-and-replace.py
+python tools/find-and-replace.py
 ```
 
 **Ví dụ 1: Tìm kiếm (không thay đổi)**
@@ -540,7 +540,7 @@ Xác nhận thực hiện? (YES để xác nhận): YES
 **Cách sử dụng:**
 
 ```bash
-python tool/generate-tree.py
+python tools/generate-tree.py
 ```
 
 **Ví dụ:**
@@ -614,7 +614,7 @@ Lưu kết quả ra file? (Y/n): Y
 **Cách sử dụng:**
 
 ```bash
-python tool/clean-temp-files.py
+python tools/clean-temp-files.py
 ```
 
 **Ví dụ:**
@@ -693,7 +693,7 @@ Xác nhận xóa? (YES để xác nhận): YES
 **Cách sử dụng:**
 
 ```bash
-python tool/extract-archive.py
+python tools/extract-archive.py
 ```
 
 **Ví dụ: Giải nén hàng loạt**
@@ -756,7 +756,7 @@ Giải nén 5 file? (Y/n): Y
 **Cách sử dụng:**
 
 ```bash
-python tool/duplicate-finder.py
+python tools/duplicate-finder.py
 ```
 
 **Ví dụ:**
@@ -841,7 +841,7 @@ Xác nhận? (YES để xác nhận): YES
 **Cách sử dụng:**
 
 ```bash
-python tool/file-organizer.py
+python tools/file-organizer.py
 ```
 
 **Ví dụ 1: Sắp xếp theo loại**
@@ -945,7 +945,7 @@ Chọn (1-3): 1
 **Cách sử dụng:**
 
 ```bash
-python tool/text-encoding-converter.py
+python tools/text-encoding-converter.py
 ```
 
 **Ví dụ 1: Phát hiện encoding**
@@ -1073,7 +1073,7 @@ pip install Pillow chardet
 A: Giống Windows, nhưng có thể cần:
 ```bash
 # Cấp quyền execute
-chmod +x tool/*.py
+chmod +x tools/*.py
 
 # Chạy với python3
 python3 menu.py
@@ -1129,7 +1129,7 @@ A: Tùy thuộc vào chế độ:
 **Q: Có thể thêm tool mới không?**
 
 A: Có! Rất đơn giản:
-1. Tạo file `.py` mới trong thư mục `tool/`
+1. Tạo file `.py` mới trong thư mục `tools/`
 2. Viết code với hàm `main()`
 3. `menu.py` sẽ tự động nhận diện tool mới
 
@@ -1177,7 +1177,7 @@ A: Tối ưu hóa:
 ```bash
 # Windows: Chạy với quyền Administrator
 # Linux/Mac: Sử dụng sudo
-sudo python tool/clean-temp-files.py
+sudo python tools/clean-temp-files.py
 
 # Hoặc thay đổi quyền
 chmod 777 /path/to/folder
@@ -1192,7 +1192,7 @@ chmod 777 /path/to/folder
 **Giải pháp:**
 ```bash
 # Dùng tool để phát hiện encoding
-python tool/text-encoding-converter.py
+python tools/text-encoding-converter.py
 
 # Chọn chế độ 1 để detect
 # Sau đó chọn chế độ 2 để convert sang UTF-8
@@ -1222,7 +1222,7 @@ df -h  # Linux/Mac
 wmic logicaldisk get size,freespace,caption  # Windows
 
 # Dọn dẹp trước
-python tool/clean-temp-files.py
+python tools/clean-temp-files.py
 ```
 
 ---
@@ -1319,7 +1319,7 @@ Bạn muốn thêm tool mới hoặc cải thiện tool hiện tại? Rất hoan
    ```
 
 3. **Viết code**
-   - Tạo file `.py` trong thư mục `tool/`
+   - Tạo file `.py` trong thư mục `tools/`
    - Tuân thủ format chuẩn
    - Comment đầy đủ bằng tiếng Việt
    - Test kỹ trước khi commit
@@ -1437,7 +1437,7 @@ Có ý tưởng tool mới? Tạo [Issue](https://github.com/VHN-DEV/myPythonToo
 
 - 📜 [CHANGELOG.md](docs/CHANGELOG.md) - Lịch sử thay đổi và phiên bản mới nhất
 - 📖 [INSTALL.md](docs/INSTALL.md) - Hướng dẫn cài đặt chi tiết
-- 🛠️ [tool/README.md](tool/README.md) - Hướng dẫn cấu trúc tool
+- 🛠️ [tools/README.md](tools/README.md) - Hướng dẫn cấu trúc tools
 
 ---
 

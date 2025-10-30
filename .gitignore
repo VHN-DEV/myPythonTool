@@ -44,7 +44,7 @@ logs/
 output/
 
 # Config riêng (có thể chứa thông tin nhạy cảm)
-tool/ssh-manager/ssh_config.json
+tools/ssh-manager/ssh_config.json
 
 # Backup metadata
 backup_metadata.json
