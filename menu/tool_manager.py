@@ -348,7 +348,7 @@ class ToolManager:
             return
         
         print(f"\n{'='*60}")
-        print(f"  {title}")
+        print(f"                   {title}")
         print(f"{'='*60}")
         
         for idx, tool in enumerate(tools, start=1):
