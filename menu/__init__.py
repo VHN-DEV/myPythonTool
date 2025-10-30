@@ -227,21 +227,10 @@ def main():
                 print(f"❌ Lệnh không hợp lệ: {command}")
                 print("💡 Nhập 'h' hoặc 'help' để xem hướng dẫn")
         
-        except EOFError:
-            # Xử lý EOF error (input stream bị đóng hoặc Ctrl+D/Ctrl+Z)
-            try:
-                print("\n\nInput stream đã đóng. Thoát chương trình...")
-            except Exception:
-                pass  # Nếu không print được, thôi
-            break
-        
-        except KeyboardInterrupt:
-            # Xử lý Ctrl+C
-            try:
-                print("\n\nTạm biệt!")
-            except Exception:
-                pass
-            break
+        except (EOFError, KeyboardInterrupt):
+            # Xử lý EOF error (input stream bị đóng) hoặc Ctrl+C
+            # Thoát im lặng để tránh lỗi khi output stream cũng đóng
+            sys.exit(0)
         
         except Exception as e:
             # Xử lý các lỗi khác
