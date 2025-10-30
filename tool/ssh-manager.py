@@ -60,10 +60,29 @@ def get_config_file():
         Path: Đường dẫn file ssh_config.json
     
     Giải thích:
-    - File config lưu trong thư mục gốc project
+    - File config lưu trong thư mục gốc project (không phụ thuộc current directory)
     - Tự động tạo nếu chưa có
+    - Tìm project root bằng cách kiểm tra file marker (setup.py, pyproject.toml)
     """
-    config_file = Path("ssh_config.json")
+    # Lấy thư mục chứa file ssh-manager.py (tool/)
+    script_dir = Path(__file__).resolve().parent
+    
+    # Lùi 1 cấp lên project root (D:\myPythonTool)
+    project_root = script_dir.parent
+    
+    # Kiểm tra xem có phải project root không (có file setup.py hoặc pyproject.toml)
+    if not (project_root / "setup.py").exists() and not (project_root / "pyproject.toml").exists():
+        # Nếu không phải, fallback về current directory
+        project_root = Path.cwd()
+        # Tìm lên các cấp cha cho đến khi tìm thấy setup.py
+        for parent in [project_root] + list(project_root.parents):
+            if (parent / "setup.py").exists() or (parent / "pyproject.toml").exists():
+                project_root = parent
+                break
+    
+    # Đường dẫn tuyệt đối đến ssh_config.json
+    config_file = project_root / "ssh_config.json"
+    
     return config_file
 
 
