@@ -47,6 +47,7 @@ class ToolManager:
             "image-watermark.py": "Thêm watermark vào ảnh (text/logo hàng loạt)",
             "pdf-tools.py": "Xử lý PDF (merge, split, compress, convert)",
             "rename-files.py": "Đổi tên file hàng loạt (prefix/suffix/số thứ tự)",
+            "ssh-manager.py": "Quản lý và kết nối SSH Server nhanh chóng",
             "text-encoding-converter.py": "Chuyển đổi encoding file text (UTF-8, ANSI...)",
             "video-converter.py": "Xử lý video (convert, compress, trim, extract audio)"
         }
@@ -65,6 +66,7 @@ class ToolManager:
             "image-watermark.py": ["watermark", "anh", "logo", "copyright"],
             "pdf-tools.py": ["pdf", "merge", "split", "compress"],
             "rename-files.py": ["rename", "doi ten", "batch"],
+            "ssh-manager.py": ["ssh", "server", "ket noi", "remote", "terminal"],
             "text-encoding-converter.py": ["encoding", "utf8", "text", "convert"],
             "video-converter.py": ["video", "convert", "compress", "mp4"]
         }
