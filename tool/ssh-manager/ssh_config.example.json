@@ -1,0 +1,141 @@
+{
+  "version": "1.0",
+  "servers": [
+    {
+      "name": "Production VPS (Ví dụ)",
+      "user": "root",
+      "host": "vps.mycompany.com",
+      "port": 22,
+      "password": null,
+      "ssh_key": "C:\\Users\\YourName\\.ssh\\id_rsa",
+      "description": "Server production - sử dụng SSH key"
+    },
+    {
+      "name": "Dev Server (Ví dụ)",
+      "user": "developer",
+      "host": "192.168.1.50",
+      "port": 2222,
+      "password": null,
+      "ssh_key": null,
+      "description": "Server development - nhập password thủ công"
+    },
+    {
+      "name": "WSL Ubuntu (Ví dụ)",
+      "user": "myuser",
+      "host": "localhost",
+      "port": 22,
+      "password": null,
+      "ssh_key": null,
+      "description": "Windows Subsystem for Linux"
+    },
+    {
+      "name": "Staging Server (Ví dụ)",
+      "user": "staging",
+      "host": "staging.mycompany.com",
+      "port": 22,
+      "password": null,
+      "ssh_key": "/home/user/.ssh/staging_key",
+      "description": "Server staging - test trước khi lên prod"
+    },
+    {
+      "name": "dev 163",
+      "user": "dev",
+      "host": "192.168.10.163",
+      "port": 1506,
+      "password": null,
+      "ssh_key": null,
+      "description": ""
+    },
+    {
+      "name": "haili 150",
+      "user": "haili",
+      "host": "192.168.10.150",
+      "port": 1506,
+      "password": null,
+      "ssh_key": "C:\\Users\\Asus\\.ssh\\id_rsa",
+      "description": ""
+    },
+    {
+      "name": "gama 150",
+      "user": "gama",
+      "host": "192.168.10.150",
+      "port": 1506,
+      "password": null,
+      "ssh_key": "C:\\Users\\Asus\\.ssh\\id_rsa",
+      "description": ""
+    },
+    {
+      "name": "samsung 150",
+      "user": "samsung",
+      "host": "192.168.10.150",
+      "port": 1506,
+      "password": null,
+      "ssh_key": "C:\\Users\\Asus\\.ssh\\id_rsa",
+      "description": ""
+    },
+    {
+      "name": "samsung 169",
+      "user": "samsung",
+      "host": "192.168.10.169",
+      "port": 1506,
+      "password": null,
+      "ssh_key": "C:\\Users\\Asus\\.ssh\\id_rsa",
+      "description": ""
+    },
+    {
+      "name": "pull 150",
+      "user": "pull",
+      "host": "192.168.10.150",
+      "port": 1506,
+      "password": null,
+      "ssh_key": "C:\\Users\\Asus\\.ssh\\id_rsa",
+      "description": ""
+    },
+    {
+      "name": "pull 163",
+      "user": "pull",
+      "host": "192.168.10.163",
+      "port": 1506,
+      "password": null,
+      "ssh_key": "C:\\Users\\Asus\\.ssh\\id_rsa",
+      "description": ""
+    },
+    {
+      "name": "thacoauto 150",
+      "user": "thacoauto",
+      "host": "192.168.10.150",
+      "port": 1506,
+      "password": null,
+      "ssh_key": "C:\\Users\\Asus\\.ssh\\id_rsa",
+      "description": ""
+    },
+    {
+      "name": "sharp 150",
+      "user": "sharp",
+      "host": "192.168.10.150",
+      "port": 1506,
+      "password": null,
+      "ssh_key": "C:\\Users\\Asus\\.ssh\\id_rsa",
+      "description": ""
+    },
+    {
+      "name": "pkhl 54",
+      "user": "pkhl",
+      "host": "172.16.0.54",
+      "port": 1506,
+      "password": null,
+      "ssh_key": "C:\\Users\\Asus\\.ssh\\id_rsa",
+      "description": ""
+    },
+    {
+      "name": "pkhl root 54",
+      "user": "root",
+      "host": "172.16.0.54",
+      "port": 1506,
+      "password": null,
+      "ssh_key": "C:\\Users\\Asus\\.ssh\\id_rsa",
+      "description": ""
+    }
+  ]
+}
+

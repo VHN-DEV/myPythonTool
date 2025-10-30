@@ -1,0 +1,90 @@
+# pyproject.toml - Cấu hình modern cho Python package
+# 
+# Mục đích: File cấu hình theo chuẩn PEP 518/621
+# Cho phép cài đặt tool như một command toàn cục
+#
+# Cách cài đặt:
+#     pip install -e .        # Development mode (khuyến nghị)
+#     pip install .           # Cài đặt bình thường
+#
+# Sau khi cài, chạy bằng lệnh: myptool
+
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "myPythonTool"
+version = "1.0.0"
+description = "Bộ công cụ Python đa năng cho các tác vụ hàng ngày"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {text = "MIT"}
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+keywords = ["utilities", "tools", "file-management", "automation"]
+
+# Dependencies chính
+dependencies = [
+    "Pillow>=10.0.0",
+    "chardet>=5.0.0",
+    "PyPDF2>=3.0.0",
+    "pdf2image>=1.16.0",
+    "moviepy>=1.0.3",
+]
+
+# Phân loại dự án
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Utilities",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: OS Independent",
+]
+
+# URL liên quan đến dự án
+[project.urls]
+Homepage = "https://github.com/yourusername/myPythonTool"
+Documentation = "https://github.com/yourusername/myPythonTool/blob/main/README.md"
+Repository = "https://github.com/yourusername/myPythonTool"
+Changelog = "https://github.com/yourusername/myPythonTool/blob/main/docs/CHANGELOG.md"
+
+# Entry points - Tạo command "myptool"
+# Khi gõ "myptool" ở bất kỳ đâu, sẽ chạy hàm main() trong menu/__init__.py
+[project.scripts]
+myptool = "menu:main"
+
+# Optional dependencies cho các tính năng mở rộng
+[project.optional-dependencies]
+archive = [
+    "py7zr>=0.20.0",
+    "rarfile>=4.0",
+]
+dev = [
+    "pytest>=7.0.0",
+    "black>=22.0.0",
+    "flake8>=4.0.0",
+]
+all = [
+    "py7zr>=0.20.0",
+    "rarfile>=4.0",
+    "pytest>=7.0.0",
+    "black>=22.0.0",
+    "flake8>=4.0.0",
+]
+
+# Cấu hình setuptools
+[tool.setuptools]
+packages = ["menu", "tool", "utils"]
+
+[tool.setuptools.package-data]
+"*" = ["*.json", "*.md", "*.txt"]
+

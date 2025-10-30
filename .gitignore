@@ -1,14 +1,9 @@
-# myPythonTool - Git Ignore File
-
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-env/
-venv/
-ENV/
 build/
 develop-eggs/
 dist/
@@ -29,7 +24,6 @@ wheels/
 venv/
 ENV/
 env/
-.venv
 
 # IDE
 .vscode/
@@ -37,66 +31,23 @@ env/
 *.swp
 *.swo
 *~
-.DS_Store
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# PyCharm
-.idea/
-
-# Output folders (tool generated)
-compressed_*/
-changed-files-export/
-Organized*/
-*.bak
-tree_*.txt
-duplicate_report.txt
-*_backup_*.zip
-*_backup_*.tar
-*_backup_*.tar.gz
-
-# Temporary files
-*.tmp
-*.temp
-*.log
-*.cache
-
-# SSH Config (có thể chứa password)
-# Uncomment nếu không muốn share SSH config
-# menu-ssh.py
-
-# Test files
-test_*/
-temp_*/
 
 # OS
-Thumbs.db
 .DS_Store
-desktop.ini
+Thumbs.db
 
-# Backup files
-*.bak
-*.old
-*~
+# Logs
+logs/
+*.log
 
-# Compiled files
-*.pyc
-*.pyo
+# Output
+output/
 
-# Coverage
-.coverage
-htmlcov/
+# Config riêng (có thể chứa thông tin nhạy cảm)
+tool/ssh-manager/ssh_config.json
 
-# pytest
-.pytest_cache/
+# Backup metadata
+backup_metadata.json
 
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Local config (nếu có)
-config.local.py
-settings.local.py
-
+# Templates
+watermark_templates.json

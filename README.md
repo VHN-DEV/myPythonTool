@@ -7,6 +7,8 @@
 
 > Bộ công cụ Python đa năng giúp tự động hóa các tác vụ thường gặp khi làm việc với file và thư mục. Giao diện tiếng Việt thân thiện, dễ sử dụng!
 
+> 👋 **Mới bắt đầu?** Xem [Quick Start](#-quick-start) hoặc đọc [INSTALL.md](docs/INSTALL.md) để cài đặt!
+
 ---
 
 ## 📑 Mục lục
@@ -76,23 +78,55 @@
 
 ## 🚀 Quick Start
 
-### Bước 1: Clone repository
+### Cách 1: Cài đặt toàn cục (Khuyến nghị) ⭐
+
+Sau khi cài đặt, bạn có thể chạy `myptool` từ bất kỳ đâu!
+
+#### Bước 1: Clone repository
 
 ```bash
 git clone https://github.com/VHN-DEV/myPythonTool.git
 cd myPythonTool
 ```
 
-### Bước 2: Cài đặt thư viện
+#### Bước 2: Cài đặt
+
+```bash
+pip install -e .
+```
+
+#### Bước 3: Chạy từ bất kỳ đâu! 🎉
+
+```bash
+# Có thể chạy từ bất kỳ thư mục nào
+myptool
+```
+
+📖 **Chi tiết:** Xem [INSTALL.md](docs/INSTALL.md) để biết thêm cách cài đặt khác
+
+---
+
+### Cách 2: Chạy trực tiếp (Không cài đặt)
+
+#### Bước 1: Clone repository
+
+```bash
+git clone https://github.com/VHN-DEV/myPythonTool.git
+cd myPythonTool
+```
+
+#### Bước 2: Cài đặt thư viện
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Bước 3: Chạy menu
+#### Bước 3: Chạy menu
 
 ```bash
-python menu.py
+python .
+# Hoặc
+python __main__.py
 ```
 
 ### Menu sẽ hiển thị:
@@ -1401,9 +1435,9 @@ Có ý tưởng tool mới? Tạo [Issue](https://github.com/VHN-DEV/myPythonToo
 
 ### Hỗ trợ
 
-- 📖 Đọc [HUONG_DAN.txt](HUONG_DAN.txt) cho hướng dẫn chi tiết
-- 📝 Xem [QUICK_REFERENCE.md](QUICK_REFERENCE.md) cho cheat sheet
-- 📜 Đọc [CHANGELOG.md](CHANGELOG.md) để biết phiên bản mới nhất
+- 📜 [CHANGELOG.md](docs/CHANGELOG.md) - Lịch sử thay đổi và phiên bản mới nhất
+- 📖 [INSTALL.md](docs/INSTALL.md) - Hướng dẫn cài đặt chi tiết
+- 🛠️ [tool/README.md](tool/README.md) - Hướng dẫn cấu trúc tool
 
 ---
 
