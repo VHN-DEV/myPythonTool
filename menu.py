@@ -34,7 +34,8 @@ def main():
         "image-watermark.py": "Thêm watermark vào ảnh (text/logo hàng loạt)",
         "pdf-tools.py": "Xử lý PDF (merge, split, compress, convert)",
         "rename-files.py": "Đổi tên file hàng loạt (prefix/suffix/số thứ tự)",
-        "text-encoding-converter.py": "Chuyển đổi encoding file text (UTF-8, ANSI...)"
+        "text-encoding-converter.py": "Chuyển đổi encoding file text (UTF-8, ANSI...)",
+        "video-converter.py": "Xử lý video (convert, compress, trim, extract audio)"
     }
 
     # Bước 2: Lấy danh sách file .py trong thư mục tool
