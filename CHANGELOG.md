@@ -4,6 +4,63 @@ Tất cả các thay đổi quan trọng của dự án sẽ được ghi lại 
 
 ---
 
+## [1.1.0] - 2024-10-30
+
+### 🎉 Major Update - 3 Tools mới cao cấp
+
+#### ✨ Tools mới (3)
+
+**PDF Processing:**
+- `pdf-tools.py` - Xử lý PDF chuyên nghiệp
+  - Merge: Gộp nhiều PDF thành 1
+  - Split: Tách PDF theo trang hoặc range
+  - Compress: Nén PDF giảm dung lượng
+  - PDF to Images: Chuyển PDF sang PNG/JPEG
+  - Rotate: Xoay trang PDF
+  - Extract Text: Trích xuất text từ PDF
+  - Info: Xem metadata và thông tin PDF
+
+**Image Watermarking:**
+- `image-watermark.py` - Thêm watermark vào ảnh
+  - Text watermark với font, size, color tùy chỉnh
+  - Image watermark (logo) với transparency
+  - 9 vị trí đặt watermark (góc, cạnh, center)
+  - Opacity control (0-255)
+  - Batch processing hàng loạt
+  - Template system lưu/tái sử dụng config
+
+**Video Processing:**
+- `video-converter.py` - Xử lý video chuyên nghiệp
+  - Convert format: MP4, AVI, MKV, WEBM, MOV
+  - Compress: Nén video với quality control
+  - Trim: Cắt video theo time range
+  - Extract Audio: Trích xuất audio (MP3/WAV/AAC)
+  - Change Resolution: 1080p, 720p, 480p, custom
+  - Video Info: Hiển thị thông tin chi tiết
+  - Batch Convert: Xử lý nhiều video cùng lúc
+
+#### 📚 Thư viện mới
+
+- `PyPDF2` >= 3.0.0 - PDF processing
+- `pdf2image` >= 1.16.0 - PDF to image conversion
+- `moviepy` >= 1.0.3 - Video processing
+
+#### 🔧 Cải tiến
+
+- Cập nhật menu.py với tên hiển thị chi tiết hơn
+- Documentation đầy đủ cho 3 tools mới
+- Error handling tốt hơn
+- Progress tracking cho các tác vụ dài
+
+#### 📊 Thống kê
+
+- **Tổng số tools**: 14 (tăng từ 11)
+- **Tổng dòng code**: ~15,000+ lines
+- **Tools mới**: 3 (PDF, Image, Video)
+- **Dependencies mới**: 3 packages
+
+---
+
 ## [1.0.0] - 2024-10-29
 
 ### 🎉 Phiên bản đầu tiên
