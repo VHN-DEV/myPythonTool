@@ -1,3 +1,40 @@
+# Find and Replace - Tim va thay the text
+
+Mo ta ngan gon: Tim kiem trong nhieu file, ho tro Regex, case sensitive/insensitive, de quy thu muc con, che do preview, thong ke so dong.
+
+## Cach su dung
+
+```bash
+python tools/find-and-replace.py
+```
+
+## Vi du 1: Chi tim kiem
+
+```
+Nhap duong dan thu muc: D:\my-react-project
+Tim kiem trong tat ca thu muc con? (Y/n): Y
+Chi xu ly file co duoi (vd: .txt .py .js - Enter de tat ca): .js .jsx
+Nhap text can tim: useState
+Phan biet chu hoa/thuong? (y/N): N
+Su dung Regular Expression? (y/N): N
+Che do: 1 (Chi tim kiem)
+```
+
+## Vi du 2: Thay the
+
+```
+Nhap text can tim: var 
+Nhap text thay the: let 
+Che do: 2 (Tim va thay the)
+Xac nhan (YES): YES
+```
+
+## Use case pho bien
+- Refactor code
+- Cap nhat URL/domain
+- Fix typo documentation
+- Thay doi config path hang loat
+
 # Find and Replace Tool
 
 ## Mô tả

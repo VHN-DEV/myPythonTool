@@ -1,3 +1,41 @@
+# Backup Folder - Sao luu va nen thu muc
+
+Mo ta ngan gon: Backup voi ten file kem timestamp, nen ZIP/TAR/TAR.GZ, exclude pattern, hien thi ty le nen va dung luong truoc/sau.
+
+## Cach su dung
+
+```bash
+python tools/backup-folder.py
+```
+
+## Vi du
+
+```
+Nhap duong dan thu muc can backup: D:\my-project
+Nhap vi tri luu backup (Enter de luu tai thu muc hien tai): D:\Backups
+
+===== CHE DO BACKUP =====
+1. Backup toan bo
+2. Backup co loai tru (exclude)
+
+Chon che do (1-2): 2
+Nhap cac pattern loai tru (cach nhau boi dau phay): node_modules,.git,__pycache__
+```
+
+Ket qua mau:
+
+```
+✅ Backup thanh cong!
+   💾 File backup: D:\Backups\my-project_backup_20241029_153045.zip
+   📊 Kich thuoc: 45.20 MB
+```
+
+## Use case pho bien
+- Backup truoc khi refactor
+- Snapshot dinh ky
+- Backup truoc khi xoa file cu
+- Nen folder de gui/ upload
+
 # Backup Folder Tool
 
 ## Mô tả
