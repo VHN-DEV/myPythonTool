@@ -394,44 +394,140 @@ def check_dependencies():
             return False
     
     # Check ffmpeg
+    ffmpeg_found = False
+    ffmpeg_path = None
+    ffmpeg_version = None
+    
+    # Cách 1: Kiểm tra từ moviepy config
     try:
         from moviepy.config import get_setting
-        ffmpeg_path = get_setting("FFMPEG_BINARY")
-        if ffmpeg_path and os.path.exists(ffmpeg_path):
-            print(f"✅ FFmpeg: OK ({ffmpeg_path})")
+        config_path = get_setting("FFMPEG_BINARY")
+        if config_path and os.path.exists(config_path):
+            ffmpeg_path = config_path
+            ffmpeg_found = True
+    except Exception:
+        pass
+    
+    # Cách 2: Kiểm tra ffmpeg trong PATH
+    if not ffmpeg_found:
+        try:
+            # Thử chạy ffmpeg -version để kiểm tra
+            result = subprocess.run(
+                ["ffmpeg", "-version"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
+            )
+            if result.returncode == 0:
+                ffmpeg_found = True
+                # Lấy path từ which/where
+                try:
+                    if sys.platform == "win32":
+                        which_result = subprocess.run(
+                            ["where", "ffmpeg"],
+                            capture_output=True,
+                            text=True,
+                            timeout=5,
+                            creationflags=subprocess.CREATE_NO_WINDOW
+                        )
+                    else:
+                        which_result = subprocess.run(
+                            ["which", "ffmpeg"],
+                            capture_output=True,
+                            text=True,
+                            timeout=5
+                        )
+                    if which_result.returncode == 0:
+                        ffmpeg_path = which_result.stdout.strip().split('\n')[0]
+                except Exception:
+                    ffmpeg_path = "PATH"
+                
+                # Lấy version từ output
+                if result.stdout:
+                    for line in result.stdout.split('\n'):
+                        if 'ffmpeg version' in line.lower():
+                            ffmpeg_version = line.strip()
+                            break
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            pass
+        except Exception:
+            pass
+    
+    # Cách 3: Tìm trong các vị trí thường gặp trên Windows
+    if not ffmpeg_found and sys.platform == "win32":
+        common_paths = [
+            r"C:\ffmpeg\bin\ffmpeg.exe",
+            r"C:\Program Files\ffmpeg\bin\ffmpeg.exe",
+            r"C:\Program Files (x86)\ffmpeg\bin\ffmpeg.exe",
+            os.path.join(os.environ.get("USERPROFILE", ""), "ffmpeg", "bin", "ffmpeg.exe"),
+            os.path.join(os.environ.get("LOCALAPPDATA", ""), "ffmpeg", "bin", "ffmpeg.exe"),
+        ]
+        for path in common_paths:
+            if os.path.exists(path):
+                ffmpeg_path = path
+                ffmpeg_found = True
+                # Kiểm tra version
+                try:
+                    result = subprocess.run(
+                        [path, "-version"],
+                        capture_output=True,
+                        text=True,
+                        timeout=5,
+                        creationflags=subprocess.CREATE_NO_WINDOW
+                    )
+                    if result.stdout:
+                        for line in result.stdout.split('\n'):
+                            if 'ffmpeg version' in line.lower():
+                                ffmpeg_version = line.strip()
+                                break
+                except Exception:
+                    pass
+                break
+    
+    # Hiển thị kết quả
+    if ffmpeg_found:
+        if ffmpeg_path:
+            if os.path.exists(ffmpeg_path):
+                print(f"✅ FFmpeg: OK")
+                print(f"   📍 Đường dẫn: {ffmpeg_path}")
+            else:
+                print(f"✅ FFmpeg: OK (tìm thấy trong PATH)")
         else:
-            # Kiểm tra ffmpeg trong PATH
-            try:
-                result = subprocess.run(
-                    ["ffmpeg", "-version"],
-                    capture_output=True,
-                    text=True,
-                    timeout=5
-                )
-                if result.returncode == 0:
-                    print("✅ FFmpeg: OK (tìm thấy trong PATH)")
-                else:
-                    raise Exception("FFmpeg not found")
-            except (subprocess.TimeoutExpired, FileNotFoundError, Exception):
-                print("⚠️  FFmpeg chưa được cấu hình đúng!")
-                print("\nHướng dẫn cài FFmpeg:")
-                print("Windows: Tải tại https://www.gyan.dev/ffmpeg/builds/")
-                print("        Giải nén và thêm vào PATH")
-                print("Linux:   sudo apt-get install ffmpeg")
-                print("macOS:   brew install ffmpeg")
-                print("\n⚠️  Tool vẫn có thể hoạt động nhưng có thể gặp lỗi.")
-                print("💡 Sau khi cài FFmpeg, chạy lại tool.")
-                # Không return False vì có thể vẫn dùng được với một số chức năng
-    except Exception as e:
+            print(f"✅ FFmpeg: OK (tìm thấy trong PATH)")
+        
+        if ffmpeg_version:
+            # Chỉ hiển thị dòng đầu tiên của version
+            version_line = ffmpeg_version.split('\n')[0] if '\n' in ffmpeg_version else ffmpeg_version
+            print(f"   📦 Phiên bản: {version_line[:80]}")
+    else:
         print("⚠️  FFmpeg chưa được cấu hình đúng!")
-        print("\nHướng dẫn cài FFmpeg:")
-        print("Windows: Tải tại https://www.gyan.dev/ffmpeg/builds/")
-        print("        Giải nén và thêm vào PATH")
-        print("Linux:   sudo apt-get install ffmpeg")
-        print("macOS:   brew install ffmpeg")
-        print("\n⚠️  Tool vẫn có thể hoạt động nhưng có thể gặp lỗi.")
-        print("💡 Sau khi cài FFmpeg, chạy lại tool.")
-        # Không return False vì có thể vẫn dùng được với một số chức năng
+        print("\n📋 Hướng dẫn cài FFmpeg:")
+        
+        if sys.platform == "win32":
+            print("Windows:")
+            print("   1. Tải FFmpeg tại: https://www.gyan.dev/ffmpeg/builds/")
+            print("      (Chọn bản 'release builds' → 'ffmpeg-release-essentials.zip')")
+            print("   2. Giải nén vào thư mục (vd: C:\\ffmpeg)")
+            print("   3. Thêm C:\\ffmpeg\\bin vào PATH:")
+            print("      - Mở 'Environment Variables'")
+            print("      - Trong 'System variables', tìm 'Path' → Edit")
+            print("      - Thêm đường dẫn C:\\ffmpeg\\bin")
+            print("   4. Khởi động lại terminal và kiểm tra: ffmpeg -version")
+        elif sys.platform == "linux":
+            print("Linux:")
+            print("   sudo apt-get update")
+            print("   sudo apt-get install ffmpeg")
+            print("   Hoặc: sudo yum install ffmpeg (cho CentOS/RHEL)")
+        elif sys.platform == "darwin":
+            print("macOS:")
+            print("   brew install ffmpeg")
+            print("   Hoặc tải từ: https://evermeet.cx/ffmpeg/")
+        else:
+            print("   Tải từ: https://ffmpeg.org/download.html")
+        
+        print("\n⚠️  Tool vẫn có thể hoạt động nhưng có thể gặp lỗi khi xử lý video.")
+        print("💡 Sau khi cài FFmpeg, khởi động lại terminal và chạy lại tool.")
     
     return True
 
