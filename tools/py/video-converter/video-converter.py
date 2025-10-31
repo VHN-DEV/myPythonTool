@@ -8,6 +8,8 @@ Mục đích: Convert format, compress, trim, extract audio
 import os
 import sys
 import datetime
+import subprocess
+import importlib
 from pathlib import Path
 
 
@@ -19,6 +21,247 @@ def print_header():
     print()
 
 
+def verify_moviepy_installed():
+    """
+    Kiểm tra xem moviepy có thực sự được cài đặt không
+    
+    Returns:
+        tuple: (bool, str, str) - (is_installed, version_or_error, location_or_empty)
+    """
+    try:
+        # Kiểm tra bằng pip show
+        result = subprocess.run(
+            [sys.executable, "-m", "pip", "show", "moviepy"],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        
+        if result.returncode == 0:
+            version = "installed"
+            location = ""
+            # Parse version và location từ output
+            for line in result.stdout.split('\n'):
+                if line.startswith('Version:'):
+                    version = line.split(':', 1)[1].strip()
+                elif line.startswith('Location:'):
+                    location = line.split(':', 1)[1].strip()
+            return True, version, location
+        else:
+            return False, "not found in pip", ""
+    except Exception as e:
+        return False, f"error: {str(e)}", ""
+
+
+def check_moviepy_files(location):
+    """
+    Kiểm tra xem các file moviepy có tồn tại không
+    
+    Returns:
+        tuple: (bool, str) - (files_exist, error_message)
+    """
+    if not location:
+        return False, "Location không hợp lệ"
+    
+    moviepy_dir = os.path.join(location, "moviepy")
+    if not os.path.exists(moviepy_dir):
+        return False, f"Không tìm thấy thư mục: {moviepy_dir}"
+    
+    __init__file = os.path.join(moviepy_dir, "__init__.py")
+    if not os.path.exists(__init__file):
+        return False, f"Không tìm thấy file: {__init__file}"
+    
+    # Kiểm tra xem có module video (moviepy 2.x) hoặc editor (moviepy 1.x)
+    video_module = os.path.join(moviepy_dir, "video")
+    editor_file = os.path.join(moviepy_dir, "editor.py")
+    editor_dir = os.path.join(moviepy_dir, "editor")
+    
+    # Module video (moviepy 2.x) hoặc editor (moviepy 1.x) đều OK
+    if os.path.exists(video_module) or os.path.exists(editor_file) or os.path.exists(editor_dir):
+        return True, "OK"
+    
+    # Thử kiểm tra xem có file nào chứa "video" hoặc "editor" không
+    try:
+        files = os.listdir(moviepy_dir)
+        if any('video' in f.lower() or 'editor' in f.lower() for f in files):
+            return True, "OK (cấu trúc khác)"
+    except:
+        pass
+    
+    return False, f"Không tìm thấy module video hoặc editor"
+
+
+def fix_sys_path_and_import():
+    """
+    Thử tự động sửa sys.path và import moviepy
+    
+    Returns:
+        tuple: (bool, str) - (success, message)
+    """
+    try:
+        # Lấy thông tin từ pip show
+        is_installed, version, location = verify_moviepy_installed()
+        
+        if not is_installed or not location:
+            return False, "Không tìm thấy location của moviepy"
+        
+        # Thêm location vào sys.path nếu chưa có
+        if location and location not in sys.path:
+            sys.path.insert(0, location)
+            print(f"   ✓ Đã thêm vào sys.path: {location}")
+        
+        # Thử tìm site-packages từ Python executable
+        import site
+        try:
+            # Lấy site-packages paths
+            site_packages = site.getsitepackages()
+            for sp in site_packages:
+                if sp not in sys.path:
+                    sys.path.insert(0, sp)
+                    print(f"   ✓ Đã thêm site-packages: {sp}")
+        except Exception as e:
+            print(f"   ⚠️  Không thể lấy site-packages: {e}")
+        
+        # Clear import cache
+        modules_to_remove = [k for k in sys.modules.keys() if k.startswith('moviepy')]
+        for module in modules_to_remove:
+            del sys.modules[module]
+        
+        # Invalidate import cache
+        import importlib
+        importlib.invalidate_caches()
+        
+        # Debug: Hiển thị sys.path để kiểm tra
+        print(f"   📂 sys.path có {len(sys.path)} entries")
+        print(f"   📂 Location trong sys.path: {location in sys.path}")
+        
+        # Thử import từng bước để xem lỗi cụ thể
+        try:
+            import moviepy
+            print(f"   ✓ Import moviepy thành công")
+            print(f"   📍 moviepy.__file__: {getattr(moviepy, '__file__', 'N/A')}")
+        except Exception as e:
+            error_msg = str(e)
+            print(f"   ❌ Lỗi import moviepy: {error_msg}")
+            # Kiểm tra xem có phải do dependencies không
+            if "decorator" in error_msg.lower() or "imageio" in error_msg.lower() or "proglog" in error_msg.lower():
+                return False, f"Thiếu dependencies: {error_msg}"
+            return False, f"Không thể import moviepy: {error_msg}"
+        
+        # Thử import VideoFileClip từ moviepy (moviepy 2.x không có module editor)
+        try:
+            from moviepy import VideoFileClip
+            print(f"   ✓ Import VideoFileClip từ moviepy thành công (moviepy 2.x)")
+            return True, f"Đã import thành công moviepy {version}"
+        except Exception as e:
+            error_msg = str(e)
+            print(f"   ❌ Lỗi import VideoFileClip từ moviepy: {error_msg}")
+            
+            # Kiểm tra cấu trúc package
+            try:
+                import os
+                moviepy_dir = os.path.dirname(moviepy.__file__)
+                print(f"   📁 Thư mục moviepy: {moviepy_dir}")
+                
+                # Kiểm tra xem có VideoFileClip không
+                video_module = os.path.join(moviepy_dir, "video")
+                if os.path.exists(video_module):
+                    print(f"   ✓ Tìm thấy module video/")
+                    try:
+                        files = os.listdir(video_module)
+                        print(f"   📋 Các file trong video/: {', '.join(files[:5])}")
+                    except:
+                        pass
+                
+                # Thử liệt kê các file trong moviepy để debug
+                try:
+                    files = os.listdir(moviepy_dir)
+                    print(f"   📋 Các file/module trong moviepy: {', '.join(files[:10])}")
+                except:
+                    pass
+            except Exception as debug_err:
+                print(f"   ⚠️  Không thể kiểm tra cấu trúc: {debug_err}")
+            
+            # Thử cách import cũ (moviepy 1.x) để tương thích ngược
+            try:
+                import moviepy.editor as mp
+                print(f"   ✓ Import thành công bằng 'moviepy.editor' (phiên bản cũ)")
+                return True, f"Đã import thành công moviepy {version} (dùng editor)"
+            except Exception as e2:
+                print(f"   ❌ Thử 'moviepy.editor' cũng thất bại: {e2}")
+            
+            # Kiểm tra xem có phải do dependencies không
+            if "No module named" in error_msg:
+                missing_module = error_msg.split("'")[1] if "'" in error_msg else "unknown"
+                return False, f"Thiếu module '{missing_module}'. Có thể cần cài dependencies hoặc package bị hỏng."
+            return False, f"Không thể import VideoFileClip từ moviepy: {error_msg}"
+        
+    except ImportError as e:
+        return False, f"ImportError: {str(e)}"
+    except Exception as e:
+        return False, f"Lỗi: {str(e)}"
+
+
+def install_moviepy():
+    """
+    Cài đặt moviepy tự động
+    
+    Returns:
+        bool: True nếu cài đặt thành công
+    """
+    try:
+        print("\n📦 Đang cài đặt moviepy...")
+        print("   (Có thể mất vài phút, vui lòng đợi...)\n")
+        
+        result = subprocess.run(
+            [sys.executable, "-m", "pip", "install", "moviepy>=1.0.3"],
+            capture_output=True,
+            text=True
+        )
+        
+        if result.returncode == 0:
+            # Kiểm tra lại để xác nhận
+            is_installed, version, location = verify_moviepy_installed()
+            if is_installed:
+                print(f"✅ Cài đặt moviepy thành công! (version: {version})")
+                # Thử import ngay sau khi cài
+                try:
+                    # Thêm location vào sys.path
+                    if location and location not in sys.path:
+                        sys.path.insert(0, location)
+                    
+                    # Clear cache và import
+                    modules_to_remove = [k for k in sys.modules.keys() if k.startswith('moviepy')]
+                    for module in modules_to_remove:
+                        del sys.modules[module]
+                    
+                    import importlib
+                    importlib.invalidate_caches()
+                    
+                    from moviepy import VideoFileClip
+                    print("✅ Đã import moviepy thành công!")
+                except:
+                    pass  # Nếu không import được ngay, không sao, cần restart process
+                return True
+            else:
+                print("⚠️  Pip báo cài đặt thành công nhưng không tìm thấy package.")
+                print("💡 Có thể package được cài vào môi trường Python khác.")
+                print(f"   Python hiện tại: {sys.executable}")
+                print("\n💡 Thử cài đặt thủ công:")
+                print(f"   {sys.executable} -m pip install moviepy")
+                return False
+        else:
+            print("❌ Lỗi khi cài đặt moviepy:")
+            if result.stderr:
+                print(result.stderr)
+            if result.stdout:
+                print(result.stdout)
+            return False
+    except Exception as e:
+        print(f"❌ Lỗi khi cài đặt: {e}")
+        return False
+
+
 def check_dependencies():
     """
     Kiểm tra các thư viện cần thiết
@@ -27,18 +270,158 @@ def check_dependencies():
     Lý do: moviepy cần thiết cho xử lý video, ffmpeg là backend
     """
     try:
-        import moviepy.editor as mp
+        # Thử import theo cách mới (moviepy 2.x)
+        from moviepy import VideoFileClip
         print("✅ Thư viện moviepy: OK")
-    except ImportError:
+    except ImportError as e:
+        # Kiểm tra xem package có được cài không
+        is_installed, version, location = verify_moviepy_installed()
+        
         print("❌ Thiếu thư viện moviepy!")
-        print("Cài đặt: pip install moviepy")
-        return False
+        
+        if is_installed:
+            print(f"\n⚠️  Package đã được cài đặt (version: {version})")
+            print("   nhưng không thể import được.")
+            print(f"   Python hiện tại: {sys.executable}")
+            
+            # Thử tự động sửa sys.path
+            print("\n🔧 Đang thử tự động sửa vấn đề sys.path...")
+            success, message = fix_sys_path_and_import()
+            
+            if success:
+                print(f"✅ {message}")
+                print("✅ Thư viện moviepy: OK")
+            else:
+                print(f"❌ {message}")
+                print("\n💡 Lưu ý: Moviepy 2.x đã thay đổi cấu trúc, không còn module 'editor'")
+                print("   Cần import trực tiếp: from moviepy import VideoFileClip")
+                print("\n💡 Có thể do:")
+                print("   - Package bị hỏng hoặc không đầy đủ")
+                print("   - Package được cài vào môi trường Python khác")
+                print("   - Vấn đề với dependencies")
+                print(f"   - Location: {location}")
+                
+                # Đề xuất cài đặt lại
+                print("\n🔧 Bạn có muốn thử cài đặt lại moviepy không?")
+                print("1. Có - Cài đặt lại (--force-reinstall)")
+                print("2. Không - Tôi sẽ tự xử lý")
+                
+                choice = input("\nChọn (1/2, mặc định: 2): ").strip()
+                
+                if choice == "1":
+                    print("\n📦 Đang cài đặt lại moviepy...")
+                    result = subprocess.run(
+                        [sys.executable, "-m", "pip", "install", "--force-reinstall", "--no-cache-dir", "moviepy>=1.0.3"],
+                        capture_output=True,
+                        text=True
+                    )
+                    
+                    if result.returncode == 0:
+                        print("✅ Đã cài đặt lại thành công!")
+                        print("💡 Tool cần restart để nhận package mới.")
+                        print("💡 Vui lòng chạy lại tool từ menu chính.")
+                        return False
+                    else:
+                        print("❌ Lỗi khi cài đặt lại:")
+                        if result.stderr:
+                            print(result.stderr)
+                        return False
+                else:
+                    print("\n💡 Giải pháp:")
+                    print(f"   1. Kiểm tra: {sys.executable} -m pip list | findstr moviepy")
+                    print(f"   2. Cài đặt lại: {sys.executable} -m pip install --force-reinstall moviepy")
+                    print("   3. Hoặc restart Python process")
+                    return False
+        
+        print("\nBạn có muốn cài đặt tự động không?")
+        print("1. Có - Tự động cài đặt (khuyến nghị)")
+        print("2. Không - Tôi sẽ cài đặt thủ công")
+        
+        choice = input("\nChọn (1/2, mặc định: 1): ").strip()
+        
+        if not choice or choice == "1":
+            if install_moviepy():
+                # Thử reload sys.path và import lại
+                try:
+                    # Clear import cache
+                    modules_to_remove = [k for k in sys.modules.keys() if k.startswith('moviepy')]
+                    for module in modules_to_remove:
+                        del sys.modules[module]
+                    
+                    # Reload site-packages paths
+                    import site
+                    import importlib
+                    site.main()
+                    
+                    # Thử thêm site-packages vào sys.path nếu chưa có
+                    try:
+                        import pkg_resources
+                        # pkg_resources tự động cập nhật sys.path
+                    except:
+                        pass
+                    
+                    # Thử import lại với importlib
+                    importlib.invalidate_caches()
+                    
+                    # Thử import lại
+                    from moviepy import VideoFileClip
+                    print("✅ Thư viện moviepy: OK")
+                except (ImportError, ModuleNotFoundError) as import_err:
+                    # Package đã được cài nhưng cần restart Python process
+                    print("\n" + "="*60)
+                    print("✅ Package đã được cài đặt thành công!")
+                    print("="*60)
+                    print("\n📝 Lưu ý quan trọng:")
+                    print("   Python process hiện tại cần khởi động lại để nhận package mới.")
+                    print("   Đây là hành vi bình thường của Python.")
+                    print(f"\n   Python: {sys.executable}")
+                    print("\n💡 Các bước tiếp theo:")
+                    print("   1. Tool sẽ tự động thoát")
+                    print("   2. Quay lại menu chính và chạy lại tool")
+                    print("   3. Tool sẽ hoạt động bình thường!")
+                    print("\n" + "="*60)
+                    print("\n⏳ Đang thoát tool...")
+                    return False
+            else:
+                print("\n💡 Cài đặt thủ công:")
+                print(f"   {sys.executable} -m pip install moviepy")
+                print("💡 Sau khi cài đặt, chạy lại tool.")
+                return False
+        else:
+            print("\n💡 Cài đặt thủ công:")
+            print(f"   {sys.executable} -m pip install moviepy")
+            print("💡 Sau khi cài đặt, chạy lại tool.")
+            return False
     
     # Check ffmpeg
     try:
         from moviepy.config import get_setting
         ffmpeg_path = get_setting("FFMPEG_BINARY")
-        print(f"✅ FFmpeg: OK ({ffmpeg_path})")
+        if ffmpeg_path and os.path.exists(ffmpeg_path):
+            print(f"✅ FFmpeg: OK ({ffmpeg_path})")
+        else:
+            # Kiểm tra ffmpeg trong PATH
+            try:
+                result = subprocess.run(
+                    ["ffmpeg", "-version"],
+                    capture_output=True,
+                    text=True,
+                    timeout=5
+                )
+                if result.returncode == 0:
+                    print("✅ FFmpeg: OK (tìm thấy trong PATH)")
+                else:
+                    raise Exception("FFmpeg not found")
+            except (subprocess.TimeoutExpired, FileNotFoundError, Exception):
+                print("⚠️  FFmpeg chưa được cấu hình đúng!")
+                print("\nHướng dẫn cài FFmpeg:")
+                print("Windows: Tải tại https://www.gyan.dev/ffmpeg/builds/")
+                print("        Giải nén và thêm vào PATH")
+                print("Linux:   sudo apt-get install ffmpeg")
+                print("macOS:   brew install ffmpeg")
+                print("\n⚠️  Tool vẫn có thể hoạt động nhưng có thể gặp lỗi.")
+                print("💡 Sau khi cài FFmpeg, chạy lại tool.")
+                # Không return False vì có thể vẫn dùng được với một số chức năng
     except Exception as e:
         print("⚠️  FFmpeg chưa được cấu hình đúng!")
         print("\nHướng dẫn cài FFmpeg:")
@@ -46,8 +429,9 @@ def check_dependencies():
         print("        Giải nén và thêm vào PATH")
         print("Linux:   sudo apt-get install ffmpeg")
         print("macOS:   brew install ffmpeg")
-        print("\nSau khi cài, chạy lại tool.")
-        return False
+        print("\n⚠️  Tool vẫn có thể hoạt động nhưng có thể gặp lỗi.")
+        print("💡 Sau khi cài FFmpeg, chạy lại tool.")
+        # Không return False vì có thể vẫn dùng được với một số chức năng
     
     return True
 
@@ -83,10 +467,10 @@ def get_video_info(video_path):
     - Dùng moviepy để đọc metadata
     - Hiển thị info cơ bản để user biết
     """
-    import moviepy.editor as mp
+    from moviepy import VideoFileClip
     
     try:
-        clip = mp.VideoFileClip(video_path)
+        clip = VideoFileClip(video_path)
         
         info = {
             'duration': clip.duration,
@@ -147,7 +531,7 @@ def convert_video_format(input_path, output_path, output_format='mp4',
       + ultrafast: Nhanh nhưng file lớn
       + slow: Chậm nhưng file nhỏ, chất lượng tốt
     """
-    import moviepy.editor as mp
+    from moviepy import VideoFileClip
     
     try:
         print(f"\n🎬 Dang chuyen doi...")
@@ -156,7 +540,7 @@ def convert_video_format(input_path, output_path, output_format='mp4',
         print(f"   Preset: {preset}\n")
         
         # Load video
-        clip = mp.VideoFileClip(input_path)
+        clip = VideoFileClip(input_path)
         
         # Điều chỉnh FPS nếu có
         if fps and fps != clip.fps:
@@ -209,14 +593,14 @@ def compress_video(input_path, output_path, target_size_mb=None,
     - Điều chỉnh bitrate theo target size
     - Nén với preset phù hợp
     """
-    import moviepy.editor as mp
+    from moviepy import VideoFileClip
     
     try:
         print(f"\n📦 Dang nen video...")
         print(f"   Quality: {quality}")
         
         # Load video
-        clip = mp.VideoFileClip(input_path)
+        clip = VideoFileClip(input_path)
         
         # Resize nếu cần
         if resolution_scale < 1.0:
@@ -290,7 +674,7 @@ def trim_video(input_path, output_path, start_time, end_time):
     - Cắt video từ start_time đến end_time
     - Giữ nguyên codec và quality
     """
-    import moviepy.editor as mp
+    from moviepy import VideoFileClip
     
     try:
         # Parse time string to seconds
@@ -315,7 +699,7 @@ def trim_video(input_path, output_path, start_time, end_time):
         print(f"   Thoi luong: {format_time(end - start)}\n")
         
         # Load và cắt
-        clip = mp.VideoFileClip(input_path).subclip(start, end)
+        clip = VideoFileClip(input_path).subclip(start, end)
         
         # Write
         clip.write_videofile(
@@ -353,7 +737,7 @@ def extract_audio(input_path, output_path, audio_format='mp3', bitrate='192k'):
     - Extract audio track từ video
     - Convert sang format mong muốn
     """
-    import moviepy.editor as mp
+    from moviepy import VideoFileClip
     
     try:
         print(f"\n🎵 Dang trich xuat audio...")
@@ -361,7 +745,7 @@ def extract_audio(input_path, output_path, audio_format='mp3', bitrate='192k'):
         print(f"   Bitrate: {bitrate}\n")
         
         # Load video
-        clip = mp.VideoFileClip(input_path)
+        clip = VideoFileClip(input_path)
         
         if not clip.audio:
             print("❌ Video khong co audio!")
@@ -406,13 +790,13 @@ def change_resolution(input_path, output_path, width=None, height=None, keep_asp
     - Resize video về resolution mới
     - Nếu keep_aspect=True, tự tính height/width để giữ tỷ lệ
     """
-    import moviepy.editor as mp
+    from moviepy import VideoFileClip
     
     try:
         print(f"\n🖼️  Dang thay doi resolution...")
         
         # Load video
-        clip = mp.VideoFileClip(input_path)
+        clip = VideoFileClip(input_path)
         
         original_width, original_height = clip.size
         
@@ -469,7 +853,7 @@ def batch_convert(input_folder, output_folder, output_format='mp4', preset='medi
     - Quét tất cả video trong thư mục
     - Convert từng video sang format mới
     """
-    import moviepy.editor as mp
+    from moviepy import VideoFileClip
     
     # Các format video hỗ trợ
     video_extensions = ['.mp4', '.avi', '.mkv', '.mov', '.wmv', '.flv', '.webm', '.m4v', '.mpg', '.mpeg']
@@ -505,7 +889,7 @@ def batch_convert(input_folder, output_folder, output_format='mp4', preset='medi
         print("-" * 60)
         
         try:
-            clip = mp.VideoFileClip(input_path)
+            clip = VideoFileClip(input_path)
             
             clip.write_videofile(
                 output_path,

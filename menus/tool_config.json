@@ -6,6 +6,7 @@
     "video-converter.py"
   ],
   "recent": [
+    "video-converter.py",
     "setup-project-linux.py",
     "compress-images.py",
     "backup-folder.py",
@@ -14,8 +15,7 @@
     "duplicate-finder.py",
     "extract-archive.py",
     "file-organizer.py",
-    "find-and-replace.py",
-    "image-watermark.py"
+    "find-and-replace.py"
   ],
   "settings": {
     "show_descriptions": true,
