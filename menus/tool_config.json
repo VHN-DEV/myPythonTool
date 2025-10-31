@@ -6,6 +6,7 @@
     "video-converter.py"
   ],
   "recent": [
+    "json-formatter.py",
     "video-converter.py",
     "setup-project-linux.py",
     "compress-images.py",
@@ -14,8 +15,7 @@
     "copy-changed-files.py",
     "duplicate-finder.py",
     "extract-archive.py",
-    "file-organizer.py",
-    "find-and-replace.py"
+    "file-organizer.py"
   ],
   "settings": {
     "show_descriptions": true,
