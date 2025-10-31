@@ -49,6 +49,7 @@ class ToolManager:
             "image-watermark.py": "Thêm watermark vào ảnh (text/logo hàng loạt)",
             "pdf-tools.py": "Xử lý PDF (merge, split, compress, convert)",
             "rename-files.py": "Đổi tên file hàng loạt (prefix/suffix/số thứ tự)",
+            "setup-project-linux.py": "Quản lý và cài đặt dự án (Linux/Ubuntu)",
             "text-encoding-converter.py": "Chuyển đổi encoding file text (UTF-8, ANSI...)",
             "video-converter.py": "Xử lý video (convert, compress, trim, extract audio)"
         }
@@ -68,6 +69,7 @@ class ToolManager:
             "image-watermark.py": ["watermark", "anh", "logo", "copyright"],
             "pdf-tools.py": ["pdf", "merge", "split", "compress"],
             "rename-files.py": ["rename", "doi ten", "batch"],
+            "setup-project-linux.py": ["linux", "server", "setup", "cai dat", "nginx", "php", "mysql"],
             "text-encoding-converter.py": ["encoding", "utf8", "text", "convert"],
             "video-converter.py": ["video", "convert", "compress", "mp4"]
         }
@@ -124,28 +126,53 @@ class ToolManager:
             list: Danh sách tên file tool (priority tools trước, sau đó alphabet)
         
         Giải thích:
-        - Bước 1: Lấy tất cả file .py trong thư mục tool (bao gồm cả trong thư mục con)
-        - Bước 2: Tách ra priority tools và tools thường
-        - Bước 3: Sắp xếp priority tools theo thứ tự định sẵn
-        - Bước 4: Sắp xếp tools thường theo alphabet
-        - Bước 5: Ghép lại: priority + alphabet
+        - Bước 1: Tìm tools trong tools/py/ (các tool Python)
+        - Bước 2: Tìm tools trong tools/sh/ (các tool shell/đặc biệt)
+        - Bước 3: Tách ra priority tools và tools thường
+        - Bước 4: Sắp xếp priority tools theo thứ tự định sẵn
+        - Bước 5: Sắp xếp tools thường theo alphabet
+        - Bước 6: Ghép lại: priority + alphabet
         
         Lý do tìm trong thư mục con:
         - Hỗ trợ cấu trúc mới: mỗi tool có thư mục riêng
-        - Ví dụ: tool/backup-folder/backup-folder.py
+        - Ví dụ: tools/py/backup-folder/backup-folder.py
+        - Ví dụ: tools/sh/setup-project-linux/setup-project-linux.py
         """
         if not self.tool_dir.exists():
             return []
         
         all_tools = []
         
-        # Duyệt qua các thư mục con trong tool/
+        # Tìm tools trong tools/py/ (các tool Python thông thường)
+        py_dir = self.tool_dir / "py"
+        if py_dir.exists() and py_dir.is_dir():
+            for item in os.listdir(py_dir):
+                item_path = py_dir / item
+                if item_path.is_dir():
+                    # Tìm file có tên giống thư mục
+                    main_file = item_path / f"{item}.py"
+                    if main_file.exists():
+                        all_tools.append(f"{item}.py")
+        
+        # Tìm tools trong tools/sh/ (các tool đặc biệt như shell scripts)
+        sh_dir = self.tool_dir / "sh"
+        if sh_dir.exists() and sh_dir.is_dir():
+            for item in os.listdir(sh_dir):
+                item_path = sh_dir / item
+                if item_path.is_dir():
+                    # Tìm file .py trong thư mục con
+                    main_file = item_path / f"{item}.py"
+                    if main_file.exists():
+                        all_tools.append(f"{item}.py")
+        
+        # Tương thích với cấu trúc cũ: tìm trực tiếp trong tools/ (nếu còn)
         for item in os.listdir(self.tool_dir):
             item_path = self.tool_dir / item
-            
+            # Bỏ qua thư mục py và sh (đã xử lý ở trên)
+            if item in ['py', 'sh']:
+                continue
             # Nếu là thư mục, tìm file .py chính trong đó
             if item_path.is_dir():
-                # Tìm file có tên giống thư mục
                 main_file = item_path / f"{item}.py"
                 if main_file.exists():
                     all_tools.append(f"{item}.py")
@@ -307,24 +334,36 @@ class ToolManager:
             Path: Đường dẫn đầy đủ đến file tool, hoặc None nếu không tìm thấy
         
         Giải thích:
-        - Bước 1: Thử tìm trong thư mục con (cấu trúc mới)
-        - Bước 2: Nếu không có, thử tìm trực tiếp (cấu trúc cũ)
+        - Bước 1: Thử tìm trong tools/py/ (các tool Python)
+        - Bước 2: Thử tìm trong tools/sh/ (các tool đặc biệt)
+        - Bước 3: Thử tìm trực tiếp trong tools/ (cấu trúc cũ)
         
         Lý do:
-        - Hỗ trợ cả 2 cấu trúc để dễ migration
-        - Ưu tiên cấu trúc mới (thư mục con)
+        - Hỗ trợ cấu trúc mới: tools/py/ và tools/sh/
+        - Ưu tiên cấu trúc mới (tools/py/ và tools/sh/)
+        - Vẫn tương thích với cấu trúc cũ
         """
         tool_name = tool.replace('.py', '')
         
-        # Thử cấu trúc mới: tool/backup-folder/backup-folder.py
-        new_structure_path = self.tool_dir / tool_name / tool
-        if new_structure_path.exists():
-            return new_structure_path
+        # Thử tìm trong tools/py/ (cấu trúc mới)
+        py_tool_path = self.tool_dir / "py" / tool_name / tool
+        if py_tool_path.exists():
+            return py_tool_path
         
-        # Thử cấu trúc cũ: tool/backup-folder.py
-        old_structure_path = self.tool_dir / tool
+        # Thử tìm trong tools/sh/ (các tool đặc biệt)
+        sh_tool_path = self.tool_dir / "sh" / tool_name / tool
+        if sh_tool_path.exists():
+            return sh_tool_path
+        
+        # Thử cấu trúc cũ: tool/backup-folder/backup-folder.py
+        old_structure_path = self.tool_dir / tool_name / tool
         if old_structure_path.exists():
             return old_structure_path
+        
+        # Thử cấu trúc cũ: tool/backup-folder.py
+        old_file_path = self.tool_dir / tool
+        if old_file_path.exists():
+            return old_file_path
         
         return None
     
@@ -416,17 +455,27 @@ class ToolManager:
             bool: True nếu đọc được doc.py, False nếu không tìm thấy
         
         Giải thích:
-        - Bước 1: Tìm thư mục chứa tool
+        - Bước 1: Tìm thư mục chứa tool (tools/py/ hoặc tools/sh/)
         - Bước 2: Import module doc.py từ thư mục đó
         - Bước 3: Gọi hàm get_help() hoặc đọc biến HELP_TEXT
         - Bước 4: Hiển thị nội dung hướng dẫn
         - Bước 5: Nếu không có doc.py, hiển thị thông báo
         """
         tool_name = tool.replace('.py', '')
-        tool_dir_path = self.tool_dir / tool_name
         
-        # Tìm file doc.py
+        # Tìm file doc.py trong tools/py/ trước
+        tool_dir_path = self.tool_dir / "py" / tool_name
         doc_path = tool_dir_path / "doc.py"
+        
+        # Nếu không có trong py/, thử tìm trong sh/
+        if not doc_path.exists():
+            tool_dir_path = self.tool_dir / "sh" / tool_name
+            doc_path = tool_dir_path / "doc.py"
+        
+        # Nếu vẫn không có, thử cấu trúc cũ
+        if not doc_path.exists():
+            tool_dir_path = self.tool_dir / tool_name
+            doc_path = tool_dir_path / "doc.py"
         
         if not doc_path.exists():
             # Thông báo không tìm thấy doc.py
