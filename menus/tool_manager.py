@@ -58,25 +58,41 @@ class ToolManager:
             dict: Config data
         
         Giải thích:
-        - Lưu favorites, recent tools, settings
+        - Lưu favorites, recent tools, settings, disabled_tools
         - Tạo config mặc định nếu chưa có
+        - Đảm bảo các field mới được thêm vào config cũ (migration)
         """
-        if self.config_file.exists():
-            try:
-                with open(self.config_file, 'r', encoding='utf-8') as f:
-                    return json.load(f)
-            except Exception:
-                pass
-        
-        # Config mặc định
-        return {
+        default_config = {
             'favorites': [],
             'recent': [],
+            'disabled_tools': [],  # Danh sách tools bị vô hiệu hóa
             'settings': {
                 'show_descriptions': True,
                 'max_recent': 10
             }
         }
+        
+        if self.config_file.exists():
+            try:
+                with open(self.config_file, 'r', encoding='utf-8') as f:
+                    loaded_config = json.load(f)
+                    # Đảm bảo các field mới có trong config cũ (migration)
+                    if 'disabled_tools' not in loaded_config:
+                        loaded_config['disabled_tools'] = []
+                    # Đảm bảo settings có đầy đủ các field
+                    if 'settings' not in loaded_config:
+                        loaded_config['settings'] = default_config['settings']
+                    else:
+                        # Thêm các field settings mới nếu thiếu
+                        for key, value in default_config['settings'].items():
+                            if key not in loaded_config['settings']:
+                                loaded_config['settings'][key] = value
+                    return loaded_config
+            except Exception:
+                pass
+        
+        # Config mặc định
+        return default_config
     
     def _save_config(self):
         """Lưu config ra file"""
@@ -371,6 +387,80 @@ class ToolManager:
         regular.sort()
         
         # Ghép lại: priority + regular
+        all_tools_unsorted = priority + regular
+        
+        # Filter ra các tool bị disabled
+        disabled_tools = set(self.config.get('disabled_tools', []))
+        active_tools = [t for t in all_tools_unsorted if t not in disabled_tools]
+        
+        return active_tools
+    
+    def get_all_tools_including_disabled(self) -> List[str]:
+        """
+        Lấy danh sách tất cả tools (bao gồm cả disabled)
+        
+        Returns:
+            list: Danh sách tất cả tools
+        """
+        if not self.tool_dir.exists():
+            return []
+        
+        all_tools = []
+        
+        # Tìm tools trong tools/py/ (các tool Python thông thường)
+        py_dir = self.tool_dir / "py"
+        if py_dir.exists() and py_dir.is_dir():
+            for item in os.listdir(py_dir):
+                item_path = py_dir / item
+                if item_path.is_dir():
+                    # Tìm file có tên giống thư mục
+                    main_file = item_path / f"{item}.py"
+                    if main_file.exists():
+                        all_tools.append(f"{item}.py")
+        
+        # Tìm tools trong tools/sh/ (các tool đặc biệt như shell scripts)
+        sh_dir = self.tool_dir / "sh"
+        if sh_dir.exists() and sh_dir.is_dir():
+            for item in os.listdir(sh_dir):
+                item_path = sh_dir / item
+                if item_path.is_dir():
+                    # Tìm file .py trong thư mục con
+                    main_file = item_path / f"{item}.py"
+                    if main_file.exists():
+                        all_tools.append(f"{item}.py")
+        
+        # Tương thích với cấu trúc cũ: tìm trực tiếp trong tools/ (nếu còn)
+        for item in os.listdir(self.tool_dir):
+            item_path = self.tool_dir / item
+            # Bỏ qua thư mục py và sh (đã xử lý ở trên)
+            if item in ['py', 'sh']:
+                continue
+            # Nếu là thư mục, tìm file .py chính trong đó
+            if item_path.is_dir():
+                main_file = item_path / f"{item}.py"
+                if main_file.exists():
+                    all_tools.append(f"{item}.py")
+            # Nếu là file .py (để tương thích với cấu trúc cũ)
+            elif item.endswith('.py'):
+                all_tools.append(item)
+        
+        # Tách priority tools và tools thường
+        priority = []
+        regular = []
+        
+        for tool in all_tools:
+            if tool in self.priority_tools:
+                priority.append(tool)
+            else:
+                regular.append(tool)
+        
+        # Sắp xếp priority tools theo thứ tự định sẵn
+        priority.sort(key=lambda x: self.priority_tools.index(x))
+        
+        # Sắp xếp tools thường theo alphabet
+        regular.sort()
+        
+        # Ghép lại: priority + regular (bao gồm cả disabled)
         return priority + regular
     
     def search_tools(self, query: str) -> List[str]:
@@ -431,6 +521,32 @@ class ToolManager:
         else:
             tool_name = self.get_tool_display_name(tool)
             print(Colors.warning(f"ℹ️  Tool không có trong favorites: {tool_name}"))
+    
+    def activate_tool(self, tool: str):
+        """Kích hoạt tool (xóa khỏi danh sách disabled)"""
+        if tool in self.config['disabled_tools']:
+            self.config['disabled_tools'].remove(tool)
+            self._save_config()
+            tool_name = self.get_tool_display_name(tool)
+            print(Colors.success(f"✅ Đã kích hoạt tool: {Colors.bold(tool_name)}"))
+        else:
+            tool_name = self.get_tool_display_name(tool)
+            print(Colors.warning(f"ℹ️  Tool đã được kích hoạt: {tool_name}"))
+    
+    def deactivate_tool(self, tool: str):
+        """Vô hiệu hóa tool (thêm vào danh sách disabled)"""
+        if tool not in self.config['disabled_tools']:
+            self.config['disabled_tools'].append(tool)
+            self._save_config()
+            tool_name = self.get_tool_display_name(tool)
+            print(Colors.warning(f"⚠️  Đã vô hiệu hóa tool: {Colors.bold(tool_name)}"))
+        else:
+            tool_name = self.get_tool_display_name(tool)
+            print(Colors.warning(f"ℹ️  Tool đã bị vô hiệu hóa: {tool_name}"))
+    
+    def is_tool_active(self, tool: str) -> bool:
+        """Kiểm tra tool có đang active không"""
+        return tool not in self.config.get('disabled_tools', [])
     
     def add_to_recent(self, tool: str):
         """
@@ -691,10 +807,15 @@ class ToolManager:
         
         # Stats nhanh
         total = len(tools)
+        all_tools_count = len(self.get_all_tools_including_disabled())
+        disabled_count = all_tools_count - total
         favorites_count = len([t for t in tools if t in self.config['favorites']])
         recent_count = len([t for t in self.config['recent'] if t in tools])
         
-        stats_line = f"{Colors.muted('📊')} {Colors.info(f'Tổng: {total}')} | {Colors.warning(f'⭐ Favorites: {favorites_count}')} | {Colors.secondary(f'📚 Recent: {recent_count}')}"
+        stats_line = f"{Colors.muted('📊')} {Colors.info(f'Active: {total}')}"
+        if disabled_count > 0:
+            stats_line += f" | {Colors.error(f'Disabled: {disabled_count}')}"
+        stats_line += f" | {Colors.warning(f'⭐ Favorites: {favorites_count}')} | {Colors.secondary(f'📚 Recent: {recent_count}')}"
         print(f"  {stats_line}")
         print()
         
@@ -802,6 +923,19 @@ class ToolManager:
         print(f"   {Colors.info('r[số]')}        - Chạy recent tool")
         print()
         print(f"   {Colors.muted('Ví dụ:')} {Colors.secondary('r1')} (chạy tool recent đầu tiên)")
+        print()
+        
+        # Activate/Deactivate
+        print(Colors.bold("🔧 ACTIVATE/DEACTIVATE:"))
+        print(f"   {Colors.info('off [số]')}      - Vô hiệu hóa tool từ menu hiện tại")
+        print(f"   {Colors.info('on [số]')}       - Kích hoạt tool từ danh sách disabled")
+        print(f"   {Colors.info('disabled')}      - Hiển thị danh sách tools bị disabled")
+        print()
+        print(f"   {Colors.muted('Hỗ trợ nhiều tool:')} {Colors.secondary('off 1 2 3')} hoặc {Colors.secondary('off 1,2,3')}")
+        print(f"   {Colors.muted('Ví dụ:')} {Colors.secondary('off 3')}, {Colors.secondary('off 1 2 3')}, {Colors.secondary('on 2 5')}")
+        print()
+        print(f"   {Colors.muted('Lưu ý:')} {Colors.secondary('off [số]')} dùng số từ menu active,")
+        print(f"            {Colors.secondary('on [số]')} dùng số từ danh sách disabled (xem bằng 'disabled')")
         print()
         
         # Settings
