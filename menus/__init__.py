@@ -268,6 +268,23 @@ def main():
                     print(f"   {key}: {value}")
                 print()
             
+            # Hiển thị hướng dẫn tool (pattern: số+h, ví dụ: 1h, 4h)
+            elif command.endswith('h') and len(command) > 1 and command[:-1].isdigit():
+                try:
+                    # Lấy số từ đầu command (bỏ 'h' ở cuối)
+                    idx = int(command[:-1])
+                    
+                    if 1 <= idx <= len(tools):
+                        tool = tools[idx - 1]
+                        # Hiển thị hướng dẫn của tool
+                        manager.show_tool_help(tool)
+                    else:
+                        print("❌ Số không hợp lệ")
+                except ValueError:
+                    # Không phải pattern số+h, xử lý như lệnh khác
+                    print(f"❌ Lệnh không hợp lệ: {command}")
+                    print("💡 Nhập 'h' hoặc 'help' để xem hướng dẫn")
+            
             # Chạy tool theo số
             elif command.isdigit():
                 idx = int(command)

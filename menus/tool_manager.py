@@ -374,6 +374,7 @@ class ToolManager:
 
 📋 LỆNH CƠ BẢN:
    [số]         - Chạy tool theo số thứ tự
+   [số]h        - Xem hướng dẫn của tool (ví dụ: 1h, 4h)
    h, help      - Hiển thị hướng dẫn này
    q, quit, 0   - Thoát chương trình
 
@@ -403,4 +404,82 @@ class ToolManager:
    l, list      - Hiển thị lại danh sách
    clear        - Xóa màn hình
         """)
+    
+    def show_tool_help(self, tool: str) -> bool:
+        """
+        Hiển thị hướng dẫn sử dụng của tool (từ doc.py)
+        
+        Args:
+            tool: Tên file tool (vd: backup-folder.py)
+        
+        Returns:
+            bool: True nếu đọc được doc.py, False nếu không tìm thấy
+        
+        Giải thích:
+        - Bước 1: Tìm thư mục chứa tool
+        - Bước 2: Import module doc.py từ thư mục đó
+        - Bước 3: Gọi hàm get_help() hoặc đọc biến HELP_TEXT
+        - Bước 4: Hiển thị nội dung hướng dẫn
+        - Bước 5: Nếu không có doc.py, hiển thị thông báo
+        """
+        tool_name = tool.replace('.py', '')
+        tool_dir_path = self.tool_dir / tool_name
+        
+        # Tìm file doc.py
+        doc_path = tool_dir_path / "doc.py"
+        
+        if not doc_path.exists():
+            # Thông báo không tìm thấy doc.py
+            tool_display_name = self.tool_names.get(tool, tool)
+            print(f"\n{'='*60}")
+            print(f"❌ Không tìm thấy hướng dẫn cho tool: {tool_display_name}")
+            print(f"   File doc.py không tồn tại trong {tool_name}/")
+            print(f"{'='*60}\n")
+            return False
+        
+        # Import và đọc doc.py
+        try:
+            # Thêm thư mục tool vào sys.path để import
+            if str(tool_dir_path) not in sys.path:
+                sys.path.insert(0, str(tool_dir_path))
+            
+            # Import module doc
+            import importlib.util
+            spec = importlib.util.spec_from_file_location(f"{tool_name}.doc", doc_path)
+            doc_module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(doc_module)
+            
+            # Lấy hướng dẫn từ module
+            # Ưu tiên hàm get_help(), nếu không có thì dùng biến HELP_TEXT
+            if hasattr(doc_module, 'get_help'):
+                help_text = doc_module.get_help()
+            elif hasattr(doc_module, 'HELP_TEXT'):
+                help_text = doc_module.HELP_TEXT
+            else:
+                tool_display_name = self.tool_names.get(tool, tool)
+                print(f"\n{'='*60}")
+                print(f"❌ File doc.py không có hàm get_help() hoặc biến HELP_TEXT")
+                print(f"   Tool: {tool_display_name}")
+                print(f"{'='*60}\n")
+                return False
+            
+            # Hiển thị hướng dẫn
+            tool_display_name = self.tool_names.get(tool, tool)
+            print(f"\n{'='*60}")
+            print(f"📖 HƯỚNG DẪN SỬ DỤNG: {tool_display_name}")
+            print(f"{'='*60}\n")
+            print(help_text)
+            print(f"{'='*60}\n")
+            
+            return True
+            
+        except Exception as e:
+            tool_display_name = self.tool_names.get(tool, tool)
+            print(f"\n{'='*60}")
+            print(f"❌ Lỗi khi đọc hướng dẫn cho tool: {tool_display_name}")
+            print(f"   Lỗi: {e}")
+            print(f"{'='*60}\n")
+            import traceback
+            traceback.print_exc()
+            return False
 
