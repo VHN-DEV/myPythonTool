@@ -417,24 +417,316 @@ def get_php_versions(xampp_path: str) -> List[str]:
     return sorted(versions, reverse=True)
 
 
-def switch_php_version(version: str, xampp_path: str):
-    """Chuyển đổi phiên bản PHP"""
+def show_add_php_version_guide(xampp_path: str):
+    """Hiển thị hướng dẫn thêm PHP version mới"""
+    print("\n" + "=" * 60)
+    print("  HUONG DAN THEM PHP VERSION MOI VAO XAMPP")
+    print("=" * 60)
+    
     php_dir = os.path.join(xampp_path, 'php')
-    target_php_path = os.path.join(php_dir, version, 'php.exe')
+    print(f"\n📁 Thu muc PHP: {php_dir}")
+    
+    print("\n" + "-" * 60)
+    print("CÁCH 1: Tải PHP từ Windows.php.net (Khuyên dùng)")
+    print("-" * 60)
+    print("""
+1. Truy cập: https://windows.php.net/download/
+2. Tải phiên bản PHP phù hợp (Thread Safe, VC16 hoặc VC15):
+   - VC16: cho PHP 7.2 trở lên (Apache 2.4)
+   - VC15: cho PHP 7.1 trở xuống
+   
+3. Giải nén file ZIP vào thư mục php:
+   {php_dir}\\php[version]
+   
+   Ví dụ: C:\\xampp\\php\\php8.4
+    
+4. Đảm bảo thư mục mới có các file:
+   - php.exe
+   - php8apache2_4.dll (hoặc php7apache2_4.dll)
+   - php.ini
+   - Các file DLL cần thiết
+
+5. Sao chép php.ini từ thư mục PHP cũ (hoặc từ php.ini-development)
+   và chỉnh sửa theo nhu cầu
+
+6. Sau khi thêm xong, chạy lại tool và chọn 'php' để chuyển đổi version
+""".format(php_dir=php_dir))
+    
+    print("-" * 60)
+    print("CÁCH 2: Sử dụng XAMPP Add-on (nếu có)")
+    print("-" * 60)
+    print("""
+1. Một số phiên bản XAMPP có add-on PHP riêng
+2. Tải từ: https://www.apachefriends.org/download.html
+3. Cài đặt add-on theo hướng dẫn
+""")
+    
+    print("-" * 60)
+    print("LƯU Ý QUAN TRỌNG:")
+    print("-" * 60)
+    print("""
+⚠️  Phiên bản PHP phải tương thích với Apache:
+   - PHP 7.2+ cần Apache 2.4 với VC16
+   - PHP 7.1- cần Apache 2.4 với VC15
+
+⚠️  Đảm bảo có file DLL Apache:
+   - php8apache2_4.dll cho PHP 8.x
+   - php7apache2_4.dll cho PHP 7.x
+   
+⚠️  File php.ini:
+   - Sao chép từ version cũ hoặc từ php.ini-development
+   - Chỉnh sửa extension_dir và các extension cần thiết
+   
+⚠️  Sau khi thêm:
+   - Chạy tool và chọn 'php' để xem version mới
+   - Chuyển đổi sang version mới bằng số thứ tự hoặc tên
+   - Restart Apache để áp dụng (lệnh 'ra')
+""")
+    
+    print("-" * 60)
+    print("KIỂM TRA PHIÊN BẢN HIỆN TẠI:")
+    print("-" * 60)
+    versions = get_php_versions(xampp_path)
+    if versions:
+        print(f"\n✅ Tim thay {len(versions)} PHP version(s):")
+        for idx, version in enumerate(versions, start=1):
+            version_path = os.path.join(php_dir, version)
+            php_exe = os.path.join(version_path, 'php.exe')
+            if os.path.exists(php_exe):
+                try:
+                    # Lấy version từ php.exe
+                    result = subprocess.run(
+                        [php_exe, '-v'],
+                        capture_output=True,
+                        text=True,
+                        timeout=5
+                    )
+                    if result.returncode == 0:
+                        first_line = result.stdout.split('\n')[0] if result.stdout else ''
+                        print(f"   {idx}. {version}")
+                        if first_line:
+                            print(f"      {first_line.strip()}")
+                    else:
+                        print(f"   {idx}. {version} (khong the kiem tra)")
+                except Exception:
+                    print(f"   {idx}. {version}")
+            else:
+                print(f"   {idx}. {version} (thieu php.exe)")
+    else:
+        print(f"\n❌ Khong tim thay PHP version nao trong: {php_dir}")
+    
+    print("\n" + "=" * 60)
+    input("\nNhan Enter de quay lai menu...")
+
+
+def verify_php_version(version_dir: str) -> Dict[str, bool]:
+    """Kiểm tra tính hợp lệ của PHP version"""
+    checks = {
+        'php_exe': False,
+        'php_dll': False,
+        'php_ini': False,
+        'valid': False
+    }
+    
+    if not os.path.exists(version_dir):
+        return checks
+    
+    # Kiểm tra php.exe
+    php_exe = os.path.join(version_dir, 'php.exe')
+    checks['php_exe'] = os.path.exists(php_exe)
+    
+    # Kiểm tra PHP DLL
+    php_dll = find_php_dll(version_dir)
+    checks['php_dll'] = php_dll is not None
+    
+    # Kiểm tra php.ini
+    php_ini = os.path.join(version_dir, 'php.ini')
+    php_ini_dev = os.path.join(version_dir, 'php.ini-development')
+    php_ini_prod = os.path.join(version_dir, 'php.ini-production')
+    checks['php_ini'] = os.path.exists(php_ini) or os.path.exists(php_ini_dev) or os.path.exists(php_ini_prod)
+    
+    # Version hợp lệ nếu có php.exe và php_dll
+    checks['valid'] = checks['php_exe'] and checks['php_dll']
+    
+    return checks
+
+
+def find_php_dll(php_version_dir: str) -> Optional[str]:
+    """Tìm file PHP Apache DLL trong thư mục PHP version"""
+    if not os.path.exists(php_version_dir):
+        return None
+    
+    # Các tên file DLL có thể có
+    possible_dlls = [
+        'php8apache2_4.dll',
+        'php8ts.dll',
+        'php7apache2_4.dll',
+        'php7ts.dll',
+        'php5apache2_4.dll',
+        'php5ts.dll'
+    ]
+    
+    # Tìm trong thư mục PHP
+    for dll_name in possible_dlls:
+        dll_path = os.path.join(php_version_dir, dll_name)
+        if os.path.exists(dll_path):
+            return dll_path
+    
+    # Nếu không tìm thấy, thử tìm bất kỳ file .dll nào có chứa "apache"
+    try:
+        for item in os.listdir(php_version_dir):
+            if item.endswith('.dll') and 'apache' in item.lower():
+                return os.path.join(php_version_dir, item)
+    except Exception:
+        pass
+    
+    return None
+
+
+def get_current_php_version(xampp_path: str) -> Optional[str]:
+    """Lấy phiên bản PHP hiện tại đang được sử dụng"""
+    httpd_conf = os.path.join(xampp_path, 'apache', 'conf', 'httpd.conf')
+    
+    if not os.path.exists(httpd_conf):
+        return None
+    
+    try:
+        with open(httpd_conf, 'r', encoding='utf-8', errors='ignore') as f:
+            lines = f.readlines()
+        
+        for line in lines:
+            # Tìm dòng LoadModule php_module
+            if 'LoadModule' in line and 'php_module' in line:
+                # Extract đường dẫn
+                match = re.search(r'["\']([^"\']+php[^"\']+\.dll)["\']', line)
+                if match:
+                    dll_path = match.group(1)
+                    # Extract version từ đường dẫn
+                    version_match = re.search(r'php[\\/]([^\\/]+)[\\/]', dll_path)
+                    if version_match:
+                        return version_match.group(1)
+    except Exception:
+        pass
+    
+    return None
+
+
+def switch_php_version(version: str, xampp_path: str):
+    """Chuyển đổi phiên bản PHP - tự động chỉnh sửa httpd.conf"""
+    php_dir = os.path.join(xampp_path, 'php')
+    php_version_dir = os.path.join(php_dir, version)
+    target_php_path = os.path.join(php_version_dir, 'php.exe')
     
     if not os.path.exists(target_php_path):
         print(f"[X] Khong tim thay PHP version: {version}")
         return False
     
-    # Tạo symlink hoặc copy php.exe (tùy vào XAMPP version)
-    # Trên XAMPP, thường cần chỉnh sửa httpd.conf
-    print(f"[>] Dang chuyen doi PHP version: {version}")
-    print("[!] Can chinh sua thu cong file httpd.conf")
-    print(f"    Tim dong 'LoadModule php_module' va sua duong dan:")
-    print(f"    LoadModule php_module \"{target_php_path.replace('php.exe', 'php7apache2_4.dll')}\"")
-    print(f"    PHPIniDir \"{os.path.join(php_dir, version)}\"")
+    # Tìm file DLL
+    php_dll = find_php_dll(php_version_dir)
+    if not php_dll:
+        print(f"[!] Khong tim thay PHP Apache DLL trong {php_version_dir}")
+        print(f"[i] Can kiem tra thu muc PHP version va chinh sua thu cong")
+        return False
     
-    return True
+    httpd_conf = os.path.join(xampp_path, 'apache', 'conf', 'httpd.conf')
+    
+    if not os.path.exists(httpd_conf):
+        print(f"[X] Khong tim thay file httpd.conf!")
+        print(f"    Tim tai: {httpd_conf}")
+        return False
+    
+    try:
+        # Đọc file httpd.conf
+        with open(httpd_conf, 'r', encoding='utf-8', errors='ignore') as f:
+            lines = f.readlines()
+        
+        # Backup file
+        backup_path = httpd_conf + '.backup'
+        with open(backup_path, 'w', encoding='utf-8', errors='ignore') as f:
+            f.writelines(lines)
+        print(f"[i] Da backup httpd.conf -> {backup_path}")
+        
+        # Tìm và thay thế các dòng liên quan đến PHP
+        new_lines = []
+        found_php_module = False
+        found_phpinidir = False
+        
+        for line in lines:
+            original_line = line
+            
+            # Tìm và thay thế LoadModule php_module
+            if 'LoadModule' in line and 'php_module' in line:
+                found_php_module = True
+                # Thay thế đường dẫn DLL
+                new_dll_path = php_dll.replace('\\', '/')  # Normalize path
+                line = re.sub(
+                    r'LoadModule\s+php_module\s+["\'][^"\']+["\']',
+                    f'LoadModule php_module "{new_dll_path}"',
+                    line
+                )
+            
+            # Tìm và thay thế PHPIniDir
+            elif 'PHPIniDir' in line:
+                found_phpinidir = True
+                new_php_dir = php_version_dir.replace('\\', '/')  # Normalize path
+                line = re.sub(
+                    r'PHPIniDir\s+["\'][^"\']+["\']',
+                    f'PHPIniDir "{new_php_dir}"',
+                    line
+                )
+            
+            new_lines.append(line)
+        
+        # Nếu không tìm thấy LoadModule php_module, thêm vào
+        if not found_php_module:
+            # Tìm vị trí thích hợp để chèn (sau các LoadModule khác)
+            insert_pos = len(new_lines)
+            for i, line in enumerate(new_lines):
+                if 'LoadModule' in line and i < len(new_lines) - 1:
+                    insert_pos = i + 1
+            
+            dll_path = php_dll.replace('\\', '/')
+            new_lines.insert(insert_pos, f'LoadModule php_module "{dll_path}"\n')
+            found_php_module = True
+        
+        # Nếu không tìm thấy PHPIniDir, thêm vào
+        if not found_phpinidir:
+            # Thêm sau LoadModule php_module
+            for i, line in enumerate(new_lines):
+                if 'LoadModule' in line and 'php_module' in line:
+                    php_dir_path = php_version_dir.replace('\\', '/')
+                    new_lines.insert(i + 1, f'PHPIniDir "{php_dir_path}"\n')
+                    break
+        
+        # Ghi file mới
+        with open(httpd_conf, 'w', encoding='utf-8', errors='ignore') as f:
+            f.writelines(new_lines)
+        
+        print(f"\n[OK] Da chuyen doi PHP version thanh cong: {version}")
+        print(f"    PHP DLL: {php_dll}")
+        print(f"    PHP Directory: {php_version_dir}")
+        print(f"\n[i] Can restart Apache de ap dung thay doi!")
+        print(f"    Su dung lenh 'ra' de restart Apache")
+        
+        return True
+        
+    except PermissionError:
+        print("[X] Khong co quyen chinh sua file httpd.conf!")
+        print("[i] Can chay tool voi quyen Administrator")
+        return False
+    except Exception as e:
+        print(f"[X] Loi khi chinh sua httpd.conf: {e}")
+        # Khôi phục từ backup nếu có lỗi
+        if os.path.exists(backup_path):
+            try:
+                with open(backup_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    backup_lines = f.readlines()
+                with open(httpd_conf, 'w', encoding='utf-8', errors='ignore') as f:
+                    f.writelines(backup_lines)
+                print("[i] Da khoi phuc httpd.conf tu backup")
+            except Exception:
+                pass
+        return False
 
 
 def restart_xampp(xampp_path: str):
@@ -699,23 +991,101 @@ def main():
             versions = get_php_versions(xampp_path)
             
             if versions:
-                print("\nDanh sach PHP version:")
-                for idx, version in enumerate(versions, start=1):
-                    print(f"{idx}. {version}")
+                # Hiển thị version hiện tại nếu có
+                current_version = get_current_php_version(xampp_path)
+                if current_version:
+                    print(f"\n[i] PHP version hien tai: {current_version}")
                 
-                version_choice = input("\nChon version de chuyen doi (so) hoac Enter de huy: ").strip()
-                if version_choice:
+                print("\nDanh sach PHP version co san:")
+                for idx, version in enumerate(versions, start=1):
+                    marker = " <-- dang su dung" if version == current_version else ""
+                    print(f"{idx}. {version}{marker}")
+                
+                print("\n" + "-" * 60)
+                print("Lenh:")
+                print("  [so/ten]  - Chuyen doi PHP version")
+                print("  add       - Huong dan them PHP version moi")
+                print("  check     - Kiem tra cac PHP version")
+                print("  Enter     - Quay lai")
+                print("-" * 60)
+                
+                version_choice = input("\nChon lenh: ").strip().lower()
+                
+                if version_choice == 'add':
+                    show_add_php_version_guide(xampp_path)
+                    continue
+                elif version_choice == 'check':
+                    print("\n" + "=" * 60)
+                    print("  KIEM TRA PHP VERSIONS")
+                    print("=" * 60)
+                    php_dir = os.path.join(xampp_path, 'php')
+                    
+                    for version in versions:
+                        version_path = os.path.join(php_dir, version)
+                        checks = verify_php_version(version_path)
+                        
+                        print(f"\n📦 {version}:")
+                        status = "✅" if checks['valid'] else "❌"
+                        print(f"   {status} php.exe: {'Co' if checks['php_exe'] else 'Thieu'}")
+                        print(f"   {status} PHP DLL: {'Co' if checks['php_dll'] else 'Thieu'}")
+                        print(f"   {'✅' if checks['php_ini'] else '⚠️ '} php.ini: {'Co' if checks['php_ini'] else 'Thieu'}")
+                        
+                        if checks['valid']:
+                            try:
+                                php_exe = os.path.join(version_path, 'php.exe')
+                                result = subprocess.run(
+                                    [php_exe, '-v'],
+                                    capture_output=True,
+                                    text=True,
+                                    timeout=5
+                                )
+                                if result.returncode == 0:
+                                    first_line = result.stdout.split('\n')[0] if result.stdout else ''
+                                    if first_line:
+                                        print(f"   📝 {first_line.strip()}")
+                            except Exception:
+                                pass
+                    
+                    input("\nNhan Enter de quay lai...")
+                    continue
+                elif version_choice:
+                    selected_version = None
+                    
+                    # Thử nhập là số thứ tự
                     try:
                         idx = int(version_choice)
                         if 1 <= idx <= len(versions):
-                            switch_php_version(versions[idx - 1], xampp_path)
+                            selected_version = versions[idx - 1]
                         else:
                             print("[X] So thu tu khong hop le!")
+                            continue
                     except ValueError:
-                        print("[X] Vui long nhap so hop le!")
+                        # Không phải số, thử tìm theo tên version
+                        version_choice_lower = version_choice.lower()
+                        for version in versions:
+                            if version.lower() == version_choice_lower or version_choice_lower in version.lower():
+                                selected_version = version
+                                break
+                        
+                        if not selected_version:
+                            print(f"[X] Khong tim thay PHP version: {version_choice}")
+                            print("[i] Vui long nhap so thu tu hoac ten version chinh xac")
+                            continue
+                    
+                    # Thực hiện chuyển đổi
+                    if selected_version:
+                        if selected_version == current_version:
+                            print(f"\n[i] PHP version '{selected_version}' dang duoc su dung!")
+                        else:
+                            switch_php_version(selected_version, xampp_path)
             else:
                 print("\n[!] Khong tim thay PHP version nao!")
                 print(f"    Duong dan XAMPP: {xampp_path}")
+                print(f"    Kiem tra thu muc: {os.path.join(xampp_path, 'php')}")
+                
+                add_choice = input("\nBan co muon xem huong dan them PHP version? (y/N): ").strip().lower()
+                if add_choice == 'y':
+                    show_add_php_version_guide(xampp_path)
         
         elif choice == 'rx':
             restart_xampp(xampp_path)
