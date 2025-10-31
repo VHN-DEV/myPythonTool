@@ -55,6 +55,63 @@ def safe_print(text, fallback_text=None):
             print(ascii_text)
 
 
+def _run_tool_loop(manager, tool, tools):
+    """
+    Chạy tool với vòng lặp riêng - tự động quay lại đầu tool khi kết thúc
+    
+    Args:
+        manager: ToolManager instance
+        tool: Tên tool cần chạy
+        tools: Danh sách tools để hiển thị menu khi thoát
+    
+    Giải thích:
+    - Bước 1: Chạy tool lần đầu
+    - Bước 2: Kiểm tra exit code từ tool
+    - Bước 3: Nếu exit code là 130 (KeyboardInterrupt), quay về menu chính
+    - Bước 4: Nếu exit code là 0 (thành công), tự động chạy lại tool đó
+    - Bước 5: Nếu có lỗi khác, quay về menu chính
+    
+    Lý do:
+    - Giúp người dùng tiếp tục làm việc với cùng một tool mà không cần quay về menu chính
+    - Tiết kiệm thời gian và thao tác
+    - Cho phép người dùng nhấn Ctrl+C để quay về menu chính
+    """
+    # Vòng lặp cho tool - tự động chạy lại khi kết thúc
+    while True:
+        try:
+            # Chạy tool và lấy exit code
+            exit_code = manager.run_tool(tool)
+            
+            # Kiểm tra exit code
+            # 130 là exit code khi người dùng nhấn Ctrl+C (KeyboardInterrupt)
+            if exit_code == 130:
+                # Người dùng nhấn Ctrl+C trong tool - quay về menu chính
+                print("\n🔄 Quay lại menu chính...\n")
+                manager.display_menu(tools)
+                break
+            
+            # Exit code 0 (thành công) hoặc code khác - tự động chạy lại tool
+            # Không cần hiển thị menu chính, chỉ chạy lại tool
+            continue
+            
+        except KeyboardInterrupt:
+            # Người dùng nhấn Ctrl+C trong vòng lặp tool (ngoài tool)
+            # Quay về menu chính
+            print("\n\n🔄 Quay lại menu chính...\n")
+            manager.display_menu(tools)
+            break
+        
+        except Exception as e:
+            # Xử lý lỗi khác
+            try:
+                print(f"\n❌ Lỗi khi chạy tool: {e}")
+                print("🔄 Quay lại menu chính...\n")
+                manager.display_menu(tools)
+            except Exception:
+                print(f"\nLoi: {str(e)}")
+            break
+
+
 def main():
     """
     Hàm main - Menu chính
@@ -195,8 +252,8 @@ def main():
                     if 1 <= idx <= len(recent):
                         tool = recent[idx - 1]
                         if tool in tools:
-                            manager.run_tool(tool)
-                            manager.display_menu(tools)
+                            # Chạy tool với vòng lặp riêng - quay lại đầu tool khi kết thúc
+                            _run_tool_loop(manager, tool, tools)
                         else:
                             print(f"❌ Tool không tồn tại: {tool}")
                     else:
@@ -217,9 +274,8 @@ def main():
                 
                 if 1 <= idx <= len(tools):
                     tool = tools[idx - 1]
-                    manager.run_tool(tool)
-                    # Hiển thị lại menu
-                    manager.display_menu(tools)
+                    # Chạy tool với vòng lặp riêng - quay lại đầu tool khi kết thúc
+                    _run_tool_loop(manager, tool, tools)
                 else:
                     print("❌ Số không hợp lệ")
             
