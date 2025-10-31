@@ -291,7 +291,13 @@ class ToolManager:
         Lý do xử lý cả 2 cấu trúc:
         - Cấu trúc cũ: tool/backup-folder.py
         - Cấu trúc mới: tool/backup-folder/backup-folder.py
+        
+        Đặc biệt: setup-project-linux.py chạy trực tiếp bash app.sh
         """
+        # Tool đặc biệt: setup-project-linux - chạy trực tiếp bash app.sh
+        if tool == "setup-project-linux.py":
+            return self._run_setup_project_linux()
+        
         # Tìm đường dẫn thực tế của tool
         tool_path = self._find_tool_path(tool)
         
@@ -314,11 +320,103 @@ class ToolManager:
             self.add_to_recent(tool)
             
             return result.returncode
-        
+            
         except KeyboardInterrupt:
             print("\n\n⚠️  Tool bị ngắt bởi người dùng")
             return 130
+            
+        except Exception as e:
+            print(f"\n❌ Lỗi khi chạy tool: {e}")
+            return 1
+    
+    def _run_setup_project_linux(self) -> int:
+        """
+        Chạy setup-project-linux trực tiếp bằng bash app.sh
+        Tránh lỗi với editable install khi chạy qua Python
+        """
+        import shutil
         
+        # Tìm đường dẫn app.sh
+        script_dir = self.tool_dir / "sh" / "setup-project-linux"
+        app_sh = script_dir / "app.sh"
+        
+        if not app_sh.exists():
+            print(f"❌ Không tìm thấy file app.sh!")
+            print(f"   Đường dẫn: {app_sh}")
+            return 1
+        
+        print(f"\n{'='*60}")
+        print(f">>> Đang chạy: {self.tool_names.get('setup-project-linux.py', 'setup-project-linux')}")
+        print(f"{'='*60}\n")
+        
+        try:
+            # Tìm bash
+            bash_cmd = None
+            
+            # Trên Windows, tìm Git Bash
+            if sys.platform == 'win32':
+                git_bash_paths = [
+                    r"C:\Program Files\Git\bin\bash.exe",
+                    r"C:\Program Files (x86)\Git\bin\bash.exe",
+                    os.path.expanduser(r"~\AppData\Local\Programs\Git\bin\bash.exe")
+                ]
+                
+                for bash_path in git_bash_paths:
+                    if os.path.exists(bash_path):
+                        bash_cmd = [bash_path]
+                        break
+                
+                # Thử WSL nếu không có Git Bash
+                if not bash_cmd:
+                    wsl_path = shutil.which('wsl')
+                    if wsl_path:
+                        bash_cmd = ['wsl', 'bash']
+                
+                # Thử bash.exe trong PATH
+                if not bash_cmd:
+                    bash_exe = shutil.which('bash.exe')
+                    if bash_exe:
+                        bash_cmd = [bash_exe]
+            else:
+                # Linux/macOS
+                bash_path = shutil.which('bash')
+                if bash_path:
+                    bash_cmd = [bash_path]
+            
+            if not bash_cmd:
+                print("❌ Không tìm thấy bash!")
+                print("   Trên Windows, cần cài Git Bash hoặc WSL")
+                return 1
+            
+            # Chuyển đổi đường dẫn cho Git Bash trên Windows
+            if sys.platform == 'win32' and 'Git' in str(bash_cmd[0]):
+                # Chuyển D:\path\to\app.sh thành /d/path/to/app.sh
+                script_path_str = str(app_sh.resolve())
+                if ':' in script_path_str:
+                    drive = script_path_str[0].lower()
+                    unix_path = script_path_str.replace('\\', '/').replace(f'{drive}:', f'/{drive}', 1)
+                else:
+                    unix_path = script_path_str.replace('\\', '/')
+                cmd = bash_cmd + [unix_path]
+            else:
+                cmd = bash_cmd + [str(app_sh)]
+            
+            # Chạy bash app.sh
+            result = subprocess.run(cmd, check=False)
+            
+            print(f"\n{'='*60}")
+            print(f">>> Tool đã chạy xong!")
+            print(f"{'='*60}\n")
+            
+            # Lưu vào recent
+            self.add_to_recent("setup-project-linux.py")
+            
+            return result.returncode
+            
+        except KeyboardInterrupt:
+            print("\n\n⚠️  Tool bị ngắt bởi người dùng")
+            return 130
+            
         except Exception as e:
             print(f"\n❌ Lỗi khi chạy tool: {e}")
             return 1

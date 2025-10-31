@@ -6,6 +6,7 @@
     "video-converter.py"
   ],
   "recent": [
+    "setup-project-linux.py",
     "compress-images.py",
     "backup-folder.py",
     "clean-temp-files.py",
@@ -14,8 +15,7 @@
     "extract-archive.py",
     "file-organizer.py",
     "find-and-replace.py",
-    "image-watermark.py",
-    "pdf-tools.py"
+    "image-watermark.py"
   ],
   "settings": {
     "show_descriptions": true,
