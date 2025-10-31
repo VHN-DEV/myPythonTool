@@ -1,0 +1,4 @@
+"""
+Tool: WordPress Auto Install
+"""
+
