@@ -34,45 +34,9 @@ class ToolManager:
         self.config_file = Path(__file__).parent / "tool_config.json"
         self.config = self._load_config()
         
-        # Ánh xạ tên file sang tên hiển thị tiếng Việt
-        self.tool_names = {
-            "ssh-manager.py": "Quản lý và kết nối SSH Server nhanh chóng",
-            "backup-folder.py": "Sao lưu và nén thư mục (có timestamp)",
-            "clean-temp-files.py": "Dọn dẹp file tạm, cache và file rác",
-            "compress-images.py": "Nén và chỉnh sửa ảnh (resize, đổi format)",
-            "copy-changed-files.py": "Sao chép file thay đổi theo Git commit",
-            "duplicate-finder.py": "Tìm và xóa file trùng lặp",
-            "extract-archive.py": "Giải nén file (ZIP, RAR, 7Z, TAR)",
-            "file-organizer.py": "Sắp xếp file (theo loại/ngày/extension)",
-            "find-and-replace.py": "Tìm và thay thế text trong nhiều file",
-            "generate-tree.py": "Tạo sơ đồ cây thư mục dự án",
-            "image-watermark.py": "Thêm watermark vào ảnh (text/logo hàng loạt)",
-            "pdf-tools.py": "Xử lý PDF (merge, split, compress, convert)",
-            "rename-files.py": "Đổi tên file hàng loạt (prefix/suffix/số thứ tự)",
-            "setup-project-linux.py": "Quản lý và cài đặt dự án (Linux/Ubuntu)",
-            "text-encoding-converter.py": "Chuyển đổi encoding file text (UTF-8, ANSI...)",
-            "video-converter.py": "Xử lý video (convert, compress, trim, extract audio)"
-        }
-        
-        # Tags cho mỗi tool (để search)
-        self.tool_tags = {
-            "ssh-manager.py": ["ssh", "server", "ket noi", "remote", "terminal"],
-            "backup-folder.py": ["backup", "sao luu", "nen", "zip", "tar"],
-            "clean-temp-files.py": ["clean", "don dep", "temp", "cache", "rac"],
-            "compress-images.py": ["image", "anh", "nen", "resize", "compress"],
-            "copy-changed-files.py": ["git", "copy", "sao chep", "commit"],
-            "duplicate-finder.py": ["duplicate", "trung lap", "xoa", "clean"],
-            "extract-archive.py": ["extract", "giai nen", "zip", "rar", "7z"],
-            "file-organizer.py": ["organize", "sap xep", "file", "thu muc"],
-            "find-and-replace.py": ["find", "replace", "tim", "thay the", "text"],
-            "generate-tree.py": ["tree", "cay", "thu muc", "structure"],
-            "image-watermark.py": ["watermark", "anh", "logo", "copyright"],
-            "pdf-tools.py": ["pdf", "merge", "split", "compress"],
-            "rename-files.py": ["rename", "doi ten", "batch"],
-            "setup-project-linux.py": ["linux", "server", "setup", "cai dat", "nginx", "php", "mysql"],
-            "text-encoding-converter.py": ["encoding", "utf8", "text", "convert"],
-            "video-converter.py": ["video", "convert", "compress", "mp4"]
-        }
+        # Cache metadata của tools (tự động load khi cần)
+        self.tool_names = {}
+        self.tool_tags = {}
         
         # Tools ưu tiên hiển thị lên đầu danh sách
         # Mục đích: Các tools hay dùng nhất hoặc quan trọng nhất sẽ hiển thị trước
@@ -117,6 +81,212 @@ class ToolManager:
                 json.dump(self.config, f, indent=2, ensure_ascii=False)
         except Exception as e:
             print(f"⚠️  Lỗi lưu config: {e}")
+    
+    def _get_tool_metadata_file(self, tool: str) -> Path:
+        """
+        Tìm file tool_info.json cho tool
+        
+        Args:
+            tool: Tên file tool (vd: backup-folder.py)
+        
+        Returns:
+            Path: Đường dẫn đến tool_info.json hoặc None
+        """
+        tool_name = tool.replace('.py', '')
+        
+        # Thử tìm trong tools/py/
+        py_tool_dir = self.tool_dir / "py" / tool_name
+        py_metadata = py_tool_dir / "tool_info.json"
+        if py_metadata.exists():
+            return py_metadata
+        
+        # Thử tìm trong tools/sh/
+        sh_tool_dir = self.tool_dir / "sh" / tool_name
+        sh_metadata = sh_tool_dir / "tool_info.json"
+        if sh_metadata.exists():
+            return sh_metadata
+        
+        # Thử cấu trúc cũ
+        old_tool_dir = self.tool_dir / tool_name
+        old_metadata = old_tool_dir / "tool_info.json"
+        if old_metadata.exists():
+            return old_metadata
+        
+        return None
+    
+    def _load_tool_metadata(self, tool: str) -> Dict:
+        """
+        Load metadata cho tool từ tool_info.json hoặc tự động generate
+        
+        Args:
+            tool: Tên file tool (vd: backup-folder.py)
+        
+        Returns:
+            dict: Metadata gồm 'name' và 'tags'
+        """
+        # Kiểm tra cache trước
+        if tool in self.tool_names:
+            return {
+                'name': self.tool_names[tool],
+                'tags': self.tool_tags.get(tool, [])
+            }
+        
+        # Thử đọc từ tool_info.json
+        metadata_file = self._get_tool_metadata_file(tool)
+        if metadata_file and metadata_file.exists():
+            try:
+                with open(metadata_file, 'r', encoding='utf-8') as f:
+                    metadata = json.load(f)
+                    
+                    # Lưu vào cache
+                    self.tool_names[tool] = metadata.get('name', self._generate_display_name(tool))
+                    self.tool_tags[tool] = metadata.get('tags', [])
+                    
+                    return {
+                        'name': self.tool_names[tool],
+                        'tags': self.tool_tags[tool]
+                    }
+            except Exception:
+                pass  # Nếu đọc lỗi, fallback sang generate tự động
+        
+        # Tự động generate metadata từ tên file
+        display_name = self._generate_display_name(tool)
+        tags = self._generate_tags(tool)
+        
+        # Lưu vào cache
+        self.tool_names[tool] = display_name
+        self.tool_tags[tool] = tags
+        
+        return {
+            'name': display_name,
+            'tags': tags
+        }
+    
+    def _generate_display_name(self, tool: str) -> str:
+        """
+        Tự động generate tên hiển thị từ tên file tool
+        
+        Args:
+            tool: Tên file tool (vd: backup-folder.py)
+        
+        Returns:
+            str: Tên hiển thị tiếng Việt
+        """
+        tool_name = tool.replace('.py', '')
+        
+        # Dictionary ánh xạ từ khóa -> tiếng Việt
+        keyword_map = {
+            'backup': 'Sao lưu',
+            'folder': 'thư mục',
+            'clean': 'Dọn dẹp',
+            'temp': 'file tạm',
+            'compress': 'Nén',
+            'image': 'ảnh',
+            'copy': 'Sao chép',
+            'changed': 'thay đổi',
+            'duplicate': 'trùng lặp',
+            'finder': 'Tìm',
+            'extract': 'Giải nén',
+            'archive': 'file nén',
+            'file': 'file',
+            'organizer': 'Sắp xếp',
+            'find': 'Tìm',
+            'replace': 'thay thế',
+            'generate': 'Tạo',
+            'tree': 'cây thư mục',
+            'watermark': 'watermark',
+            'pdf': 'PDF',
+            'rename': 'Đổi tên',
+            'setup': 'Cài đặt',
+            'project': 'dự án',
+            'linux': 'Linux',
+            'text': 'text',
+            'encoding': 'encoding',
+            'converter': 'chuyển đổi',
+            'video': 'video',
+            'ssh': 'SSH',
+            'manager': 'Quản lý',
+            'server': 'Server'
+        }
+        
+        # Convert kebab-case sang từng từ và translate
+        words = tool_name.split('-')
+        translated_words = []
+        
+        for word in words:
+            if word in keyword_map:
+                translated_words.append(keyword_map[word])
+            else:
+                # Nếu không tìm thấy, giữ nguyên nhưng capitalize
+                translated_words.append(word.capitalize())
+        
+        # Ghép lại thành tên hiển thị
+        display_name = ' '.join(translated_words)
+        
+        # Thêm mô tả ngắn nếu cần (tùy chọn)
+        return display_name
+    
+    def _generate_tags(self, tool: str) -> List[str]:
+        """
+        Tự động generate tags từ tên file tool
+        
+        Args:
+            tool: Tên file tool (vd: backup-folder.py)
+        
+        Returns:
+            list: Danh sách tags
+        """
+        tool_name = tool.replace('.py', '').lower()
+        
+        # Extract tags từ tên file (các từ trong kebab-case)
+        tags = tool_name.split('-')
+        
+        # Thêm tên file đầy đủ làm tag
+        tags.append(tool_name)
+        
+        # Thêm tags phổ biến dựa trên keywords
+        if 'image' in tool_name or 'photo' in tool_name:
+            tags.extend(['anh', 'hinh', 'picture'])
+        elif 'video' in tool_name:
+            tags.extend(['video', 'phim'])
+        elif 'pdf' in tool_name:
+            tags.extend(['pdf', 'document'])
+        elif 'backup' in tool_name:
+            tags.extend(['backup', 'sao luu'])
+        elif 'compress' in tool_name or 'zip' in tool_name:
+            tags.extend(['compress', 'nen'])
+        elif 'ssh' in tool_name:
+            tags.extend(['ssh', 'remote', 'server'])
+        
+        return list(set(tags))  # Remove duplicates
+    
+    def get_tool_display_name(self, tool: str) -> str:
+        """
+        Lấy tên hiển thị của tool (tự động load metadata nếu chưa có)
+        
+        Args:
+            tool: Tên file tool (vd: backup-folder.py)
+        
+        Returns:
+            str: Tên hiển thị tiếng Việt
+        """
+        if tool not in self.tool_names:
+            self._load_tool_metadata(tool)
+        return self.tool_names.get(tool, tool)
+    
+    def get_tool_tags(self, tool: str) -> List[str]:
+        """
+        Lấy tags của tool (tự động load metadata nếu chưa có)
+        
+        Args:
+            tool: Tên file tool (vd: backup-folder.py)
+        
+        Returns:
+            list: Danh sách tags
+        """
+        if tool not in self.tool_tags:
+            self._load_tool_metadata(tool)
+        return self.tool_tags.get(tool, [])
     
     def get_tool_list(self) -> List[str]:
         """
@@ -224,14 +394,14 @@ class ToolManager:
                 continue
             
             # Tìm trong description
-            description = self.tool_names.get(tool, "")
+            description = self.get_tool_display_name(tool)
             if query in description.lower():
                 results.append(tool)
                 continue
             
             # Tìm trong tags
-            tags = self.tool_tags.get(tool, [])
-            if any(query in tag for tag in tags):
+            tags = self.get_tool_tags(tool)
+            if any(query in tag.lower() for tag in tags):
                 results.append(tool)
         
         return results
@@ -241,14 +411,14 @@ class ToolManager:
         if tool not in self.config['favorites']:
             self.config['favorites'].append(tool)
             self._save_config()
-            print(f"⭐ Đã thêm vào favorites: {self.tool_names.get(tool, tool)}")
+            print(f"⭐ Đã thêm vào favorites: {self.get_tool_display_name(tool)}")
     
     def remove_from_favorites(self, tool: str):
         """Xóa tool khỏi favorites"""
         if tool in self.config['favorites']:
             self.config['favorites'].remove(tool)
             self._save_config()
-            print(f"❌ Đã xóa khỏi favorites: {self.tool_names.get(tool, tool)}")
+            print(f"❌ Đã xóa khỏi favorites: {self.get_tool_display_name(tool)}")
     
     def add_to_recent(self, tool: str):
         """
@@ -306,7 +476,7 @@ class ToolManager:
             return 1
         
         print(f"\n{'='*60}")
-        print(f">>> Đang chạy: {self.tool_names.get(tool, tool)}")
+        print(f">>> Đang chạy: {self.get_tool_display_name(tool)}")
         print(f"{'='*60}\n")
         
         try:
@@ -346,7 +516,7 @@ class ToolManager:
             return 1
         
         print(f"\n{'='*60}")
-        print(f">>> Đang chạy: {self.tool_names.get('setup-project-linux.py', 'setup-project-linux')}")
+        print(f">>> Đang chạy: {self.get_tool_display_name('setup-project-linux.py')}")
         print(f"{'='*60}\n")
         
         try:
@@ -495,7 +665,7 @@ class ToolManager:
             star = "⭐" if is_favorite else "  "
             
             # Tên tool
-            tool_name = self.tool_names.get(tool, tool)
+            tool_name = self.get_tool_display_name(tool)
             
             # Hiển thị
             print(f"{star} {idx}. {tool_name}")
@@ -577,7 +747,7 @@ class ToolManager:
         
         if not doc_path.exists():
             # Thông báo không tìm thấy doc.py
-            tool_display_name = self.tool_names.get(tool, tool)
+            tool_display_name = self.get_tool_display_name(tool)
             print(f"\n{'='*60}")
             print(f"❌ Không tìm thấy hướng dẫn cho tool: {tool_display_name}")
             print(f"   File doc.py không tồn tại trong {tool_name}/")
@@ -603,7 +773,7 @@ class ToolManager:
             elif hasattr(doc_module, 'HELP_TEXT'):
                 help_text = doc_module.HELP_TEXT
             else:
-                tool_display_name = self.tool_names.get(tool, tool)
+                tool_display_name = self.get_tool_display_name(tool)
                 print(f"\n{'='*60}")
                 print(f"❌ File doc.py không có hàm get_help() hoặc biến HELP_TEXT")
                 print(f"   Tool: {tool_display_name}")
@@ -611,7 +781,7 @@ class ToolManager:
                 return False
             
             # Hiển thị hướng dẫn
-            tool_display_name = self.tool_names.get(tool, tool)
+            tool_display_name = self.get_tool_display_name(tool)
             print(f"\n{'='*60}")
             print(f"📖 HƯỚNG DẪN SỬ DỤNG: {tool_display_name}")
             print(f"{'='*60}\n")
@@ -621,7 +791,7 @@ class ToolManager:
             return True
             
         except Exception as e:
-            tool_display_name = self.tool_names.get(tool, tool)
+            tool_display_name = self.get_tool_display_name(tool)
             print(f"\n{'='*60}")
             print(f"❌ Lỗi khi đọc hướng dẫn cho tool: {tool_display_name}")
             print(f"   Lỗi: {e}")
