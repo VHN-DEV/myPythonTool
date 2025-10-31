@@ -350,25 +350,17 @@ class ToolManager:
             self._load_tool_metadata(tool)
         return self.tool_tags.get(tool, [])
     
-    def get_tool_list(self) -> List[str]:
+    def _scan_tools_from_directory(self) -> List[str]:
         """
-        Lấy danh sách file .py trong thư mục tool
+        Scan tất cả tools từ thư mục tools (private method)
         
         Returns:
-            list: Danh sách tên file tool (priority tools trước, sau đó alphabet)
+            list: Danh sách tên file tool (chưa sắp xếp, chưa filter disabled)
         
         Giải thích:
-        - Bước 1: Tìm tools trong tools/py/ (các tool Python)
-        - Bước 2: Tìm tools trong tools/sh/ (các tool shell/đặc biệt)
-        - Bước 3: Tách ra priority tools và tools thường
-        - Bước 4: Sắp xếp priority tools theo thứ tự định sẵn
-        - Bước 5: Sắp xếp tools thường theo alphabet
-        - Bước 6: Ghép lại: priority + alphabet
-        
-        Lý do tìm trong thư mục con:
-        - Hỗ trợ cấu trúc mới: mỗi tool có thư mục riêng
-        - Ví dụ: tools/py/backup-folder/backup-folder.py
-        - Ví dụ: tools/sh/setup-project-linux/setup-project-linux.py
+        - Tách logic scan ra khỏi get_tool_list để tái sử dụng
+        - Xử lý cả cấu trúc mới (py/sh) và cấu trúc cũ
+        - Bắt PermissionError khi quét thư mục
         """
         if not self.tool_dir.exists():
             return []
@@ -378,45 +370,69 @@ class ToolManager:
         # Tìm tools trong tools/py/ (các tool Python thông thường)
         py_dir = self.tool_dir / "py"
         if py_dir.exists() and py_dir.is_dir():
-            for item in os.listdir(py_dir):
-                item_path = py_dir / item
-                if item_path.is_dir():
-                    # Tìm file có tên giống thư mục
-                    main_file = item_path / f"{item}.py"
-                    if main_file.exists():
-                        all_tools.append(f"{item}.py")
+            try:
+                for item in os.listdir(py_dir):
+                    item_path = py_dir / item
+                    if item_path.is_dir():
+                        # Tìm file có tên giống thư mục
+                        main_file = item_path / f"{item}.py"
+                        if main_file.exists():
+                            all_tools.append(f"{item}.py")
+            except (PermissionError, OSError):
+                # Bỏ qua thư mục không có quyền truy cập
+                pass
         
         # Tìm tools trong tools/sh/ (các tool đặc biệt như shell scripts)
         sh_dir = self.tool_dir / "sh"
         if sh_dir.exists() and sh_dir.is_dir():
-            for item in os.listdir(sh_dir):
-                item_path = sh_dir / item
+            try:
+                for item in os.listdir(sh_dir):
+                    item_path = sh_dir / item
+                    if item_path.is_dir():
+                        # Tìm file .py trong thư mục con
+                        main_file = item_path / f"{item}.py"
+                        if main_file.exists():
+                            all_tools.append(f"{item}.py")
+            except (PermissionError, OSError):
+                # Bỏ qua thư mục không có quyền truy cập
+                pass
+        
+        # Tương thích với cấu trúc cũ: tìm trực tiếp trong tools/ (nếu còn)
+        try:
+            for item in os.listdir(self.tool_dir):
+                item_path = self.tool_dir / item
+                # Bỏ qua thư mục py và sh (đã xử lý ở trên)
+                if item in ['py', 'sh']:
+                    continue
+                # Nếu là thư mục, tìm file .py chính trong đó
                 if item_path.is_dir():
-                    # Tìm file .py trong thư mục con
                     main_file = item_path / f"{item}.py"
                     if main_file.exists():
                         all_tools.append(f"{item}.py")
+                # Nếu là file .py (để tương thích với cấu trúc cũ)
+                elif item.endswith('.py'):
+                    all_tools.append(item)
+        except (PermissionError, OSError):
+            # Bỏ qua nếu không có quyền truy cập
+            pass
         
-        # Tương thích với cấu trúc cũ: tìm trực tiếp trong tools/ (nếu còn)
-        for item in os.listdir(self.tool_dir):
-            item_path = self.tool_dir / item
-            # Bỏ qua thư mục py và sh (đã xử lý ở trên)
-            if item in ['py', 'sh']:
-                continue
-            # Nếu là thư mục, tìm file .py chính trong đó
-            if item_path.is_dir():
-                main_file = item_path / f"{item}.py"
-                if main_file.exists():
-                    all_tools.append(f"{item}.py")
-            # Nếu là file .py (để tương thích với cấu trúc cũ)
-            elif item.endswith('.py'):
-                all_tools.append(item)
+        return all_tools
+    
+    def _sort_and_prioritize_tools(self, tools: List[str]) -> List[str]:
+        """
+        Sắp xếp tools: priority tools trước, sau đó alphabet
         
+        Args:
+            tools: Danh sách tools chưa sắp xếp
+        
+        Returns:
+            list: Danh sách tools đã sắp xếp
+        """
         # Tách priority tools và tools thường
         priority = []
         regular = []
         
-        for tool in all_tools:
+        for tool in tools:
             if tool in self.priority_tools:
                 priority.append(tool)
             else:
@@ -429,11 +445,38 @@ class ToolManager:
         regular.sort()
         
         # Ghép lại: priority + regular
-        all_tools_unsorted = priority + regular
+        return priority + regular
+    
+    def get_tool_list(self) -> List[str]:
+        """
+        Lấy danh sách file .py trong thư mục tool
+        
+        Returns:
+            list: Danh sách tên file tool (priority tools trước, sau đó alphabet, đã filter disabled)
+        
+        Giải thích:
+        - Bước 1: Tìm tools trong tools/py/ (các tool Python)
+        - Bước 2: Tìm tools trong tools/sh/ (các tool shell/đặc biệt)
+        - Bước 3: Tách ra priority tools và tools thường
+        - Bước 4: Sắp xếp priority tools theo thứ tự định sẵn
+        - Bước 5: Sắp xếp tools thường theo alphabet
+        - Bước 6: Ghép lại: priority + alphabet
+        - Bước 7: Filter ra các tool bị disabled
+        
+        Lý do tìm trong thư mục con:
+        - Hỗ trợ cấu trúc mới: mỗi tool có thư mục riêng
+        - Ví dụ: tools/py/backup-folder/backup-folder.py
+        - Ví dụ: tools/sh/setup-project-linux/setup-project-linux.py
+        """
+        # Scan tools từ thư mục
+        all_tools = self._scan_tools_from_directory()
+        
+        # Sắp xếp và ưu tiên
+        sorted_tools = self._sort_and_prioritize_tools(all_tools)
         
         # Filter ra các tool bị disabled
         disabled_tools = set(self.config.get('disabled_tools', []))
-        active_tools = [t for t in all_tools_unsorted if t not in disabled_tools]
+        active_tools = [t for t in sorted_tools if t not in disabled_tools]
         
         return active_tools
     
@@ -442,68 +485,13 @@ class ToolManager:
         Lấy danh sách tất cả tools (bao gồm cả disabled)
         
         Returns:
-            list: Danh sách tất cả tools
+            list: Danh sách tất cả tools (đã sắp xếp, bao gồm cả disabled)
         """
-        if not self.tool_dir.exists():
-            return []
+        # Scan tools từ thư mục
+        all_tools = self._scan_tools_from_directory()
         
-        all_tools = []
-        
-        # Tìm tools trong tools/py/ (các tool Python thông thường)
-        py_dir = self.tool_dir / "py"
-        if py_dir.exists() and py_dir.is_dir():
-            for item in os.listdir(py_dir):
-                item_path = py_dir / item
-                if item_path.is_dir():
-                    # Tìm file có tên giống thư mục
-                    main_file = item_path / f"{item}.py"
-                    if main_file.exists():
-                        all_tools.append(f"{item}.py")
-        
-        # Tìm tools trong tools/sh/ (các tool đặc biệt như shell scripts)
-        sh_dir = self.tool_dir / "sh"
-        if sh_dir.exists() and sh_dir.is_dir():
-            for item in os.listdir(sh_dir):
-                item_path = sh_dir / item
-                if item_path.is_dir():
-                    # Tìm file .py trong thư mục con
-                    main_file = item_path / f"{item}.py"
-                    if main_file.exists():
-                        all_tools.append(f"{item}.py")
-        
-        # Tương thích với cấu trúc cũ: tìm trực tiếp trong tools/ (nếu còn)
-        for item in os.listdir(self.tool_dir):
-            item_path = self.tool_dir / item
-            # Bỏ qua thư mục py và sh (đã xử lý ở trên)
-            if item in ['py', 'sh']:
-                continue
-            # Nếu là thư mục, tìm file .py chính trong đó
-            if item_path.is_dir():
-                main_file = item_path / f"{item}.py"
-                if main_file.exists():
-                    all_tools.append(f"{item}.py")
-            # Nếu là file .py (để tương thích với cấu trúc cũ)
-            elif item.endswith('.py'):
-                all_tools.append(item)
-        
-        # Tách priority tools và tools thường
-        priority = []
-        regular = []
-        
-        for tool in all_tools:
-            if tool in self.priority_tools:
-                priority.append(tool)
-            else:
-                regular.append(tool)
-        
-        # Sắp xếp priority tools theo thứ tự định sẵn
-        priority.sort(key=lambda x: self.priority_tools.index(x))
-        
-        # Sắp xếp tools thường theo alphabet
-        regular.sort()
-        
-        # Ghép lại: priority + regular (bao gồm cả disabled)
-        return priority + regular
+        # Sắp xếp và ưu tiên (bao gồm cả disabled)
+        return self._sort_and_prioritize_tools(all_tools)
     
     def search_tools(self, query: str) -> List[str]:
         """

@@ -133,8 +133,9 @@ def main():
     """
     # Khởi tạo ToolManager
     # __file__ là menus/__init__.py, cần lùi 1 cấp lên project root
-    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    tool_dir = os.path.join(project_root, "tools")
+    from pathlib import Path
+    project_root = Path(__file__).parent.parent
+    tool_dir = str(project_root / "tools")
     manager = ToolManager(tool_dir)
     
     # Lấy danh sách tools
