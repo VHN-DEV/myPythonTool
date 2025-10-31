@@ -1,0 +1,4 @@
+"""
+Tool: barcode-qr-decoder
+"""
+
