@@ -15,6 +15,8 @@ from pathlib import Path
 from typing import List, Dict, Optional
 from utils.colors import Colors
 from utils.format import print_header, print_separator
+from utils.categories import group_tools_by_category, get_category_info
+from utils.helpers import highlight_keyword
 
 
 class ToolManager:
@@ -656,19 +658,21 @@ class ToolManager:
         
         return None
     
-    def display_menu(self, tools: Optional[List[str]] = None, title: str = "DANH SÁCH TOOL"):
+    def display_menu(self, tools: Optional[List[str]] = None, title: str = "DANH SÁCH TOOL", group_by_category: bool = True, search_query: Optional[str] = None):
         """
         Hiển thị menu tools với UI/UX đẹp hơn
         
         Args:
             tools: Danh sách tools (None = hiển thị tất cả)
             title: Tiêu đề menu
+            group_by_category: Có nhóm theo categories không
         
         Giải thích:
         - Hiển thị danh sách đẹp với số thứ tự
         - Highlight favorites với màu sắc
         - Nhóm tools theo categories nếu có
         - Sử dụng màu sắc và icons đẹp hơn
+        - Hiển thị stats nhanh
         """
         if tools is None:
             tools = self.get_tool_list()
@@ -680,34 +684,78 @@ class ToolManager:
         # Header
         print()
         print_separator("═", 70, Colors.PRIMARY)
-        title_colored = Colors.primary(f"                      {title}")
+        title_colored = Colors.primary(f"  {title}")
         print(title_colored)
         print_separator("═", 70, Colors.PRIMARY)
         print()
         
-        # Hiển thị danh sách tools
-        for idx, tool in enumerate(tools, start=1):
-            # Check favorite
-            is_favorite = tool in self.config['favorites']
+        # Stats nhanh
+        total = len(tools)
+        favorites_count = len([t for t in tools if t in self.config['favorites']])
+        recent_count = len([t for t in self.config['recent'] if t in tools])
+        
+        stats_line = f"{Colors.muted('📊')} {Colors.info(f'Tổng: {total}')} | {Colors.warning(f'⭐ Favorites: {favorites_count}')} | {Colors.secondary(f'📚 Recent: {recent_count}')}"
+        print(f"  {stats_line}")
+        print()
+        
+        # Nhóm theo categories hoặc hiển thị flat list
+        if group_by_category and len(tools) > 5:
+            grouped = group_tools_by_category(tools, self)
+            current_idx = 1
             
-            # Tên tool
-            tool_name = self.get_tool_display_name(tool)
-            
-            # Format số thứ tự
-            idx_str = f"{idx:2d}."
-            
-            # Highlight favorites
-            if is_favorite:
-                star = Colors.warning("⭐")
-                tool_name_colored = Colors.bold(tool_name)
-                idx_colored = Colors.info(idx_str)
-            else:
-                star = "  "
-                tool_name_colored = tool_name
-                idx_colored = Colors.muted(idx_str)
-            
-            # Hiển thị với format đẹp
-            print(f"{star} {idx_colored} {tool_name_colored}")
+            for category, category_tools in grouped.items():
+                cat_info = get_category_info(category)
+                icon = cat_info['icon']
+                cat_name = cat_info['name']
+                
+                # Category header
+                print()
+                category_header = f"{icon} {Colors.bold(cat_name)} {Colors.muted(f'({len(category_tools)})')}"
+                print(f"  {category_header}")
+                print_separator("─", 68, Colors.MUTED)
+                
+                # Tools trong category
+                for tool in category_tools:
+                    is_favorite = tool in self.config['favorites']
+                    tool_name = self.get_tool_display_name(tool)
+                    idx_str = f"{current_idx:2d}."
+                    
+                    if is_favorite:
+                        star = Colors.warning("⭐")
+                        idx_colored = Colors.info(idx_str)
+                    else:
+                        star = "  "
+                        idx_colored = Colors.muted(idx_str)
+                    
+                    # Highlight search query nếu có
+                    if search_query:
+                        tool_name_colored = highlight_keyword(tool_name, search_query)
+                    else:
+                        tool_name_colored = Colors.bold(tool_name) if is_favorite else tool_name
+                    
+                    print(f"  {star} {idx_colored} {tool_name_colored}")
+                    current_idx += 1
+        else:
+            # Hiển thị flat list (không nhóm)
+            for idx, tool in enumerate(tools, start=1):
+                is_favorite = tool in self.config['favorites']
+                tool_name = self.get_tool_display_name(tool)
+                idx_str = f"{idx:2d}."
+                
+                if is_favorite:
+                    star = Colors.warning("⭐")
+                    idx_colored = Colors.info(idx_str)
+                else:
+                    star = "  "
+                    idx_colored = Colors.muted(idx_str)
+                
+                # Highlight search query nếu có
+                if search_query:
+                    tool_name_colored = highlight_keyword(tool_name, search_query)
+                else:
+                    tool_name_colored = Colors.bold(tool_name) if is_favorite else tool_name
+                
+                print(f"{star} {idx_colored} {tool_name_colored}")
         
         # Footer
         print()

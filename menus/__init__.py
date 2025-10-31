@@ -30,6 +30,7 @@ if sys.platform == 'win32':
 from .tool_manager import ToolManager
 from utils.colors import Colors
 from utils.format import print_separator
+from utils.helpers import print_welcome_tip, print_command_suggestions, suggest_command
 
 
 def safe_print(text, fallback_text=None):
@@ -162,6 +163,10 @@ def main():
     
     print()
     
+    # Welcome tip
+    print_welcome_tip()
+    print()
+    
     # Hiển thị menu lần đầu
     manager.display_menu(tools)
     
@@ -218,9 +223,15 @@ def main():
                     query_msg = Colors.secondary(f"'{query}'")
                     print()
                     print(Colors.info(f"🔍 Tìm thấy {count_msg} tool phù hợp với {query_msg}:"))
-                    manager.display_menu(results, title=f"KẾT QUẢ TÌM KIẾM: {query}")
+                    manager.display_menu(results, title=f"KẾT QUẢ TÌM KIẾM: {query}", group_by_category=False, search_query=query)
                 else:
                     print(Colors.error(f"❌ Không tìm thấy tool nào phù hợp với '{query}'"))
+                    # Gợi ý các tools gần đúng
+                    all_tools = manager.get_tool_list()
+                    suggestions = suggest_command(query, [manager.get_tool_display_name(t) for t in all_tools][:10])
+                    if suggestions:
+                        print()
+                        print(Colors.info(f"💡 Gợi ý tìm kiếm: {', '.join([Colors.secondary(s) for s in suggestions[:3]])}"))
             
             # Favorites
             elif command == 'f':
@@ -325,7 +336,14 @@ def main():
             
             else:
                 print(Colors.error(f"❌ Lệnh không hợp lệ: {command}"))
-                print(Colors.info("💡 Nhập 'h' hoặc 'help' để xem hướng dẫn"))
+                
+                # Gợi ý commands
+                valid_commands = ['h', 'help', 'q', 'quit', 'l', 'list', 's', 'search', 'f', 'r', 'set', 'clear']
+                suggestions = suggest_command(command, valid_commands)
+                if suggestions:
+                    print_command_suggestions(command, suggestions)
+                else:
+                    print(Colors.info("💡 Nhập 'h' hoặc 'help' để xem hướng dẫn"))
         
         except (EOFError, KeyboardInterrupt):
             # Xử lý EOF error (input stream bị đóng) hoặc Ctrl+C

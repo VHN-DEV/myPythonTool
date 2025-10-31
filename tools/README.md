@@ -68,9 +68,12 @@ Tạo file `tool_info.json` để cung cấp metadata cho tool:
 ```
 
 **Lưu ý:**
-- Nếu không có `tool_info.json`, hệ thống sẽ tự động generate tên hiển thị và tags từ tên file
+- ✅ **TỰ ĐỘNG HOÀN TOÀN**: Nếu không có `tool_info.json`, hệ thống sẽ tự động:
+  - Generate tên hiển thị từ tên file (vd: `backup-folder.py` → "Sao lưu thư mục")
+  - Generate tags từ các từ trong tên file
+  - Phân loại category tự động (dựa trên keywords: image, video, file, archive, etc.)
 - Tên file theo format `kebab-case` (ví dụ: `backup-folder.py`) sẽ được tự động chuyển đổi
-- Tags sẽ được tự động tạo từ các từ trong tên file
+- Tool sẽ tự động xuất hiện trong menu với category và icon phù hợp
 
 ### Bước 5: (Optional) Tạo doc.py
 
@@ -100,14 +103,28 @@ def get_help():
     """
 ```
 
-### Bước 6: Hoàn thành!
+### Bước 6: Hoàn thành! ✅
 
 **Tool sẽ tự động xuất hiện trong menu chính mà không cần sửa code nào khác!**
 
-- Tool sẽ tự động được phát hiện
-- Tên hiển thị sẽ tự động được tạo (hoặc lấy từ `tool_info.json`)
-- Tags sẽ tự động được tạo (hoặc lấy từ `tool_info.json`)
-- Hướng dẫn sử dụng sẽ tự động được đọc từ `doc.py`
+#### 🎯 Tính năng tự động:
+
+1. ✅ **Tự động phát hiện**: Tool được scan tự động khi khởi động
+2. ✅ **Tự động tên hiển thị**: Tạo từ tên file hoặc lấy từ `tool_info.json`
+3. ✅ **Tự động tags**: Generate từ tên file hoặc lấy từ `tool_info.json`
+4. ✅ **Tự động phân loại category**: Dựa trên keywords (image, video, file, etc.)
+   - 🖼️ Hình ảnh: tools có từ "image", "anh", "photo", "watermark"
+   - 🎬 Video: tools có từ "video", "phim", "movie"
+   - 📁 File & Thư mục: tools có từ "file", "folder", "backup", "organizer"
+   - 📦 Nén & Giải nén: tools có từ "archive", "extract", "compress", "zip"
+   - 📝 Text & Encoding: tools có từ "text", "encoding", "find", "replace", "json"
+   - 📄 PDF: tools có từ "pdf"
+   - 🔀 Git: tools có từ "git", "commit", "changed"
+   - ⚙️ Hệ thống: tools có từ "clean", "temp", "setup", "project", "tree"
+   - 🌐 Network & Server: tools có từ "ssh", "server", "connect", "remote"
+   - 🔧 Khác: các tools không khớp với categories trên
+5. ✅ **Tự động hiển thị**: Xuất hiện trong menu với icon category phù hợp
+6. ✅ **Tự động hướng dẫn**: Đọc từ `doc.py` khi nhập `[số]h`
 
 ## Ví dụ: Thêm tool mới
 
@@ -125,9 +142,11 @@ def get_help():
 ```
 
 **Kết quả:**
-- Tool `my-new-tool.py` sẽ tự động xuất hiện trong menu
-- Nếu không có `tool_info.json`, tên hiển thị sẽ là: "My New Tool"
-- Tags sẽ tự động là: `["my", "new", "tool", "my-new-tool"]`
+- ✅ Tool `my-new-tool.py` sẽ tự động xuất hiện trong menu
+- ✅ Nếu không có `tool_info.json`, tên hiển thị sẽ là: "My New Tool"
+- ✅ Tags sẽ tự động là: `["my", "new", "tool", "my-new-tool"]`
+- ✅ Category sẽ tự động là "Khác" (vì không match keywords nào)
+- ✅ Để vào category cụ thể, thêm keyword phù hợp vào tên file (vd: `my-image-tool.py` → category "Hình ảnh")
 
 ## File Config của Tool
 
@@ -142,9 +161,32 @@ Mỗi tool có thể có file config riêng trong thư mục của nó:
 - Dễ backup/restore từng tool với config riêng
 - Không lộn xộn ở project root
 
+## ✨ Tóm tắt: Thêm tool mới CHỈ CẦN 3 BƯỚC
+
+```bash
+# 1. Tạo thư mục
+mkdir tools/py/my-tool
+
+# 2. Tạo file chính
+cat > tools/py/my-tool/my-tool.py << 'EOF'
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+def main():
+    print("Hello from my tool!")
+if __name__ == "__main__":
+    main()
+EOF
+
+# 3. Tạo __init__.py
+echo '"""Tool: my-tool"""' > tools/py/my-tool/__init__.py
+```
+
+**Xong!** Tool sẽ tự động xuất hiện trong menu khi chạy `python .` hoặc `myptool`.
+
 ## Lưu ý
 
-- Tool phải có file `.py` chính có tên giống tên thư mục
-- File chính phải có thể chạy độc lập bằng `python ten-tool.py`
-- Nếu tool cần dependencies, thêm vào `requirements.txt` ở project root
-- Tool nên có xử lý lỗi và thông báo rõ ràng cho người dùng
+- ✅ Tool phải có file `.py` chính có tên giống tên thư mục
+- ✅ File chính phải có thể chạy độc lập bằng `python ten-tool.py`
+- ✅ Nếu tool cần dependencies, thêm vào `requirements.txt` ở project root
+- ✅ Tool nên có xử lý lỗi và thông báo rõ ràng cho người dùng
+- ✅ **Không cần config gì thêm** - mọi thứ đều tự động!
