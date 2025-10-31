@@ -21,7 +21,7 @@ readme = "README.md"
 requires-python = ">=3.7"
 license = {text = "MIT"}
 authors = [
-    {name = "Your Name", email = "your.email@example.com"}
+    {name = "V.H.Nam", email = "vhnam18032002@gmail.com"}
 ]
 keywords = ["utilities", "tools", "file-management", "automation"]
 
@@ -52,10 +52,10 @@ classifiers = [
 
 # URL liên quan đến dự án
 [project.urls]
-Homepage = "https://github.com/yourusername/myPythonTool"
-Documentation = "https://github.com/yourusername/myPythonTool/blob/main/README.md"
-Repository = "https://github.com/yourusername/myPythonTool"
-Changelog = "https://github.com/yourusername/myPythonTool/blob/main/docs/CHANGELOG.md"
+Homepage = "https://github.com/VHN-DEV/myPythonTool"
+Documentation = "https://github.com/VHN-DEV/myPythonTool/blob/main/README.md"
+Repository = "https://github.com/VHN-DEV/myPythonTool"
+Changelog = "https://github.com/VHN-DEV/myPythonTool/blob/main/docs/CHANGELOG.md"
 
 # Entry points - Tạo command "myptool"
 # Khi gõ "myptool" ở bất kỳ đâu, sẽ chạy hàm main() trong menus/__init__.py
