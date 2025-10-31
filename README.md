@@ -203,23 +203,35 @@ python -c "import PIL, chardet; print('✅ Cài đặt thành công!')"
 
 | STT | Tên Tool | Mô tả chức năng | Thích hợp cho |
 |-----|----------|----------------|---------------|
-| 1 | **backup-folder.py** | Sao lưu và nén thư mục với timestamp | Backup dự án, tài liệu |
-| 2 | **clean-temp-files.py** | Dọn dẹp file tạm, cache và file rác | Giải phóng dung lượng |
-| 3 | **compress-images.py** | Nén và chỉnh sửa ảnh (resize, đổi format) | Web developer, nhiếp ảnh |
-| 4 | **copy-changed-files.py** | Sao chép file thay đổi theo Git commit | Upload lên server |
-| 5 | **duplicate-finder.py** | Tìm và xóa file trùng lặp | Dọn dẹp ổ cứng |
-| 6 | **extract-archive.py** | Giải nén file (ZIP, RAR, 7Z, TAR) | Giải nén hàng loạt |
-| 7 | **file-organizer.py** | Sắp xếp file theo loại/ngày/extension | Tổ chức Downloads |
-| 8 | **find-and-replace.py** | Tìm và thay thế text trong nhiều file | Refactor code |
-| 9 | **generate-tree.py** | Tạo sơ đồ cây thư mục dự án | Documentation |
-| 10 | **rename-files.py** | Đổi tên file hàng loạt (prefix/suffix/số thứ tự) | Đổi tên ảnh, video |
-| 11 | **text-encoding-converter.py** | Chuyển đổi encoding file text (UTF-8, ANSI...) | Fix lỗi tiếng Việt |
+| 1 | [backup-folder.py](tools/backup-folder/README.md) | Sao lưu và nén thư mục với timestamp | Backup dự án, tài liệu |
+| 2 | [clean-temp-files.py](tools/clean-temp-files/README.md) | Dọn dẹp file tạm, cache và file rác | Giải phóng dung lượng |
+| 3 | [compress-images.py](tools/compress-images/README.md) | Nén và chỉnh sửa ảnh (resize, đổi format) | Web developer, nhiếp ảnh |
+| 4 | [copy-changed-files.py](tools/copy-changed-files/README.md) | Sao chép file thay đổi theo Git commit | Upload lên server |
+| 5 | [duplicate-finder.py](tools/duplicate-finder/README.md) | Tìm và xóa file trùng lặp | Dọn dẹp ổ cứng |
+| 6 | [extract-archive.py](tools/extract-archive/README.md) | Giải nén file (ZIP, RAR, 7Z, TAR) | Giải nén hàng loạt |
+| 7 | [file-organizer.py](tools/file-organizer/README.md) | Sắp xếp file theo loại/ngày/extension | Tổ chức Downloads |
+| 8 | [find-and-replace.py](tools/find-and-replace/README.md) | Tìm và thay thế text trong nhiều file | Refactor code |
+| 9 | [generate-tree.py](tools/generate-tree/README.md) | Tạo sơ đồ cây thư mục dự án | Documentation |
+| 10 | [rename-files.py](tools/rename-files/README.md) | Đổi tên file hàng loạt (prefix/suffix/số thứ tự) | Đổi tên ảnh, video |
+| 11 | [text-encoding-converter.py](tools/text-encoding-converter/README.md) | Chuyển đổi encoding file text (UTF-8, ANSI...) | Fix lỗi tiếng Việt |
 
 ---
 
 ## 📖 Hướng dẫn chi tiết
 
-### 1. 🖼️ Compress Images - Nén và chỉnh sửa ảnh
+Nội dung chi tiết đã được tách sang README riêng của từng tool:
+
+- Compress Images: xem `tools/compress-images/README.md`
+- Copy Changed Files: xem `tools/copy-changed-files/README.md`
+- Rename Files: xem `tools/rename-files/README.md`
+- Backup Folder: xem `tools/backup-folder/README.md`
+- Find and Replace: xem `tools/find-and-replace/README.md`
+- Generate Tree: xem `tools/generate-tree/README.md`
+- Clean Temp Files: xem `tools/clean-temp-files/README.md`
+- Extract Archive: xem `tools/extract-archive/README.md`
+- Duplicate Finder: xem `tools/duplicate-finder/README.md`
+- File Organizer: xem `tools/file-organizer/README.md`
+- Text Encoding Converter: xem `tools/text-encoding-converter/README.md`
 
 **Chức năng:**
 - ✅ Nén ảnh với quality tùy chỉnh (1-100)
@@ -232,7 +244,7 @@ python -c "import PIL, chardet; print('✅ Cài đặt thành công!')"
 **Cách sử dụng:**
 
 ```bash
-python tool/compress-images.py
+python tools/compress-images.py
 ```
 
 **Ví dụ thực tế:**
@@ -279,7 +291,7 @@ Nhập chiều cao (px, Enter để bỏ qua): [Enter]
 **Cách sử dụng:**
 
 ```bash
-python tool/copy-changed-files.py
+python tools/copy-changed-files.py
 ```
 
 **Ví dụ thực tế:**
@@ -341,7 +353,7 @@ Nhập commit ID kết thúc (Enter = HEAD): [Enter]
 **Cách sử dụng:**
 
 ```bash
-python tool/rename-files.py
+python tools/rename-files.py
 ```
 
 **Ví dụ 1: Đổi tên theo số thứ tự**
@@ -401,7 +413,7 @@ Nhập prefix (tiền tố): [Backup]_
 **Cách sử dụng:**
 
 ```bash
-python tool/backup-folder.py
+python tools/backup-folder.py
 ```
 
 **Ví dụ:**
@@ -452,7 +464,7 @@ Nhập các pattern cần loại trừ (cách nhau bởi dấu phẩy): node_mod
 **Cách sử dụng:**
 
 ```bash
-python tool/find-and-replace.py
+python tools/find-and-replace.py
 ```
 
 **Ví dụ 1: Tìm kiếm (không thay đổi)**
@@ -540,7 +552,7 @@ Xác nhận thực hiện? (YES để xác nhận): YES
 **Cách sử dụng:**
 
 ```bash
-python tool/generate-tree.py
+python tools/generate-tree.py
 ```
 
 **Ví dụ:**
@@ -614,7 +626,7 @@ Lưu kết quả ra file? (Y/n): Y
 **Cách sử dụng:**
 
 ```bash
-python tool/clean-temp-files.py
+python tools/clean-temp-files.py
 ```
 
 **Ví dụ:**
@@ -693,7 +705,7 @@ Xác nhận xóa? (YES để xác nhận): YES
 **Cách sử dụng:**
 
 ```bash
-python tool/extract-archive.py
+python tools/extract-archive.py
 ```
 
 **Ví dụ: Giải nén hàng loạt**
@@ -756,7 +768,7 @@ Giải nén 5 file? (Y/n): Y
 **Cách sử dụng:**
 
 ```bash
-python tool/duplicate-finder.py
+python tools/duplicate-finder.py
 ```
 
 **Ví dụ:**
@@ -841,7 +853,7 @@ Xác nhận? (YES để xác nhận): YES
 **Cách sử dụng:**
 
 ```bash
-python tool/file-organizer.py
+python tools/file-organizer.py
 ```
 
 **Ví dụ 1: Sắp xếp theo loại**
@@ -945,7 +957,7 @@ Chọn (1-3): 1
 **Cách sử dụng:**
 
 ```bash
-python tool/text-encoding-converter.py
+python tools/text-encoding-converter.py
 ```
 
 **Ví dụ 1: Phát hiện encoding**
@@ -1073,7 +1085,7 @@ pip install Pillow chardet
 A: Giống Windows, nhưng có thể cần:
 ```bash
 # Cấp quyền execute
-chmod +x tool/*.py
+chmod +x tools/*.py
 
 # Chạy với python3
 python3 menu.py
@@ -1129,7 +1141,7 @@ A: Tùy thuộc vào chế độ:
 **Q: Có thể thêm tool mới không?**
 
 A: Có! Rất đơn giản:
-1. Tạo file `.py` mới trong thư mục `tool/`
+1. Tạo file `.py` mới trong thư mục `tools/`
 2. Viết code với hàm `main()`
 3. `menu.py` sẽ tự động nhận diện tool mới
 
@@ -1177,7 +1189,7 @@ A: Tối ưu hóa:
 ```bash
 # Windows: Chạy với quyền Administrator
 # Linux/Mac: Sử dụng sudo
-sudo python tool/clean-temp-files.py
+sudo python tools/clean-temp-files.py
 
 # Hoặc thay đổi quyền
 chmod 777 /path/to/folder
@@ -1192,7 +1204,7 @@ chmod 777 /path/to/folder
 **Giải pháp:**
 ```bash
 # Dùng tool để phát hiện encoding
-python tool/text-encoding-converter.py
+python tools/text-encoding-converter.py
 
 # Chọn chế độ 1 để detect
 # Sau đó chọn chế độ 2 để convert sang UTF-8
@@ -1222,7 +1234,7 @@ df -h  # Linux/Mac
 wmic logicaldisk get size,freespace,caption  # Windows
 
 # Dọn dẹp trước
-python tool/clean-temp-files.py
+python tools/clean-temp-files.py
 ```
 
 ---
@@ -1319,7 +1331,7 @@ Bạn muốn thêm tool mới hoặc cải thiện tool hiện tại? Rất hoan
    ```
 
 3. **Viết code**
-   - Tạo file `.py` trong thư mục `tool/`
+   - Tạo file `.py` trong thư mục `tools/`
    - Tuân thủ format chuẩn
    - Comment đầy đủ bằng tiếng Việt
    - Test kỹ trước khi commit
@@ -1437,7 +1449,7 @@ Có ý tưởng tool mới? Tạo [Issue](https://github.com/VHN-DEV/myPythonToo
 
 - 📜 [CHANGELOG.md](docs/CHANGELOG.md) - Lịch sử thay đổi và phiên bản mới nhất
 - 📖 [INSTALL.md](docs/INSTALL.md) - Hướng dẫn cài đặt chi tiết
-- 🛠️ [tool/README.md](tool/README.md) - Hướng dẫn cấu trúc tool
+- 🛠️ [tools/README.md](tools/README.md) - Hướng dẫn cấu trúc tools
 
 ---
 

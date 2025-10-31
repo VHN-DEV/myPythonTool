@@ -1,0 +1,24 @@
+{
+  "favorites": [
+    "ssh-manager.py",
+    "compress-images.py",
+    "copy-changed-files.py",
+    "video-converter.py"
+  ],
+  "recent": [
+    "video-converter.py",
+    "setup-project-linux.py",
+    "compress-images.py",
+    "backup-folder.py",
+    "clean-temp-files.py",
+    "copy-changed-files.py",
+    "duplicate-finder.py",
+    "extract-archive.py",
+    "file-organizer.py",
+    "find-and-replace.py"
+  ],
+  "settings": {
+    "show_descriptions": true,
+    "max_recent": 10
+  }
+}

@@ -35,8 +35,8 @@ if current_dir not in sys.path:
 # Import và chạy menu
 if __name__ == "__main__":
     try:
-        # Import menu module từ menu package
-        from menu import main
+        # Import menu module từ menus package
+        from menus import main
         
         # Chạy menu
         main()
