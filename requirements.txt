@@ -19,3 +19,6 @@ moviepy>=1.0.3       # Cần cài thêm ffmpeg (xem hướng dẫn trong README)
 # py7zr>=0.20.0        # Hỗ trợ .7z
 # rarfile>=4.0         # Hỗ trợ .rar (cần cài WinRAR/unrar)
 
+# UI/UX improvements
+colorama>=0.4.6        # Cross-platform colored terminal output
+

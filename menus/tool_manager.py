@@ -13,6 +13,8 @@ import subprocess
 import json
 from pathlib import Path
 from typing import List, Dict, Optional
+from utils.colors import Colors
+from utils.format import print_header, print_separator
 
 
 class ToolManager:
@@ -411,14 +413,22 @@ class ToolManager:
         if tool not in self.config['favorites']:
             self.config['favorites'].append(tool)
             self._save_config()
-            print(f"⭐ Đã thêm vào favorites: {self.get_tool_display_name(tool)}")
+            tool_name = self.get_tool_display_name(tool)
+            print(Colors.success(f"⭐ Đã thêm vào favorites: {Colors.bold(tool_name)}"))
+        else:
+            tool_name = self.get_tool_display_name(tool)
+            print(Colors.warning(f"ℹ️  Tool đã có trong favorites: {tool_name}"))
     
     def remove_from_favorites(self, tool: str):
         """Xóa tool khỏi favorites"""
         if tool in self.config['favorites']:
             self.config['favorites'].remove(tool)
             self._save_config()
-            print(f"❌ Đã xóa khỏi favorites: {self.get_tool_display_name(tool)}")
+            tool_name = self.get_tool_display_name(tool)
+            print(Colors.info(f"❌ Đã xóa khỏi favorites: {tool_name}"))
+        else:
+            tool_name = self.get_tool_display_name(tool)
+            print(Colors.warning(f"ℹ️  Tool không có trong favorites: {tool_name}"))
     
     def add_to_recent(self, tool: str):
         """
@@ -472,19 +482,24 @@ class ToolManager:
         tool_path = self._find_tool_path(tool)
         
         if not tool_path or not tool_path.exists():
-            print(f"❌ Tool không tồn tại: {tool}")
+            print(Colors.error(f"❌ Tool không tồn tại: {tool}"))
             return 1
         
-        print(f"\n{'='*60}")
-        print(f">>> Đang chạy: {self.get_tool_display_name(tool)}")
-        print(f"{'='*60}\n")
+        tool_display_name = self.get_tool_display_name(tool)
+        print()
+        print_separator("═", 70, Colors.PRIMARY)
+        print(Colors.primary(f"  ▶ Đang chạy: {Colors.bold(tool_display_name)}"))
+        print_separator("═", 70, Colors.PRIMARY)
+        print()
         
         try:
             result = subprocess.run(["python", str(tool_path)])
             
-            print(f"\n{'='*60}")
-            print(f">>> Tool đã chạy xong!")
-            print(f"{'='*60}\n")
+            print()
+            print_separator("═", 70, Colors.SUCCESS)
+            print(Colors.success(f"  ✅ Tool đã chạy xong!"))
+            print_separator("═", 70, Colors.SUCCESS)
+            print()
             
             # Lưu vào recent
             self.add_to_recent(tool)
@@ -492,11 +507,13 @@ class ToolManager:
             return result.returncode
             
         except KeyboardInterrupt:
-            print("\n\n⚠️  Tool bị ngắt bởi người dùng")
+            print()
+            print(Colors.warning("⚠️  Tool bị ngắt bởi người dùng"))
             return 130
             
         except Exception as e:
-            print(f"\n❌ Lỗi khi chạy tool: {e}")
+            print()
+            print(Colors.error(f"❌ Lỗi khi chạy tool: {e}"))
             return 1
     
     def _run_setup_project_linux(self) -> int:
@@ -574,9 +591,11 @@ class ToolManager:
             # Chạy bash app.sh
             result = subprocess.run(cmd, check=False)
             
-            print(f"\n{'='*60}")
-            print(f">>> Tool đã chạy xong!")
-            print(f"{'='*60}\n")
+            print()
+            print_separator("═", 70, Colors.SUCCESS)
+            print(Colors.success(f"  ✅ Tool đã chạy xong!"))
+            print_separator("═", 70, Colors.SUCCESS)
+            print()
             
             # Lưu vào recent
             self.add_to_recent("setup-project-linux.py")
@@ -584,11 +603,13 @@ class ToolManager:
             return result.returncode
             
         except KeyboardInterrupt:
-            print("\n\n⚠️  Tool bị ngắt bởi người dùng")
+            print()
+            print(Colors.warning("⚠️  Tool bị ngắt bởi người dùng"))
             return 130
             
         except Exception as e:
-            print(f"\n❌ Lỗi khi chạy tool: {e}")
+            print()
+            print(Colors.error(f"❌ Lỗi khi chạy tool: {e}"))
             return 1
     
     def _find_tool_path(self, tool: str) -> Optional[Path]:
@@ -637,7 +658,7 @@ class ToolManager:
     
     def display_menu(self, tools: Optional[List[str]] = None, title: str = "DANH SÁCH TOOL"):
         """
-        Hiển thị menu tools
+        Hiển thị menu tools với UI/UX đẹp hơn
         
         Args:
             tools: Danh sách tools (None = hiển thị tất cả)
@@ -645,72 +666,109 @@ class ToolManager:
         
         Giải thích:
         - Hiển thị danh sách đẹp với số thứ tự
-        - Highlight favorites
-        - Hiển thị description
+        - Highlight favorites với màu sắc
+        - Nhóm tools theo categories nếu có
+        - Sử dụng màu sắc và icons đẹp hơn
         """
         if tools is None:
             tools = self.get_tool_list()
         
         if not tools:
-            print("❌ Không tìm thấy tool nào!")
+            print(Colors.error("❌ Không tìm thấy tool nào!"))
             return
         
-        print(f"\n{'='*60}")
-        print(f"                   {title}")
-        print(f"{'='*60}")
+        # Header
+        print()
+        print_separator("═", 70, Colors.PRIMARY)
+        title_colored = Colors.primary(f"                      {title}")
+        print(title_colored)
+        print_separator("═", 70, Colors.PRIMARY)
+        print()
         
+        # Hiển thị danh sách tools
         for idx, tool in enumerate(tools, start=1):
             # Check favorite
             is_favorite = tool in self.config['favorites']
-            star = "⭐" if is_favorite else "  "
             
             # Tên tool
             tool_name = self.get_tool_display_name(tool)
             
-            # Hiển thị
-            print(f"{star} {idx}. {tool_name}")
+            # Format số thứ tự
+            idx_str = f"{idx:2d}."
+            
+            # Highlight favorites
+            if is_favorite:
+                star = Colors.warning("⭐")
+                tool_name_colored = Colors.bold(tool_name)
+                idx_colored = Colors.info(idx_str)
+            else:
+                star = "  "
+                tool_name_colored = tool_name
+                idx_colored = Colors.muted(idx_str)
+            
+            # Hiển thị với format đẹp
+            print(f"{star} {idx_colored} {tool_name_colored}")
         
-        print(f"{'='*60}\n")
+        # Footer
+        print()
+        print_separator("═", 70, Colors.PRIMARY)
+        print()
     
     def show_help(self):
-        """Hiển thị help"""
-        print("""
-============================================================
-                  HUONG DAN SU DUNG                       
-============================================================
-
-📋 LỆNH CƠ BẢN:
-   [số]         - Chạy tool theo số thứ tự
-   [số]h        - Xem hướng dẫn của tool (ví dụ: 1h, 4h)
-   h, help      - Hiển thị hướng dẫn này
-   q, quit, 0   - Thoát chương trình
-
-🔍 TÌM KIẾM:
-   s [keyword]  - Tìm kiếm tool
-   /[keyword]   - Tìm kiếm tool (cách khác)
-   
-   Ví dụ: s backup, /image
-
-⭐ FAVORITES:
-   f            - Hiển thị danh sách favorites
-   f+ [số]      - Thêm tool vào favorites
-   f- [số]      - Xóa tool khỏi favorites
-   
-   Ví dụ: f+ 3, f- 1
-
-📚 RECENT:
-   r            - Hiển thị recent tools
-   r[số]        - Chạy recent tool
-   
-   Ví dụ: r1 (chạy tool recent đầu tiên)
-
-⚙️  SETTINGS:
-   set          - Xem/chỉnh sửa settings
-
-🔄 KHÁC:
-   l, list      - Hiển thị lại danh sách
-   clear        - Xóa màn hình
-        """)
+        """Hiển thị help với UI/UX đẹp hơn"""
+        print()
+        print_separator("═", 70, Colors.PRIMARY)
+        title = Colors.primary("  HƯỚNG DẪN SỬ DỤNG")
+        print(title)
+        print_separator("═", 70, Colors.PRIMARY)
+        print()
+        
+        # Lệnh cơ bản
+        print(Colors.bold("📋 LỆNH CƠ BẢN:"))
+        print(f"   {Colors.info('[số]')}         - Chạy tool theo số thứ tự")
+        print(f"   {Colors.info('[số]h')}        - Xem hướng dẫn của tool (ví dụ: 1h, 4h)")
+        print(f"   {Colors.info('h, help')}      - Hiển thị hướng dẫn này")
+        print(f"   {Colors.info('q, quit, 0')}   - Thoát chương trình")
+        print()
+        
+        # Tìm kiếm
+        print(Colors.bold("🔍 TÌM KIẾM:"))
+        print(f"   {Colors.info('s [keyword]')}  - Tìm kiếm tool")
+        print(f"   {Colors.info('/[keyword]')}   - Tìm kiếm tool (cách khác)")
+        print()
+        print(f"   {Colors.muted('Ví dụ:')} {Colors.secondary('s backup')}, {Colors.secondary('/image')}")
+        print()
+        
+        # Favorites
+        print(Colors.bold("⭐ FAVORITES:"))
+        print(f"   {Colors.info('f')}            - Hiển thị danh sách favorites")
+        print(f"   {Colors.info('f+ [số]')}      - Thêm tool vào favorites")
+        print(f"   {Colors.info('f- [số]')}      - Xóa tool khỏi favorites")
+        print()
+        print(f"   {Colors.muted('Ví dụ:')} {Colors.secondary('f+ 3')}, {Colors.secondary('f- 1')}")
+        print()
+        
+        # Recent
+        print(Colors.bold("📚 RECENT:"))
+        print(f"   {Colors.info('r')}            - Hiển thị recent tools")
+        print(f"   {Colors.info('r[số]')}        - Chạy recent tool")
+        print()
+        print(f"   {Colors.muted('Ví dụ:')} {Colors.secondary('r1')} (chạy tool recent đầu tiên)")
+        print()
+        
+        # Settings
+        print(Colors.bold("⚙️  SETTINGS:"))
+        print(f"   {Colors.info('set')}          - Xem/chỉnh sửa settings")
+        print()
+        
+        # Khác
+        print(Colors.bold("🔄 KHÁC:"))
+        print(f"   {Colors.info('l, list')}      - Hiển thị lại danh sách")
+        print(f"   {Colors.info('clear')}        - Xóa màn hình")
+        print()
+        
+        print_separator("═", 70, Colors.PRIMARY)
+        print()
     
     def show_tool_help(self, tool: str) -> bool:
         """
@@ -748,10 +806,12 @@ class ToolManager:
         if not doc_path.exists():
             # Thông báo không tìm thấy doc.py
             tool_display_name = self.get_tool_display_name(tool)
-            print(f"\n{'='*60}")
-            print(f"❌ Không tìm thấy hướng dẫn cho tool: {tool_display_name}")
-            print(f"   File doc.py không tồn tại trong {tool_name}/")
-            print(f"{'='*60}\n")
+            print()
+            print_separator("═", 70, Colors.ERROR)
+            print(Colors.error(f"❌ Không tìm thấy hướng dẫn cho tool: {tool_display_name}"))
+            print(Colors.muted(f"   File doc.py không tồn tại trong {tool_name}/"))
+            print_separator("═", 70, Colors.ERROR)
+            print()
             return False
         
         # Import và đọc doc.py
@@ -774,28 +834,37 @@ class ToolManager:
                 help_text = doc_module.HELP_TEXT
             else:
                 tool_display_name = self.get_tool_display_name(tool)
-                print(f"\n{'='*60}")
-                print(f"❌ File doc.py không có hàm get_help() hoặc biến HELP_TEXT")
-                print(f"   Tool: {tool_display_name}")
-                print(f"{'='*60}\n")
+                print()
+                print_separator("═", 70, Colors.ERROR)
+                print(Colors.error(f"❌ File doc.py không có hàm get_help() hoặc biến HELP_TEXT"))
+                print(Colors.muted(f"   Tool: {tool_display_name}"))
+                print_separator("═", 70, Colors.ERROR)
+                print()
                 return False
             
             # Hiển thị hướng dẫn
             tool_display_name = self.get_tool_display_name(tool)
-            print(f"\n{'='*60}")
-            print(f"📖 HƯỚNG DẪN SỬ DỤNG: {tool_display_name}")
-            print(f"{'='*60}\n")
+            print()
+            print_separator("═", 70, Colors.INFO)
+            title = Colors.info(f"📖 HƯỚNG DẪN SỬ DỤNG: {Colors.bold(tool_display_name)}")
+            print(f"  {title}")
+            print_separator("═", 70, Colors.INFO)
+            print()
             print(help_text)
-            print(f"{'='*60}\n")
+            print()
+            print_separator("═", 70, Colors.INFO)
+            print()
             
             return True
             
         except Exception as e:
             tool_display_name = self.get_tool_display_name(tool)
-            print(f"\n{'='*60}")
-            print(f"❌ Lỗi khi đọc hướng dẫn cho tool: {tool_display_name}")
-            print(f"   Lỗi: {e}")
-            print(f"{'='*60}\n")
+            print()
+            print_separator("═", 70, Colors.ERROR)
+            print(Colors.error(f"❌ Lỗi khi đọc hướng dẫn cho tool: {tool_display_name}"))
+            print(Colors.muted(f"   Lỗi: {e}"))
+            print_separator("═", 70, Colors.ERROR)
+            print()
             import traceback
             traceback.print_exc()
             return False

@@ -10,6 +10,7 @@ Lý do: Các thao tác xử lý nhiều file có thể mất thời gian
 import sys
 import time
 from typing import Optional
+from .colors import Colors
 
 
 class ProgressBar:
@@ -85,27 +86,39 @@ class ProgressBar:
         else:
             eta_str = "N/A"
         
-        # Xây dựng output string
+        # Xây dựng output string với màu sắc
         output_parts = []
         
         if self.prefix:
-            output_parts.append(self.prefix)
+            output_parts.append(Colors.info(self.prefix))
         
-        output_parts.append(f'|{bar}|')
+        # Colorize progress bar
+        filled_part = Colors.success(self.fill * filled_length)
+        empty_part = Colors.muted('-' * (self.length - filled_length))
+        colored_bar = f'|{filled_part}{empty_part}|'
+        output_parts.append(colored_bar)
         
         if self.show_percentage:
-            output_parts.append(f'{percent:.1f}%')
+            percent_str = f'{percent:.1f}%'
+            if percent >= 100:
+                output_parts.append(Colors.success(percent_str))
+            elif percent >= 50:
+                output_parts.append(Colors.info(percent_str))
+            else:
+                output_parts.append(Colors.warning(percent_str))
         
-        output_parts.append(f'({self.current}/{self.total})')
+        count_str = f'({self.current}/{self.total})'
+        output_parts.append(Colors.muted(count_str))
         
         if self.current < self.total:
-            output_parts.append(f'ETA: {eta_str}')
+            eta_str_colored = Colors.muted(f'ETA: {eta_str}')
+            output_parts.append(eta_str_colored)
         
         if message:
-            output_parts.append(f'- {message}')
+            output_parts.append(Colors.primary(f'- {message}'))
         
         if self.suffix:
-            output_parts.append(self.suffix)
+            output_parts.append(Colors.muted(self.suffix))
         
         # In ra và xóa dòng cũ
         output = ' '.join(output_parts)
@@ -148,7 +161,8 @@ class ProgressBar:
         # Hiển thị tổng thời gian
         total_time = time.time() - self.start_time
         time_str = self._format_time(total_time)
-        print(f"⏱️  Tổng thời gian: {time_str}")
+        print(Colors.success(f"✅ {message}"))
+        print(Colors.muted(f"⏱️  Tổng thời gian: {time_str}"))
 
 
 class Spinner:
@@ -190,7 +204,9 @@ class Spinner:
         """Hiển thị frame tiếp theo của spinner"""
         if self.is_spinning:
             frame = self.frames[self.current_frame]
-            print(f'\r{frame} {self.message}', end='', flush=True)
+            colored_frame = Colors.info(frame)
+            colored_message = Colors.primary(self.message)
+            print(f'\r{colored_frame} {colored_message}', end='', flush=True)
             self.current_frame = (self.current_frame + 1) % len(self.frames)
 
 

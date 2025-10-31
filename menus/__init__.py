@@ -28,6 +28,8 @@ if sys.platform == 'win32':
 
 # Import ToolManager từ module riêng
 from .tool_manager import ToolManager
+from utils.colors import Colors
+from utils.format import print_separator
 
 
 def safe_print(text, fallback_text=None):
@@ -86,7 +88,9 @@ def _run_tool_loop(manager, tool, tools):
             # 130 là exit code khi người dùng nhấn Ctrl+C (KeyboardInterrupt)
             if exit_code == 130:
                 # Người dùng nhấn Ctrl+C trong tool - quay về menu chính
-                print("\n🔄 Quay lại menu chính...\n")
+                print()
+                print(Colors.info("🔄 Quay lại menu chính..."))
+                print()
                 manager.display_menu(tools)
                 break
             
@@ -97,15 +101,19 @@ def _run_tool_loop(manager, tool, tools):
         except KeyboardInterrupt:
             # Người dùng nhấn Ctrl+C trong vòng lặp tool (ngoài tool)
             # Quay về menu chính
-            print("\n\n🔄 Quay lại menu chính...\n")
+            print()
+            print(Colors.info("🔄 Quay lại menu chính..."))
+            print()
             manager.display_menu(tools)
             break
         
         except Exception as e:
             # Xử lý lỗi khác
             try:
-                print(f"\n❌ Lỗi khi chạy tool: {e}")
-                print("🔄 Quay lại menu chính...\n")
+                print()
+                print(Colors.error(f"❌ Lỗi khi chạy tool: {e}"))
+                print(Colors.info("🔄 Quay lại menu chính..."))
+                print()
                 manager.display_menu(tools)
             except Exception:
                 print(f"\nLoi: {str(e)}")
@@ -131,18 +139,28 @@ def main():
     tools = manager.get_tool_list()
     
     if not tools:
-        print("❌ Không tìm thấy tool nào trong thư mục tools/")
+        print(Colors.error("❌ Không tìm thấy tool nào trong thư mục tools/"))
         return
     
-    # Hiển thị banner
-    print("""
-╔══════════════════════════════════════════════════════════╗
-║                  MY PYTHON TOOLS                         ║
-║              Bộ công cụ Python tiện ích                  ║
-║                                                          ║
-║         Nhập 'h' hoặc 'help' để xem hướng dẫn            ║
-╚══════════════════════════════════════════════════════════╝
-    """)
+    # Hiển thị banner đẹp hơn
+    print()
+    
+    # Logo/Title
+    title_line1 = Colors.primary("  ╔═══════════════════════════════════════════════════════╗")
+    title_line2 = Colors.primary("  ║") + Colors.bold(Colors.info("                  MY PYTHON TOOLS")) + Colors.primary("                      ║")
+    title_line3 = Colors.primary("  ║") + Colors.secondary("              Bộ công cụ Python tiện ích") + Colors.primary("               ║")
+    title_line4 = Colors.primary("  ║") + " " * 55 + Colors.primary("║")
+    title_line5 = Colors.primary("  ║") + Colors.muted("         Nhập 'h' hoặc 'help' để xem hướng dẫn") + Colors.primary("         ║")
+    title_line6 = Colors.primary("  ╚═══════════════════════════════════════════════════════╝")
+    
+    print(title_line1)
+    print(title_line2)
+    print(title_line3)
+    print(title_line4)
+    print(title_line5)
+    print(title_line6)
+    
+    print()
     
     # Hiển thị menu lần đầu
     manager.display_menu(tools)
@@ -150,8 +168,9 @@ def main():
     # Vòng lặp chính
     while True:
         try:
-            # Nhận input
-            user_input = input(">>> Chọn tool (h=help, q=quit): ").strip()
+            # Nhận input với prompt đẹp hơn
+            prompt = Colors.primary(">>> ") + Colors.secondary("Chọn tool") + Colors.muted(" (h=help, q=quit): ")
+            user_input = input(prompt).strip()
             
             if not user_input:
                 continue
@@ -165,7 +184,7 @@ def main():
             
             # Thoát
             if command in ['q', 'quit', '0', 'exit']:
-                print("👋 Tạm biệt!")
+                print(Colors.info("👋 Tạm biệt!"))
                 break
             
             # Help
@@ -189,16 +208,19 @@ def main():
                     query = args
                 
                 if not query:
-                    print("⚠️  Vui lòng nhập từ khóa tìm kiếm")
+                    print(Colors.warning("⚠️  Vui lòng nhập từ khóa tìm kiếm"))
                     continue
                 
                 results = manager.search_tools(query)
                 
                 if results:
-                    print(f"\n🔍 Tìm thấy {len(results)} tool phù hợp với '{query}':")
+                    count_msg = Colors.success(f"{len(results)}")
+                    query_msg = Colors.secondary(f"'{query}'")
+                    print()
+                    print(Colors.info(f"🔍 Tìm thấy {count_msg} tool phù hợp với {query_msg}:"))
                     manager.display_menu(results, title=f"KẾT QUẢ TÌM KIẾM: {query}")
                 else:
-                    print(f"❌ Không tìm thấy tool nào phù hợp với '{query}'")
+                    print(Colors.error(f"❌ Không tìm thấy tool nào phù hợp với '{query}'"))
             
             # Favorites
             elif command == 'f':
@@ -207,7 +229,7 @@ def main():
                     valid_favorites = [f for f in favorites if f in tools]
                     manager.display_menu(valid_favorites, title="FAVORITES")
                 else:
-                    print("⭐ Chưa có favorites nào")
+                    print(Colors.warning("⭐ Chưa có favorites nào"))
             
             elif command.startswith('f+'):
                 # Thêm vào favorites
@@ -217,9 +239,9 @@ def main():
                         tool = tools[idx - 1]
                         manager.add_to_favorites(tool)
                     else:
-                        print("❌ Số không hợp lệ")
+                        print(Colors.error("❌ Số không hợp lệ"))
                 except ValueError:
-                    print("❌ Số không hợp lệ")
+                    print(Colors.error("❌ Số không hợp lệ"))
             
             elif command.startswith('f-'):
                 # Xóa khỏi favorites
@@ -229,9 +251,9 @@ def main():
                         tool = tools[idx - 1]
                         manager.remove_from_favorites(tool)
                     else:
-                        print("❌ Số không hợp lệ")
+                        print(Colors.error("❌ Số không hợp lệ"))
                 except ValueError:
-                    print("❌ Số không hợp lệ")
+                    print(Colors.error("❌ Số không hợp lệ"))
             
             # Recent
             elif command == 'r':
@@ -241,7 +263,7 @@ def main():
                     valid_recent = [r for r in recent if r in tools]
                     manager.display_menu(valid_recent, title="RECENT TOOLS")
                 else:
-                    print("📚 Chưa có recent tools")
+                    print(Colors.warning("📚 Chưa có recent tools"))
             
             elif command.startswith('r') and len(command) > 1:
                 # Chạy recent tool
@@ -255,17 +277,22 @@ def main():
                             # Chạy tool với vòng lặp riêng - quay lại đầu tool khi kết thúc
                             _run_tool_loop(manager, tool, tools)
                         else:
-                            print(f"❌ Tool không tồn tại: {tool}")
+                            print(Colors.error(f"❌ Tool không tồn tại: {tool}"))
                     else:
-                        print("❌ Số không hợp lệ")
+                        print(Colors.error("❌ Số không hợp lệ"))
                 except ValueError:
-                    print("❌ Số không hợp lệ")
+                    print(Colors.error("❌ Số không hợp lệ"))
             
             # Settings
             elif command == 'set':
-                print("\n⚙️  SETTINGS:")
+                print()
+                print_separator("─", 70, Colors.INFO)
+                print(Colors.bold("⚙️  SETTINGS:"))
                 for key, value in manager.config['settings'].items():
-                    print(f"   {key}: {value}")
+                    key_colored = Colors.info(key)
+                    value_colored = Colors.secondary(str(value))
+                    print(f"   {key_colored}: {value_colored}")
+                print_separator("─", 70, Colors.INFO)
                 print()
             
             # Hiển thị hướng dẫn tool (pattern: số+h, ví dụ: 1h, 4h)
@@ -279,11 +306,11 @@ def main():
                         # Hiển thị hướng dẫn của tool
                         manager.show_tool_help(tool)
                     else:
-                        print("❌ Số không hợp lệ")
+                        print(Colors.error("❌ Số không hợp lệ"))
                 except ValueError:
                     # Không phải pattern số+h, xử lý như lệnh khác
-                    print(f"❌ Lệnh không hợp lệ: {command}")
-                    print("💡 Nhập 'h' hoặc 'help' để xem hướng dẫn")
+                    print(Colors.error(f"❌ Lệnh không hợp lệ: {command}"))
+                    print(Colors.info("💡 Nhập 'h' hoặc 'help' để xem hướng dẫn"))
             
             # Chạy tool theo số
             elif command.isdigit():
@@ -294,21 +321,23 @@ def main():
                     # Chạy tool với vòng lặp riêng - quay lại đầu tool khi kết thúc
                     _run_tool_loop(manager, tool, tools)
                 else:
-                    print("❌ Số không hợp lệ")
+                    print(Colors.error("❌ Số không hợp lệ"))
             
             else:
-                print(f"❌ Lệnh không hợp lệ: {command}")
-                print("💡 Nhập 'h' hoặc 'help' để xem hướng dẫn")
+                print(Colors.error(f"❌ Lệnh không hợp lệ: {command}"))
+                print(Colors.info("💡 Nhập 'h' hoặc 'help' để xem hướng dẫn"))
         
         except (EOFError, KeyboardInterrupt):
             # Xử lý EOF error (input stream bị đóng) hoặc Ctrl+C
-            # Thoát im lặng để tránh lỗi khi output stream cũng đóng
+            print()
+            print(Colors.info("👋 Tạm biệt!"))
             sys.exit(0)
         
         except Exception as e:
             # Xử lý các lỗi khác
             try:
-                print(f"\nLỗi: {e}")
+                print()
+                print(Colors.error(f"❌ Lỗi: {e}"))
                 import traceback
                 traceback.print_exc()
             except Exception:
