@@ -41,6 +41,7 @@ class ToolManager:
         # Cache metadata của tools (tự động load khi cần)
         self.tool_names = {}
         self.tool_tags = {}
+        self.tool_types = {}  # Cache loại tool: 'py' hoặc 'sh'
         
         # Tools ưu tiên hiển thị lên đầu danh sách
         # Mục đích: Các tools hay dùng nhất hoặc quan trọng nhất sẽ hiển thị trước
@@ -280,6 +281,37 @@ class ToolManager:
         
         return list(set(tags))  # Remove duplicates
     
+    def _get_tool_type(self, tool: str) -> str:
+        """
+        Xác định loại tool: 'py' hoặc 'sh'
+        
+        Args:
+            tool: Tên file tool (vd: backup-folder.py)
+        
+        Returns:
+            str: 'py' nếu là Python tool, 'sh' nếu là Shell tool
+        """
+        if tool in self.tool_types:
+            return self.tool_types[tool]
+        
+        tool_name = tool.replace('.py', '')
+        
+        # Kiểm tra trong tools/py/
+        py_tool_path = self.tool_dir / "py" / tool_name / tool
+        if py_tool_path.exists():
+            self.tool_types[tool] = 'py'
+            return 'py'
+        
+        # Kiểm tra trong tools/sh/
+        sh_tool_path = self.tool_dir / "sh" / tool_name / tool
+        if sh_tool_path.exists():
+            self.tool_types[tool] = 'sh'
+            return 'sh'
+        
+        # Mặc định là py nếu không tìm thấy (tương thích với cấu trúc cũ)
+        self.tool_types[tool] = 'py'
+        return 'py'
+    
     def get_tool_display_name(self, tool: str) -> str:
         """
         Lấy tên hiển thị của tool (tự động load metadata nếu chưa có)
@@ -288,11 +320,21 @@ class ToolManager:
             tool: Tên file tool (vd: backup-folder.py)
         
         Returns:
-            str: Tên hiển thị tiếng Việt
+            str: Tên hiển thị tiếng Việt với ký hiệu phân biệt py/sh
         """
         if tool not in self.tool_names:
             self._load_tool_metadata(tool)
-        return self.tool_names.get(tool, tool)
+        
+        display_name = self.tool_names.get(tool, tool)
+        tool_type = self._get_tool_type(tool)
+        
+        # Thêm ký hiệu phân biệt
+        if tool_type == 'py':
+            return f"[PY] {display_name}"  # Python tool
+        elif tool_type == 'sh':
+            return f"[SH] {display_name}"  # Shell tool
+        else:
+            return display_name
     
     def get_tool_tags(self, tool: str) -> List[str]:
         """
