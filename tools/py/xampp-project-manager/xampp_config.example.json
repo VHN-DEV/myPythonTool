@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "xampp_path": "C:\\xampp",
+  "htdocs_path": "C:\\xampp\\htdocs",
+  "hosts_file": "C:\\Windows\\System32\\drivers\\etc\\hosts",
+  "apache_path": "C:\\xampp\\apache\\bin\\httpd.exe",
+  "default_editor": "code",
+  "php_versions": [],
+  "hosts": []
+}
+
