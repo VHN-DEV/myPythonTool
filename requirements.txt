@@ -12,6 +12,7 @@ qrcode>=7.4.2        # Tạo QR code (cần Pillow, đã có ở trên)
 opencv-python>=4.8.0  # Giải mã QR code
 pyzbar>=0.1.9        # Giải mã QR code và barcode
 numpy>=1.24.0        # Xử lý ảnh (cho opencv)
+pyperclip>=1.8.2     # Hỗ trợ clipboard (tùy chọn cho tính năng clipboard)
 
 # Tool pdf-tools
 PyPDF2>=3.0.0
