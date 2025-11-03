@@ -21,15 +21,19 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import (
     print_header, format_size, get_user_input, confirm_action,
     get_file_list, ensure_directory_exists, ProgressBar, 
-    log_info, log_error, setup_logger, normalize_path
+    log_info, log_error, setup_logger, normalize_path,
+    install_library
 )
 
 # Kiểm tra thư viện PIL
 try:
     from PIL import Image
 except ImportError:
-    print("❌ Thiếu thư viện Pillow!")
-    print("Cài đặt: pip install Pillow")
+    install_library(
+        package_name="Pillow",
+        install_command="pip install Pillow",
+        library_display_name="Pillow"
+    )
     sys.exit(1)
 
 
