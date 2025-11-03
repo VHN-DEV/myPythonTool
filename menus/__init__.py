@@ -225,7 +225,7 @@ def main():
             remaining_padding = prompt_width - 3 - prompt_text_display_width - input_display_width
             if remaining_padding < 0:
                 remaining_padding = 0
-            print(" " * remaining_padding + Colors.primary("┘"))
+            # print(" " * remaining_padding + Colors.primary("┘"))
             print()
             
             if not user_input:
