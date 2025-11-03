@@ -123,7 +123,7 @@ def load_servers():
                 data = json.load(f)
                 return data.get('servers', [])
         except Exception as e:
-            print(f"[!] Loi doc config: {e}")
+            print(f"[!] Lỗi đọc config: {e}")
             return get_default_servers()
     else:
         # Tạo config mặc định
@@ -158,7 +158,7 @@ def save_servers(servers):
             json.dump(data, f, indent=2, ensure_ascii=False)
         return True
     except Exception as e:
-        print(f"[X] Loi luu config: {e}")
+        print(f"[X] Lỗi lưu config: {e}")
         return False
 
 
@@ -216,7 +216,7 @@ def connect_server(server):
     # Kiểm tra SSH key có tồn tại không
     if server.get("ssh_key"):
         if not os.path.exists(server["ssh_key"]):
-            print(f"[X] Loi: Khong tim thay SSH key tai: {server['ssh_key']}")
+            print(f"[X] Lỗi: Không tìm thấy SSH key tại: {server['ssh_key']}")
             return
         
         # Kết nối bằng SSH key
@@ -245,11 +245,11 @@ def connect_server(server):
         print("[OK] Da ngat ket noi SSH")
     except FileNotFoundError:
         print("\n" + "=" * 60)
-        print("[X] Loi: Khong tim thay lenh 'ssh'")
+        print("[X] Lỗi: Không tìm thấy lệnh 'ssh'")
         print("[i] Cai dat OpenSSH hoac su dung Git Bash")
     except Exception as e:
         print("\n" + "=" * 60)
-        print(f"[X] Loi ket noi: {e}")
+        print(f"[X] Lỗi kết nối: {e}")
 
 
 def add_new_server(servers):
@@ -330,7 +330,7 @@ def add_new_server(servers):
             print("\n[OK] Da them va luu server moi!")
             return True
         else:
-            print("\n[X] Loi luu server")
+            print("\n[X] Lỗi lưu server")
             servers.pop()  # Rollback
             return False
     
@@ -338,7 +338,7 @@ def add_new_server(servers):
         print("[X] Port phai la so")
         return False
     except Exception as e:
-        print(f"[X] Loi: {e}")
+        print(f"[X] Lỗi: {e}")
         return False
 
 
@@ -409,7 +409,7 @@ def delete_server(servers):
         print("[X] Vui long nhap so")
         return False
     except Exception as e:
-        print(f"[X] Loi: {e}")
+        print(f"[X] Lỗi: {e}")
         return False
 
 
@@ -510,7 +510,7 @@ def edit_server(servers):
                 print(f"\n[OK] Da luu thay doi!")
                 return True
             else:
-                print("\n[X] Loi lưu config")
+                print("\n[X] Lỗi lưu config")
                 return False
         else:
             print("[X] Lua chon khong hop le")
@@ -520,7 +520,7 @@ def edit_server(servers):
         print("[X] Vui long nhap so hop le")
         return False
     except Exception as e:
-        print(f"[X] Loi: {e}")
+        print(f"[X] Lỗi: {e}")
         return False
 
 
@@ -616,7 +616,7 @@ def view_config():
             print(content)
             print("-" * 60)
         except Exception as e:
-            print(f"\n[X] Loi doc file: {e}")
+            print(f"\n[X] Lỗi đọc file: {e}")
     else:
         print("\n[!] File config chua ton tai")
     
@@ -691,7 +691,7 @@ def main():
             except KeyboardInterrupt:
                 print("\n\n[!] Da huy ket noi")
             except Exception as e:
-                print(f"[X] Loi: {e}")
+                print(f"[X] Lỗi: {e}")
 
 
 if __name__ == "__main__":

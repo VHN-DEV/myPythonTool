@@ -47,7 +47,7 @@ def load_config():
             with open(config_file, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except Exception as e:
-            print(f"[!] Loi doc config: {e}")
+            print(f"[!] Lỗi đọc config: {e}")
             return get_default_config()
     else:
         config = get_default_config()
@@ -64,7 +64,7 @@ def save_config(config):
             json.dump(config, f, indent=2, ensure_ascii=False)
         return True
     except Exception as e:
-        print(f"[X] Loi luu config: {e}")
+        print(f"[X] Lỗi lưu config: {e}")
         return False
 
 
@@ -102,7 +102,7 @@ def list_projects(htdocs_path: str) -> List[str]:
                 if item.lower() not in ['cgi-bin', 'webalizer', 'usage']:
                     projects.append(item)
     except Exception as e:
-        print(f"[!] Loi doc thu muc htdocs: {e}")
+        print(f"[!] Lỗi đọc thư mục htdocs: {e}")
     
     return sorted(projects)
 
@@ -130,7 +130,7 @@ def open_project_in_editor(project_path: str, editor: str = 'code'):
         print(f"[i] Vui long cai dat {editor} hoac them vao PATH")
         return False
     except Exception as e:
-        print(f"[X] Loi mo du an: {e}")
+        print(f"[X] Lỗi mở dự án: {e}")
         return False
 
 
@@ -157,7 +157,7 @@ def clone_project(source: str, project_name: str, htdocs_path: str):
             print(f"[OK] Da clone du an thanh cong!")
             return True
         else:
-            print(f"[X] Loi khi clone:")
+            print(f"[X] Lỗi khi clone:")
             print(result.stderr)
             return False
     except FileNotFoundError:
@@ -165,7 +165,7 @@ def clone_project(source: str, project_name: str, htdocs_path: str):
         print("[i] Vui long cai dat Git hoac them vao PATH")
         return False
     except Exception as e:
-        print(f"[X] Loi: {e}")
+        print(f"[X] Lỗi: {e}")
         return False
 
 
@@ -190,7 +190,7 @@ def delete_project(project_name: str, htdocs_path: str):
             print("Da huy")
             return False
     except Exception as e:
-        print(f"[X] Loi xoa du an: {e}")
+        print(f"[X] Lỗi xóa dự án: {e}")
         return False
 
 
@@ -212,7 +212,7 @@ def rename_project(old_name: str, new_name: str, htdocs_path: str):
         print(f"[OK] Da doi ten du an: {old_name} -> {new_name}")
         return True
     except Exception as e:
-        print(f"[X] Loi doi ten: {e}")
+        print(f"[X] Lỗi đổi tên: {e}")
         return False
 
 
@@ -230,7 +230,7 @@ def read_hosts_file(hosts_file: str) -> List[str]:
         print("[i] Can chay voi quyen Administrator")
         return []
     except Exception as e:
-        print(f"[X] Loi doc file hosts: {e}")
+        print(f"[X] Lỗi đọc file hosts: {e}")
         return []
 
 
@@ -245,7 +245,7 @@ def write_hosts_file(hosts_file: str, lines: List[str]):
         print("[i] Can chay voi quyen Administrator")
         return False
     except Exception as e:
-        print(f"[X] Loi ghi file hosts: {e}")
+        print(f"[X] Lỗi ghi file hosts: {e}")
         return False
 
 
@@ -715,7 +715,7 @@ def switch_php_version(version: str, xampp_path: str):
         print("[i] Can chay tool voi quyen Administrator")
         return False
     except Exception as e:
-        print(f"[X] Loi khi chinh sua httpd.conf: {e}")
+        print(f"[X] Lỗi khi chỉnh sửa httpd.conf: {e}")
         # Khôi phục từ backup nếu có lỗi
         if os.path.exists(backup_path):
             try:
@@ -743,7 +743,7 @@ def restart_xampp(xampp_path: str):
         subprocess.Popen([xampp_control])
         return True
     except Exception as e:
-        print(f"[X] Loi mo XAMPP Control: {e}")
+        print(f"[X] Lỗi mở XAMPP Control: {e}")
         return False
 
 
@@ -769,7 +769,7 @@ def restart_apache(xampp_path: str):
         print("[OK] Da restart Apache!")
         return True
     except Exception as e:
-        print(f"[X] Loi restart Apache: {e}")
+        print(f"[X] Lỗi restart Apache: {e}")
         return False
 
 
@@ -1113,7 +1113,7 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\n\n[X] Da huy!")
     except Exception as e:
-        print(f"\n[X] Loi: {e}")
+        print(f"\n[X] Lỗi: {e}")
         import traceback
         traceback.print_exc()
 

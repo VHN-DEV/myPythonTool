@@ -75,7 +75,7 @@ def convert_encoding(file_path, source_encoding, target_encoding, backup=True):
         return True
     
     except Exception as e:
-        print(f"   ❌ Loi: {e}")
+        print(f"   ❌ Lỗi: {e}")
         return False
 
 

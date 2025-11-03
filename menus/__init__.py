@@ -252,7 +252,7 @@ def _run_tool_loop(manager, tool, tools):
                 print()
                 manager.display_menu(tools)
             except Exception:
-                print(f"\nLoi: {str(e)}")
+                print(f"\nLỗi: {str(e)}")
             break
 
 
