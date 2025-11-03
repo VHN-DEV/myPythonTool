@@ -525,8 +525,12 @@ def main():
                     # Lấy số từ đầu command (bỏ 'h' ở cuối)
                     idx = int(command[:-1])
                     
-                    if 1 <= idx <= len(tools):
-                        tool = tools[idx - 1]
+                    # Sử dụng displayed_tools_order nếu có (khi hiển thị theo category)
+                    # Nếu không có, dùng tools gốc (khi hiển thị flat list)
+                    displayed_tools = getattr(manager, 'displayed_tools_order', tools)
+                    
+                    if 1 <= idx <= len(displayed_tools):
+                        tool = displayed_tools[idx - 1]
                         # Hiển thị hướng dẫn của tool
                         manager.show_tool_help(tool)
                     else:
@@ -540,8 +544,12 @@ def main():
             elif command.isdigit():
                 idx = int(command)
                 
-                if 1 <= idx <= len(tools):
-                    tool = tools[idx - 1]
+                # Sử dụng displayed_tools_order nếu có (khi hiển thị theo category)
+                # Nếu không có, dùng tools gốc (khi hiển thị flat list)
+                displayed_tools = getattr(manager, 'displayed_tools_order', tools)
+                
+                if 1 <= idx <= len(displayed_tools):
+                    tool = displayed_tools[idx - 1]
                     # Chạy tool với vòng lặp riêng - quay lại đầu tool khi kết thúc
                     _run_tool_loop(manager, tool, tools)
                 else:

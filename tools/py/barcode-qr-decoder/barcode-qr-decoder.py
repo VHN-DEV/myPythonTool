@@ -280,13 +280,16 @@ Tổng kết:
 
 def main():
     """Hàm main"""
-    print_header()
+    print_header("Tool Giải mã Mã vạch và QR Code", width=70)
     print(Colors.primary("  📷 TOOL GIẢI MÃ MÃ VẠCH VÀ QR CODE"))
-    print("=" * 70)
     print()
     
     # Bước 1: Nhập đường dẫn
-    directory = get_user_input("Nhập đường dẫn thư mục chứa ảnh: ", required=True)
+    while True:
+        directory = get_user_input("Nhập đường dẫn thư mục chứa ảnh: ")
+        if directory:
+            break
+        print(Colors.error("❌ Vui lòng nhập đường dẫn thư mục!"))
     directory = normalize_path(directory)
     directory_path = Path(directory)
     

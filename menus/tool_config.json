@@ -6,6 +6,7 @@
     "video-converter.py"
   ],
   "recent": [
+    "scan-malware.py",
     "json-formatter.py",
     "video-converter.py",
     "setup-project-linux.py",
@@ -14,8 +15,7 @@
     "clean-temp-files.py",
     "copy-changed-files.py",
     "duplicate-finder.py",
-    "extract-archive.py",
-    "file-organizer.py"
+    "extract-archive.py"
   ],
   "settings": {
     "show_descriptions": true,

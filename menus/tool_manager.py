@@ -43,6 +43,9 @@ class ToolManager:
         self.tool_tags = {}
         self.tool_types = {}  # Cache loại tool: 'py' hoặc 'sh'
         
+        # Danh sách tools theo đúng thứ tự hiển thị (được cập nhật mỗi khi hiển thị menu)
+        self.displayed_tools_order = []
+        
         # Tools ưu tiên hiển thị lên đầu danh sách
         # Mục đích: Các tools hay dùng nhất hoặc quan trọng nhất sẽ hiển thị trước
         # Lý do: Dễ dàng truy cập nhanh các tools thường xuyên sử dụng
@@ -471,8 +474,16 @@ class ToolManager:
         # Scan tools từ thư mục
         all_tools = self._scan_tools_from_directory()
         
+        # Loại bỏ duplicate (giữ thứ tự đầu tiên)
+        seen = set()
+        unique_tools = []
+        for tool in all_tools:
+            if tool not in seen:
+                seen.add(tool)
+                unique_tools.append(tool)
+        
         # Sắp xếp và ưu tiên
-        sorted_tools = self._sort_and_prioritize_tools(all_tools)
+        sorted_tools = self._sort_and_prioritize_tools(unique_tools)
         
         # Filter ra các tool bị disabled
         disabled_tools = set(self.config.get('disabled_tools', []))
@@ -490,8 +501,16 @@ class ToolManager:
         # Scan tools từ thư mục
         all_tools = self._scan_tools_from_directory()
         
+        # Loại bỏ duplicate (giữ thứ tự đầu tiên)
+        seen = set()
+        unique_tools = []
+        for tool in all_tools:
+            if tool not in seen:
+                seen.add(tool)
+                unique_tools.append(tool)
+        
         # Sắp xếp và ưu tiên (bao gồm cả disabled)
-        return self._sort_and_prioritize_tools(all_tools)
+        return self._sort_and_prioritize_tools(unique_tools)
     
     def search_tools(self, query: str) -> List[str]:
         """
@@ -915,6 +934,9 @@ class ToolManager:
         print("  " + Colors.primary("╠" + "═" * content_width + "╣"))
         print()
         
+        # Tạo danh sách tools theo đúng thứ tự hiển thị
+        displayed_tools_order = []
+        
         # Nhóm theo categories hoặc hiển thị flat list
         if group_by_category and len(tools) > 5:
             grouped = group_tools_by_category(tools, self)
@@ -939,6 +961,8 @@ class ToolManager:
                 
                 # Tools trong category
                 for tool in category_tools:
+                    # Lưu tool vào danh sách theo đúng thứ tự hiển thị
+                    displayed_tools_order.append(tool)
                     is_favorite = tool in self.config['favorites']
                     tool_name = self.get_tool_display_name(tool)
                     idx_str = f"{current_idx:2d}."
@@ -972,6 +996,7 @@ class ToolManager:
                 print("  " + Colors.secondary("└" + "─" * category_box_width + "┘"))
         else:
             # Hiển thị flat list (không nhóm) với border
+            displayed_tools_order = tools.copy()  # Flat list giữ nguyên thứ tự
             print()
             for idx, tool in enumerate(tools, start=1):
                 is_favorite = tool in self.config['favorites']
@@ -999,6 +1024,9 @@ class ToolManager:
         print()
         print("  " + Colors.primary("╚" + "═" * content_width + "╝"))
         print()
+        
+        # Lưu danh sách tools theo đúng thứ tự hiển thị để dùng khi chọn số
+        self.displayed_tools_order = displayed_tools_order
     
     def show_help(self):
         """Hiển thị help với UI/UX đẹp hơn"""
