@@ -8,8 +8,11 @@ Lý do: Tách riêng logic validation để dễ maintain và test
 """
 
 import os
+import sys
+import subprocess
 from pathlib import Path
 from typing import Optional, Tuple
+from .colors import Colors
 
 
 def get_user_input(prompt: str, default: Optional[str] = None, 
@@ -186,4 +189,87 @@ def parse_size_string(size_str: str) -> int:
         return int(size_str)
     except ValueError:
         return 0
+
+
+def install_library(package_name: str, install_command: str, 
+                    library_display_name: Optional[str] = None) -> bool:
+    """
+    Cài đặt thư viện tự động khi thiếu
+    
+    Args:
+        package_name: Tên package (vd: "qrcode[pil]")
+        install_command: Lệnh cài đặt (vd: "pip install qrcode[pil]")
+        library_display_name: Tên hiển thị của thư viện (mặc định: package_name)
+    
+    Returns:
+        bool: True nếu cài đặt thành công, False nếu không
+    
+    Giải thích:
+    - Hiển thị thông báo thiếu thư viện
+    - Hỏi người dùng có muốn cài đặt tự động không
+    - Nếu có, chạy pip install
+    - Trả về True nếu thành công, False nếu không
+    
+    Mục đích: 
+    - Tự động hóa việc cài đặt thư viện
+    - Cải thiện UX khi thiếu dependencies
+    """
+    display_name = library_display_name or package_name
+    
+    print(Colors.error(f"❌ Thiếu thư viện {display_name}!"))
+    print(f"Cài đặt: {install_command}")
+    print()
+    
+    choice = get_user_input(
+        f"Bạn có muốn cài đặt tự động không? (y/n, mặc định: y): ",
+        default="y"
+    ).strip().lower()
+    
+    if choice and choice not in ['y', 'yes']:
+        return False
+    
+    try:
+        print()
+        print(Colors.info(f"📦 Đang cài đặt {display_name}..."))
+        
+        # Tách install_command để lấy package names
+        # Xử lý các trường hợp: "pip install package", "package", etc.
+        install_parts = install_command.split()
+        
+        # Tìm phần "install" để lấy các package sau đó
+        if "install" in install_parts:
+            install_idx = install_parts.index("install")
+            packages = install_parts[install_idx + 1:]
+        else:
+            # Nếu không có "install", coi toàn bộ là packages
+            packages = install_parts
+        
+        # Tạo command với sys.executable -m pip install
+        args = [sys.executable, "-m", "pip", "install"] + packages
+        
+        # Chạy lệnh cài đặt
+        result = subprocess.run(
+            args,
+            check=True,
+            capture_output=True,
+            text=True
+        )
+        
+        print(Colors.success(f"✅ Đã cài đặt {display_name} thành công!"))
+        print(Colors.warning("💡 Tool cần restart để nhận package mới."))
+        print()
+        return True
+        
+    except subprocess.CalledProcessError as e:
+        print(Colors.error(f"❌ Lỗi khi cài đặt: {e}"))
+        if e.stdout:
+            print(e.stdout)
+        if e.stderr:
+            print(e.stderr)
+        print()
+        return False
+    except Exception as e:
+        print(Colors.error(f"❌ Lỗi không mong muốn: {e}"))
+        print()
+        return False
 

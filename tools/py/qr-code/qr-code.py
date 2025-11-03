@@ -25,7 +25,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 
 from utils import (
     print_header, get_user_input, confirm_action,
-    ensure_directory_exists, log_info, log_error, normalize_path
+    ensure_directory_exists, log_info, log_error, normalize_path,
+    install_library
 )
 from utils.colors import Colors
 
@@ -393,8 +394,11 @@ def mode_generate():
     print()
     
     if not QRCODE_GEN_AVAILABLE:
-        print(Colors.error("❌ Thiếu thư viện qrcode!"))
-        print("Cài đặt: pip install qrcode[pil]")
+        install_library(
+            package_name="qrcode[pil]",
+            install_command="pip install qrcode[pil]",
+            library_display_name="qrcode"
+        )
         return
     
     while True:
@@ -516,8 +520,11 @@ def mode_decode():
     print()
     
     if not QRCODE_DECODE_AVAILABLE:
-        print(Colors.error("❌ Thiếu thư viện cần thiết!"))
-        print("Cài đặt: pip install opencv-python pyzbar pillow numpy")
+        install_library(
+            package_name="opencv-python pyzbar pillow numpy",
+            install_command="pip install opencv-python pyzbar pillow numpy",
+            library_display_name="opencv-python, pyzbar, pillow, numpy"
+        )
         return
     
     while True:
