@@ -10,6 +10,8 @@ Lý do: Dễ dàng truy cập và quản lý tools
 import os
 import sys
 import re
+import subprocess
+from pathlib import Path
 
 # Fix Windows console encoding - Improved
 if sys.platform == 'win32':
@@ -57,6 +59,129 @@ def safe_print(text, fallback_text=None):
             import re
             ascii_text = re.sub(r'[^\x00-\x7F]+', '', text)
             print(ascii_text)
+
+
+def _run_create_tool_script(manager):
+    """Chạy script create-tool.py để tạo tool mới"""
+    print()
+    print_separator("─", 70, Colors.INFO)
+    print(Colors.bold("🛠️  TẠO TOOL MỚI"))
+    print_separator("─", 70, Colors.INFO)
+    print()
+    
+    # Tìm đường dẫn script create-tool.py
+    project_root = Path(__file__).parent.parent
+    create_tool_script = project_root / "scripts" / "create-tool.py"
+    
+    if not create_tool_script.exists():
+        print(Colors.error(f"❌ Không tìm thấy script: {create_tool_script}"))
+        print()
+        return
+    
+    try:
+        # Chạy script create-tool.py
+        print(Colors.info("📦 Đang khởi động script tạo tool..."))
+        print()
+        
+        result = subprocess.run(
+            [sys.executable, str(create_tool_script)],
+            cwd=str(project_root)
+        )
+        
+        print()
+        print_separator("─", 70, Colors.INFO)
+        
+        if result.returncode == 0:
+            print(Colors.success("✅ Hoàn tất!"))
+            print()
+            print(Colors.info("💡 Chạy lại chương trình để tool mới xuất hiện trong menu"))
+        else:
+            print(Colors.warning("⚠️  Script đã kết thúc với mã lỗi"))
+        
+        print_separator("─", 70, Colors.INFO)
+        print()
+        input(Colors.muted("Nhấn Enter để quay lại..."))
+        
+    except KeyboardInterrupt:
+        print()
+        print(Colors.warning("⚠️  Đã hủy bởi người dùng"))
+        print()
+    except Exception as e:
+        print()
+        print(Colors.error(f"❌ Lỗi khi chạy script: {e}"))
+        print()
+        input(Colors.muted("Nhấn Enter để quay lại..."))
+
+
+def _show_settings_menu(manager):
+    """Hiển thị menu settings với các tùy chọn"""
+    while True:
+        print()
+        print_separator("─", 70, Colors.INFO)
+        print(Colors.bold("⚙️  SETTINGS"))
+        print_separator("─", 70, Colors.INFO)
+        print()
+        
+        # Hiển thị settings hiện tại
+        print(Colors.bold("📋 Settings hiện tại:"))
+        for key, value in manager.config['settings'].items():
+            key_colored = Colors.info(key)
+            value_colored = Colors.secondary(str(value))
+            print(f"   {key_colored}: {value_colored}")
+        
+        # Hiển thị số disabled tools
+        disabled_count = len(manager.config.get('disabled_tools', []))
+        if disabled_count > 0:
+            print(f"   {Colors.info('disabled_tools')}: {Colors.error(str(disabled_count))}")
+        
+        print()
+        print_separator("─", 70, Colors.INFO)
+        print()
+        print(Colors.bold("📝 Tùy chọn:"))
+        print(f"   1. {Colors.info('show_descriptions')} - Hiển thị mô tả tool")
+        print(f"   2. {Colors.info('max_recent')} - Số lượng recent tools tối đa")
+        print(f"   3. {Colors.info('create-tool')} - Tạo tool mới")
+        print(f"   0. {Colors.muted('Quay lại')}")
+        print()
+        
+        choice = input(f"{Colors.primary('Chọn tùy chọn')} (0-3): ").strip()
+        
+        if choice == '0':
+            break
+        elif choice == '1':
+            # Toggle show_descriptions
+            current = manager.config['settings'].get('show_descriptions', True)
+            new_value = not current
+            manager.config['settings']['show_descriptions'] = new_value
+            manager._save_config()
+            print()
+            print(Colors.success(f"✅ Đã {'bật' if new_value else 'tắt'} hiển thị mô tả"))
+            print()
+        elif choice == '2':
+            # Thay đổi max_recent
+            print()
+            current = manager.config['settings'].get('max_recent', 10)
+            new_value_input = input(f"Nhập số lượng recent tools tối đa (hiện tại: {current}): ").strip()
+            try:
+                new_value = int(new_value_input)
+                if new_value < 0:
+                    print(Colors.error("❌ Số phải >= 0"))
+                else:
+                    manager.config['settings']['max_recent'] = new_value
+                    manager._save_config()
+                    print()
+                    print(Colors.success(f"✅ Đã cập nhật max_recent = {new_value}"))
+                    print()
+            except ValueError:
+                print(Colors.error("❌ Giá trị không hợp lệ"))
+                print()
+        elif choice == '3':
+            # Chạy script create-tool
+            _run_create_tool_script(manager)
+        else:
+            print()
+            print(Colors.error("❌ Lựa chọn không hợp lệ"))
+            print()
 
 
 def _run_tool_loop(manager, tool, tools):
@@ -513,20 +638,7 @@ def main():
             
             # Settings
             elif command == 'set':
-                print()
-                print_separator("─", 70, Colors.INFO)
-                print(Colors.bold("⚙️  SETTINGS:"))
-                for key, value in manager.config['settings'].items():
-                    key_colored = Colors.info(key)
-                    value_colored = Colors.secondary(str(value))
-                    print(f"   {key_colored}: {value_colored}")
-                
-                # Hiển thị số disabled tools
-                disabled_count = len(manager.config.get('disabled_tools', []))
-                if disabled_count > 0:
-                    print(f"   {Colors.info('disabled_tools')}: {Colors.error(str(disabled_count))}")
-                print_separator("─", 70, Colors.INFO)
-                print()
+                _show_settings_menu(manager)
             
             # Hiển thị hướng dẫn tool (pattern: số+h, ví dụ: 1h, 4h)
             elif command.endswith('h') and len(command) > 1 and command[:-1].isdigit():

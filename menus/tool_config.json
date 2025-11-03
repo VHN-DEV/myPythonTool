@@ -18,7 +18,7 @@
     "duplicate-finder.py"
   ],
   "settings": {
-    "show_descriptions": true,
+    "show_descriptions": false,
     "max_recent": 10
   },
   "disabled_tools": [
