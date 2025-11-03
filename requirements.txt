@@ -7,6 +7,12 @@ Pillow>=10.0.0
 # Tool text-encoding-converter
 chardet>=5.0.0
 
+# Tool qr-code (tạo và giải mã QR code)
+qrcode>=7.4.2        # Tạo QR code (cần Pillow, đã có ở trên)
+opencv-python>=4.8.0  # Giải mã QR code
+pyzbar>=0.1.9        # Giải mã QR code và barcode
+numpy>=1.24.0        # Xử lý ảnh (cho opencv)
+
 # Tool pdf-tools
 PyPDF2>=3.0.0
 pdf2image>=1.16.0    # Cần cài thêm poppler-utils (xem hướng dẫn trong README)
