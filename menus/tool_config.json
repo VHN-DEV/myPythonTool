@@ -6,6 +6,7 @@
     "video-converter.py"
   ],
   "recent": [
+    "qr-code.py",
     "scan-malware.py",
     "json-formatter.py",
     "video-converter.py",
@@ -14,8 +15,7 @@
     "backup-folder.py",
     "clean-temp-files.py",
     "copy-changed-files.py",
-    "duplicate-finder.py",
-    "extract-archive.py"
+    "duplicate-finder.py"
   ],
   "settings": {
     "show_descriptions": true,

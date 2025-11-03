@@ -14,7 +14,11 @@ import argparse
 import contextlib
 import shutil
 from pathlib import Path
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, TYPE_CHECKING
+
+# Import Image cho type hint (nếu có)
+if TYPE_CHECKING:
+    from PIL import Image
 
 # Thêm thư mục cha vào sys.path để import utils
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -34,6 +38,7 @@ try:
     QRCODE_GEN_AVAILABLE = True
 except ImportError:
     QRCODE_GEN_AVAILABLE = False
+    Image = None  # Set to None nếu không có
 
 # Kiểm tra thư viện giải mã QR code
 try:
@@ -111,7 +116,7 @@ def get_error_correction_level(level: str) -> int:
     return level_map.get(level.upper(), qrcode.constants.ERROR_CORRECT_M)
 
 
-def add_logo_to_qr(qr_img: Image.Image, logo_path: str, size_ratio: float = 0.3) -> Image.Image:
+def add_logo_to_qr(qr_img: "Image.Image", logo_path: str, size_ratio: float = 0.3) -> "Image.Image":
     """Thêm logo vào giữa QR code"""
     try:
         logo = Image.open(logo_path)
