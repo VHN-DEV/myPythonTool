@@ -466,16 +466,19 @@ def main():
                 try:
                     idx = int(command[1:])
                     recent = manager.config['recent']
+                    # Lọc chỉ những tool còn tồn tại (giống như khi hiển thị menu)
+                    valid_recent = [r for r in recent if r in tools]
                     
-                    if 1 <= idx <= len(recent):
-                        tool = recent[idx - 1]
-                        if tool in tools:
-                            # Chạy tool với vòng lặp riêng - quay lại đầu tool khi kết thúc
-                            _run_tool_loop(manager, tool, tools)
-                        else:
-                            print(Colors.error(f"❌ Tool không tồn tại: {tool}"))
+                    if not valid_recent:
+                        print(Colors.warning("📚 Không có recent tool nào còn tồn tại"))
+                        continue
+                    
+                    if 1 <= idx <= len(valid_recent):
+                        tool = valid_recent[idx - 1]
+                        # Chạy tool với vòng lặp riêng - quay lại đầu tool khi kết thúc
+                        _run_tool_loop(manager, tool, tools)
                     else:
-                        print(Colors.error("❌ Số không hợp lệ"))
+                        print(Colors.error(f"❌ Số không hợp lệ (phải từ 1 đến {len(valid_recent)})"))
                 except ValueError:
                     print(Colors.error("❌ Số không hợp lệ"))
             

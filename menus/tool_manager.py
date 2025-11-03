@@ -608,11 +608,17 @@ class ToolManager:
         - Xóa tool nếu đã có trong list (để move lên đầu)
         - Thêm vào đầu list
         - Giới hạn số lượng recent
+        - Tự động dọn dẹp tools đã bị xóa (chỉ giữ tools còn tồn tại)
         """
         if tool in self.config['recent']:
             self.config['recent'].remove(tool)
         
         self.config['recent'].insert(0, tool)
+        
+        # Dọn dẹp: Loại bỏ tools không còn tồn tại
+        all_tools = self._scan_tools_from_directory()
+        all_tools_set = set(all_tools)
+        self.config['recent'] = [t for t in self.config['recent'] if t in all_tools_set]
         
         # Giới hạn số recent
         max_recent = self.config['settings'].get('max_recent', 10)
