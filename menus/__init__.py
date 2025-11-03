@@ -103,10 +103,19 @@ def _run_tool_loop(manager, tool, tools):
         except KeyboardInterrupt:
             # Người dùng nhấn Ctrl+C trong vòng lặp tool (ngoài tool)
             # Quay về menu chính
-            print()
-            print(Colors.info("🔄 Quay lại menu chính..."))
-            print()
-            manager.display_menu(tools)
+            try:
+                print()
+                print(Colors.info("🔄 Quay lại menu chính..."))
+                print()
+                manager.display_menu(tools)
+            except (KeyboardInterrupt, EOFError, Exception):
+                # Nếu vẫn bị interrupt, thoát luôn
+                try:
+                    print()
+                    print(Colors.info("👋 Tạm biệt!"))
+                except:
+                    pass
+                sys.exit(0)
             break
         
         except Exception as e:
@@ -568,8 +577,12 @@ def main():
         
         except (EOFError, KeyboardInterrupt):
             # Xử lý EOF error (input stream bị đóng) hoặc Ctrl+C
-            print()
-            print(Colors.info("👋 Tạm biệt!"))
+            try:
+                print()
+                print(Colors.info("👋 Tạm biệt!"))
+            except (KeyboardInterrupt, EOFError, Exception):
+                # Bỏ qua nếu vẫn bị interrupt khi in thông báo
+                pass
             sys.exit(0)
         
         except Exception as e:
