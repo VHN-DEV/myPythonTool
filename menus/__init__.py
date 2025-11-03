@@ -145,29 +145,51 @@ def main():
         print(Colors.error("❌ Không tìm thấy tool nào trong thư mục tools/"))
         return
     
-    # Hiển thị banner đẹp hơn
-    print()
-    
-    # Logo/Title
-    title_line1 = Colors.primary("  ╔═══════════════════════════════════════════════════════╗")
-    title_line2 = Colors.primary("  ║") + Colors.bold(Colors.info("                  MY PYTHON TOOLS")) + Colors.primary("                      ║")
-    title_line3 = Colors.primary("  ║") + Colors.secondary("              Bộ công cụ Python tiện ích") + Colors.primary("               ║")
-    title_line4 = Colors.primary("  ║") + " " * 55 + Colors.primary("║")
-    title_line5 = Colors.primary("  ║") + Colors.muted("         Nhập 'h' hoặc 'help' để xem hướng dẫn") + Colors.primary("         ║")
-    title_line6 = Colors.primary("  ╚═══════════════════════════════════════════════════════╝")
-    
-    print(title_line1)
-    print(title_line2)
-    print(title_line3)
-    print(title_line4)
-    print(title_line5)
-    print(title_line6)
-    
-    print()
+    # Hiển thị banner đẹp hơn với design hiện đại
+    from utils.helpers import print_banner
+    print_banner()
     
     # Welcome tip
     print_welcome_tip()
     print()
+    
+    # Tính content_width để đồng nhất với display_menu
+    def get_display_width(text: str) -> int:
+        """Tính độ dài hiển thị thực tế của text (bao gồm cả emoji)"""
+        import unicodedata
+        from utils.helpers import strip_ansi
+        plain_text = strip_ansi(text)
+        width = 0
+        for char in plain_text:
+            try:
+                eaw = unicodedata.east_asian_width(char)
+                if eaw in ('W', 'F'):  # Wide hoặc Fullwidth
+                    width += 2
+                else:
+                    width += 1
+            except:
+                width += 1
+        return width
+    
+    # Tính dòng dài nhất để xác định content_width (giống như trong display_menu)
+    max_line_width = 0
+    if len(tools) > 5:
+        from utils.categories import group_tools_by_category
+        grouped = group_tools_by_category(tools, manager)
+        for tool in tools:
+            tool_name = manager.get_tool_display_name(tool)
+            is_favorite = tool in manager.config['favorites']
+            star_plain = "⭐" if is_favorite else "  "
+            idx_str = "99."  # Giả sử max 99 tools
+            line_plain = f"{star_plain} {idx_str} {tool_name}"
+            line_display_width = get_display_width(line_plain)
+            if line_display_width > max_line_width:
+                max_line_width = line_display_width
+    
+    # Xác định content_width dựa trên dòng dài nhất
+    required_content_width = max_line_width + 4 if max_line_width > 0 else 68
+    content_width = max(required_content_width, 68)
+    prompt_width = content_width  # Prompt width = content_width để đồng nhất
     
     # Hiển thị menu lần đầu
     manager.display_menu(tools)
@@ -175,9 +197,36 @@ def main():
     # Vòng lặp chính
     while True:
         try:
-            # Nhận input với prompt đẹp hơn
-            prompt = Colors.primary(">>> ") + Colors.secondary("Chọn tool") + Colors.muted(" (h=help, q=quit): ")
-            user_input = input(prompt).strip()
+            # Nhận input với prompt đẹp và rõ ràng hơn - đồng nhất với content_width
+            prompt_title = "myptool"
+            prompt_title_display_width = get_display_width(prompt_title)
+            prompt_title_padding = prompt_width - prompt_title_display_width - 3
+            if prompt_title_padding < 0:
+                prompt_title_padding = 0
+            
+            prompt_prefix = Colors.primary("┌─") + " " + Colors.bold(Colors.info(prompt_title)) + Colors.primary(" " + "─" * prompt_title_padding + "┐")
+            print(f"  {prompt_prefix}")
+            
+            prompt_text = "Chọn tool (h=help, q=quit):"
+            prompt_text_display_width = get_display_width(prompt_text)
+            # Tính padding cần thiết để đủ width
+            prompt_text_padding = prompt_width - prompt_text_display_width - 3
+            if prompt_text_padding < 0:
+                prompt_text_padding = 0
+            
+            # In prompt text không có padding (để input() hiển thị text ngay sau)
+            prompt_input = "  " + Colors.primary("└─ ") + Colors.secondary("▶") + " " + Colors.bold(prompt_text)
+            user_input = input(prompt_input).strip()
+            
+            # Tính độ dài input đã nhập và in padding + ký tự đóng box
+            input_display_width = get_display_width(user_input) if user_input else 0
+            # Tổng độ dài: prompt_text_display_width + input_display_width + padding = prompt_width - 3
+            # Vậy: padding = prompt_width - 3 - prompt_text_display_width - input_display_width
+            remaining_padding = prompt_width - 3 - prompt_text_display_width - input_display_width
+            if remaining_padding < 0:
+                remaining_padding = 0
+            print(" " * remaining_padding + Colors.primary("┘"))
+            print()
             
             if not user_input:
                 continue

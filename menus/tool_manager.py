@@ -16,7 +16,7 @@ from typing import List, Dict, Optional
 from utils.colors import Colors
 from utils.format import print_header, print_separator
 from utils.categories import group_tools_by_category, get_category_info
-from utils.helpers import highlight_keyword
+from utils.helpers import highlight_keyword, strip_ansi
 
 
 class ToolManager:
@@ -827,26 +827,92 @@ class ToolManager:
             print(Colors.error("❌ Không tìm thấy tool nào!"))
             return
         
-        # Header
-        print()
-        print_separator("═", 70, Colors.PRIMARY)
-        title_colored = Colors.primary(f"  {title}")
-        print(title_colored)
-        print_separator("═", 70, Colors.PRIMARY)
-        print()
+        # Helper function để tính display width (bao gồm emoji)
+        def get_display_width(text: str) -> int:
+            """Tính độ dài hiển thị thực tế của text (bao gồm cả emoji)"""
+            import unicodedata
+            plain_text = strip_ansi(text)
+            width = 0
+            for char in plain_text:
+                try:
+                    eaw = unicodedata.east_asian_width(char)
+                    if eaw in ('W', 'F'):  # Wide hoặc Fullwidth
+                        width += 2
+                    else:
+                        width += 1
+                except:
+                    width += 1
+            return width
         
-        # Stats nhanh
+        # Tính dòng dài nhất nếu có group_by_category để xác định width
+        max_line_width = 0
+        if group_by_category and len(tools) > 5:
+            for tool in tools:
+                tool_name = self.get_tool_display_name(tool)
+                is_favorite = tool in self.config['favorites']
+                star_plain = "⭐" if is_favorite else "  "
+                # Giả sử index là 2 chữ số (max 99)
+                idx_str = "99."
+                line_plain = f"{star_plain} {idx_str} {tool_name}"
+                line_display_width = get_display_width(line_plain)
+                if line_display_width > max_line_width:
+                    max_line_width = line_display_width
+        
+        # Category box width = max_line_width + padding (│  + line + │)
+        # Format: "│  " (3) + line + padding + " │" (1) = category_box_width
+        # Vậy: category_box_width >= 3 + max_line_width + 1 = max_line_width + 4
+        # Xác định content_width dựa trên dòng dài nhất
+        required_content_width = max_line_width + 4 if max_line_width > 0 else 68
+        initial_content_width = 68  # Width mặc định
+        
+        # Dùng width lớn hơn giữa required và initial
+        content_width = max(required_content_width, initial_content_width)
+        box_width = content_width + 2  # Content area + 2 borders
+        
+        # Header với box design
+        print()
+        print("  " + Colors.primary("╔" + "═" * content_width + "╗"))
+        title_plain = title  # Plain text để tính độ dài
+        title_padding = (content_width - len(title_plain)) // 2
+        title_padding_right = content_width - len(title_plain) - title_padding
+        title_line = "  " + Colors.primary("║") + " " * title_padding + Colors.bold(Colors.info(title)) + " " * title_padding_right + Colors.primary("║")
+        print(title_line)
+        print("  " + Colors.primary("╠" + "═" * content_width + "╣"))
+        
+        # Stats nhanh với icon đẹp
         total = len(tools)
         all_tools_count = len(self.get_all_tools_including_disabled())
         disabled_count = all_tools_count - total
         favorites_count = len([t for t in tools if t in self.config['favorites']])
         recent_count = len([t for t in self.config['recent'] if t in tools])
         
-        stats_line = f"{Colors.muted('📊')} {Colors.info(f'Active: {total}')}"
+        # Build stats text
+        stats_text_parts = []
         if disabled_count > 0:
-            stats_line += f" | {Colors.error(f'Disabled: {disabled_count}')}"
-        stats_line += f" | {Colors.warning(f'⭐ Favorites: {favorites_count}')} | {Colors.secondary(f'📚 Recent: {recent_count}')}"
-        print(f"  {stats_line}")
+            stats_text_parts.extend([f"📊 Active: {total}", f"🔒 Disabled: {disabled_count}", f"⭐ Favorites: {favorites_count}", f"📚 Recent: {recent_count}"])
+        else:
+            stats_text_parts.extend([f"📊 Active: {total}", f"⭐ Favorites: {favorites_count}", f"📚 Recent: {recent_count}"])
+        
+        stats_text = " | ".join(stats_text_parts)
+        stats_display_width = get_display_width(stats_text)
+        
+        # Build colored stats
+        stats_parts = [
+            Colors.info(f"📊 Active: {Colors.bold(str(total))}"),
+        ]
+        if disabled_count > 0:
+            stats_parts.append(Colors.error(f"🔒 Disabled: {Colors.bold(str(disabled_count))}"))
+        stats_parts.append(Colors.warning(f"⭐ Favorites: {Colors.bold(str(favorites_count))}"))
+        stats_parts.append(Colors.secondary(f"📚 Recent: {Colors.bold(str(recent_count))}"))
+        
+        stats_colored = " | ".join(stats_parts)
+        # Tính padding: 1 space + stats + padding = content_width
+        padding = content_width - 1 - stats_display_width
+        if padding < 0:
+            padding = 0
+        stats_line = "  " + Colors.primary("║") + " " + stats_colored + " " * padding + Colors.primary("║")
+        print(stats_line)
+        print("  " + Colors.primary("╠" + "═" * content_width + "╣"))
         print()
         
         # Nhóm theo categories hoặc hiển thị flat list
@@ -854,16 +920,22 @@ class ToolManager:
             grouped = group_tools_by_category(tools, self)
             current_idx = 1
             
+            category_box_width = content_width
+            
             for category, category_tools in grouped.items():
                 cat_info = get_category_info(category)
                 icon = cat_info['icon']
                 cat_name = cat_info['name']
                 
-                # Category header
+                # Category header với box style - đồng nhất width
                 print()
-                category_header = f"{icon} {Colors.bold(cat_name)} {Colors.muted(f'({len(category_tools)})')}"
-                print(f"  {category_header}")
-                print_separator("─", 68, Colors.MUTED)
+                cat_title = f"{icon} {cat_name} ({len(category_tools)})"
+                cat_title_plain = cat_title  # Plain text để tính độ dài
+                cat_title_display_width = get_display_width(cat_title_plain)
+                cat_title_padding = category_box_width - cat_title_display_width - 3
+                if cat_title_padding < 0:
+                    cat_title_padding = 0
+                print("  " + Colors.secondary("┌─ ") + Colors.bold(Colors.info(cat_title)) + Colors.secondary(" " + "─" * cat_title_padding + "┐"))
                 
                 # Tools trong category
                 for tool in category_tools:
@@ -873,21 +945,34 @@ class ToolManager:
                     
                     if is_favorite:
                         star = Colors.warning("⭐")
+                        star_plain = "⭐"
                         idx_colored = Colors.info(idx_str)
                     else:
                         star = "  "
+                        star_plain = "  "
                         idx_colored = Colors.muted(idx_str)
                     
                     # Highlight search query nếu có
                     if search_query:
                         tool_name_colored = highlight_keyword(tool_name, search_query)
+                        tool_name_plain = tool_name  # Approximate, vì highlight có thể thay đổi
                     else:
-                        tool_name_colored = Colors.bold(tool_name) if is_favorite else tool_name
+                        tool_name_colored = Colors.bold(tool_name) if is_favorite else Colors.muted(tool_name)
+                        tool_name_plain = tool_name
                     
-                    print(f"  {star} {idx_colored} {tool_name_colored}")
+                    line_plain = f"{star_plain} {idx_str} {tool_name_plain}"
+                    line_display_width = get_display_width(line_plain)
+                    padding_right = category_box_width - line_display_width - 3
+                    if padding_right < 0:
+                        padding_right = 0
+                    
+                    print(f"  {Colors.secondary('│')}  {star} {idx_colored} {tool_name_colored}" + " " * padding_right + f" {Colors.secondary('│')}")
                     current_idx += 1
+                
+                print("  " + Colors.secondary("└" + "─" * category_box_width + "┘"))
         else:
-            # Hiển thị flat list (không nhóm)
+            # Hiển thị flat list (không nhóm) với border
+            print()
             for idx, tool in enumerate(tools, start=1):
                 is_favorite = tool in self.config['favorites']
                 tool_name = self.get_tool_display_name(tool)
@@ -904,82 +989,202 @@ class ToolManager:
                 if search_query:
                     tool_name_colored = highlight_keyword(tool_name, search_query)
                 else:
-                    tool_name_colored = Colors.bold(tool_name) if is_favorite else tool_name
+                    tool_name_colored = Colors.bold(tool_name) if is_favorite else Colors.muted(tool_name)
                 
-                print(f"{star} {idx_colored} {tool_name_colored}")
+                # Padding để align với border
+                padding = " " * 2
+                print(f"  {padding}{star} {idx_colored} {tool_name_colored}")
         
         # Footer
         print()
-        print_separator("═", 70, Colors.PRIMARY)
+        print("  " + Colors.primary("╚" + "═" * content_width + "╝"))
         print()
     
     def show_help(self):
         """Hiển thị help với UI/UX đẹp hơn"""
-        print()
-        print_separator("═", 70, Colors.PRIMARY)
-        title = Colors.primary("  HƯỚNG DẪN SỬ DỤNG")
-        print(title)
-        print_separator("═", 70, Colors.PRIMARY)
-        print()
+        # Độ rộng content area = độ dài của dòng dài nhất (note4 = 71 ký tự)
+        content_width = 71
+        
+        def get_display_width(text: str) -> int:
+            """
+            Tính độ dài hiển thị thực tế của text (bao gồm cả emoji)
+            Emoji chiếm 2 cột terminal, ký tự thường chiếm 1 cột
+            """
+            import unicodedata
+            # Loại bỏ ANSI codes trước
+            plain_text = strip_ansi(text)
+            width = 0
+            for char in plain_text:
+                # Kiểm tra nếu là emoji hoặc ký tự wide (chiếm 2 cột)
+                # Các emoji thường có category So (Symbol, other) hoặc Sk (Symbol, modifier)
+                # Hoặc có East Asian Width = Wide hoặc Fullwidth
+                try:
+                    eaw = unicodedata.east_asian_width(char)
+                    if eaw in ('W', 'F'):  # Wide hoặc Fullwidth
+                        width += 2
+                    else:
+                        width += 1
+                except:
+                    # Fallback: nếu không xác định được, coi như 1 cột
+                    width += 1
+            return width
+        
+        def print_box_line(content_colored, content_plain, left_spaces=3):
+            """Helper function để in một dòng trong box với padding chính xác"""
+            # Tính độ dài thực tế của content (không có ANSI codes)
+            actual_len = len(content_plain)
+            # Tính padding cần thiết để tổng độ dài = content_width
+            # Format: left_spaces + content + padding = content_width
+            padding = content_width - left_spaces - actual_len
+            if padding < 0:
+                # Nếu content quá dài, không thêm padding (nhưng sẽ tràn)
+                padding = 0
+            print("  " + Colors.primary("║") + " " * left_spaces + content_colored + " " * padding + Colors.primary("║"))
+        
+        def print_box_title(title_colored, title_plain):
+            """Helper function để in tiêu đề section"""
+            # Tính display width thực tế (bao gồm emoji chiếm 2 cột)
+            display_width = get_display_width(title_plain)
+            # Format: 1 space + title + padding = content_width
+            padding = content_width - 1 - display_width
+            if padding < 0:
+                padding = 0
+            print("  " + Colors.primary("║") + " " + title_colored + " " * padding + Colors.primary("║"))
+        
+        def print_box_empty():
+            """Helper function để in dòng trống"""
+            print("  " + Colors.primary("║") + " " * content_width + Colors.primary("║"))
+        
+        print("  " + Colors.primary("╔" + "═" * content_width + "╗"))
+        title = "HƯỚNG DẪN SỬ DỤNG"
+        title_padding = (content_width - len(title) - 2) // 2
+        title_line = "  " + Colors.primary("║") + " " * title_padding + Colors.bold(Colors.info(title)) + " " * (content_width - len(title) - title_padding) + Colors.primary("║")
+        print(title_line)
+        print("  " + Colors.primary("╠" + "═" * content_width + "╣"))
         
         # Lệnh cơ bản
-        print(Colors.bold("📋 LỆNH CƠ BẢN:"))
-        print(f"   {Colors.info('[số]')}         - Chạy tool theo số thứ tự")
-        print(f"   {Colors.info('[số]h')}        - Xem hướng dẫn của tool (ví dụ: 1h, 4h)")
-        print(f"   {Colors.info('h, help')}      - Hiển thị hướng dẫn này")
-        print(f"   {Colors.info('q, quit, 0')}   - Thoát chương trình")
-        print()
+        basic_title = "📋 LỆNH CƠ BẢN:"
+        print_box_title(Colors.bold(Colors.warning(basic_title)), basic_title)
+        
+        cmd_basic1 = f"{Colors.info('[số]')}         - Chạy tool theo số thứ tự"
+        print_box_line(cmd_basic1, "[số]         - Chạy tool theo số thứ tự")
+        
+        cmd_basic2 = f"{Colors.info('[số]h')}        - Xem hướng dẫn của tool (ví dụ: 1h, 4h)"
+        print_box_line(cmd_basic2, "[số]h        - Xem hướng dẫn của tool (ví dụ: 1h, 4h)")
+        
+        cmd_basic3 = f"{Colors.info('h, help')}      - Hiển thị hướng dẫn này"
+        print_box_line(cmd_basic3, "h, help      - Hiển thị hướng dẫn này")
+        
+        cmd_basic4 = f"{Colors.info('q, quit, 0')}   - Thoát chương trình"
+        print_box_line(cmd_basic4, "q, quit, 0   - Thoát chương trình")
+        
+        print_box_empty()
         
         # Tìm kiếm
-        print(Colors.bold("🔍 TÌM KIẾM:"))
-        print(f"   {Colors.info('s [keyword]')}  - Tìm kiếm tool")
-        print(f"   {Colors.info('/[keyword]')}   - Tìm kiếm tool (cách khác)")
-        print()
-        print(f"   {Colors.muted('Ví dụ:')} {Colors.secondary('s backup')}, {Colors.secondary('/image')}")
-        print()
+        search_title = "🔍 TÌM KIẾM:"
+        print_box_title(Colors.bold(Colors.warning(search_title)), search_title)
+        
+        cmd1 = f"{Colors.info('s [keyword]')}  - Tìm kiếm tool"
+        print_box_line(cmd1, "s [keyword]  - Tìm kiếm tool")
+        
+        cmd2 = f"{Colors.info('/[keyword]')}   - Tìm kiếm tool (cách khác)"
+        print_box_line(cmd2, "/[keyword]   - Tìm kiếm tool (cách khác)")
+        
+        print_box_empty()
+        
+        example1 = f"{Colors.muted('Ví dụ:')} {Colors.secondary('s backup')}, {Colors.secondary('/image')}"
+        print_box_line(example1, "Ví dụ: s backup, /image")
+        
+        print_box_empty()
         
         # Favorites
-        print(Colors.bold("⭐ FAVORITES:"))
-        print(f"   {Colors.info('f')}            - Hiển thị danh sách favorites")
-        print(f"   {Colors.info('f+ [số]')}      - Thêm tool vào favorites")
-        print(f"   {Colors.info('f- [số]')}      - Xóa tool khỏi favorites")
-        print()
-        print(f"   {Colors.muted('Ví dụ:')} {Colors.secondary('f+ 3')}, {Colors.secondary('f- 1')}")
-        print()
+        fav_title = "⭐ FAVORITES:"
+        print_box_title(Colors.bold(Colors.warning(fav_title)), fav_title)
+        
+        fav1 = f"{Colors.info('f')}            - Hiển thị danh sách favorites"
+        print_box_line(fav1, "f            - Hiển thị danh sách favorites")
+        
+        fav2 = f"{Colors.info('f+ [số]')}      - Thêm tool vào favorites"
+        print_box_line(fav2, "f+ [số]      - Thêm tool vào favorites")
+        
+        fav3 = f"{Colors.info('f- [số]')}      - Xóa tool khỏi favorites"
+        print_box_line(fav3, "f- [số]      - Xóa tool khỏi favorites")
+        
+        print_box_empty()
+        
+        example2 = f"{Colors.muted('Ví dụ:')} {Colors.secondary('f+ 3')}, {Colors.secondary('f- 1')}"
+        print_box_line(example2, "Ví dụ: f+ 3, f- 1")
+        
+        print_box_empty()
         
         # Recent
-        print(Colors.bold("📚 RECENT:"))
-        print(f"   {Colors.info('r')}            - Hiển thị recent tools")
-        print(f"   {Colors.info('r[số]')}        - Chạy recent tool")
-        print()
-        print(f"   {Colors.muted('Ví dụ:')} {Colors.secondary('r1')} (chạy tool recent đầu tiên)")
-        print()
+        recent_title = "📚 RECENT:"
+        print_box_title(Colors.bold(Colors.warning(recent_title)), recent_title)
+        
+        rec1 = f"{Colors.info('r')}            - Hiển thị recent tools"
+        print_box_line(rec1, "r            - Hiển thị recent tools")
+        
+        rec2 = f"{Colors.info('r[số]')}        - Chạy recent tool"
+        print_box_line(rec2, "r[số]        - Chạy recent tool")
+        
+        print_box_empty()
+        
+        example3 = f"{Colors.muted('Ví dụ:')} {Colors.secondary('r1')} (chạy tool recent đầu tiên)"
+        print_box_line(example3, "Ví dụ: r1 (chạy tool recent đầu tiên)")
+        
+        print_box_empty()
         
         # Activate/Deactivate
-        print(Colors.bold("🔧 ACTIVATE/DEACTIVATE:"))
-        print(f"   {Colors.info('off [số]')}      - Vô hiệu hóa tool từ menu hiện tại")
-        print(f"   {Colors.info('on [số]')}       - Kích hoạt tool từ danh sách disabled")
-        print(f"   {Colors.info('disabled')}      - Hiển thị danh sách tools bị disabled")
-        print()
-        print(f"   {Colors.muted('Hỗ trợ nhiều tool:')} {Colors.secondary('off 1 2 3')} hoặc {Colors.secondary('off 1,2,3')}")
-        print(f"   {Colors.muted('Ví dụ:')} {Colors.secondary('off 3')}, {Colors.secondary('off 1 2 3')}, {Colors.secondary('on 2 5')}")
-        print()
-        print(f"   {Colors.muted('Lưu ý:')} {Colors.secondary('off [số]')} dùng số từ menu active,")
-        print(f"            {Colors.secondary('on [số]')} dùng số từ danh sách disabled (xem bằng 'disabled')")
-        print()
+        act_title = "🔧 ACTIVATE/DEACTIVATE:"
+        print_box_title(Colors.bold(Colors.warning(act_title)), act_title)
+        
+        act1 = f"{Colors.info('off [số]')}      - Vô hiệu hóa tool từ menu hiện tại"
+        print_box_line(act1, "off [số]      - Vô hiệu hóa tool từ menu hiện tại")
+        
+        act2 = f"{Colors.info('on [số]')}       - Kích hoạt tool từ danh sách disabled"
+        print_box_line(act2, "on [số]       - Kích hoạt tool từ danh sách disabled")
+        
+        act3 = f"{Colors.info('disabled')}      - Hiển thị danh sách tools bị disabled"
+        print_box_line(act3, "disabled      - Hiển thị danh sách tools bị disabled")
+        
+        print_box_empty()
+        
+        note1 = f"{Colors.muted('Hỗ trợ nhiều tool:')} {Colors.secondary('off 1 2 3')} hoặc {Colors.secondary('off 1,2,3')}"
+        print_box_line(note1, "Hỗ trợ nhiều tool: off 1 2 3 hoặc off 1,2,3")
+        
+        note2 = f"{Colors.muted('Ví dụ:')} {Colors.secondary('off 3')}, {Colors.secondary('off 1 2 3')}, {Colors.secondary('on 2 5')}"
+        print_box_line(note2, "Ví dụ: off 3, off 1 2 3, on 2 5")
+        
+        print_box_empty()
+        
+        note3 = f"{Colors.muted('Lưu ý:')} {Colors.secondary('off [số]')} dùng số từ menu active,"
+        print_box_line(note3, "Lưu ý: off [số] dùng số từ menu active,")
+        
+        note4 = f"          {Colors.secondary('on [số]')} dùng số từ danh sách disabled (xem bằng 'disabled')"
+        print_box_line(note4, "            on [số] dùng số từ danh sách disabled (xem bằng 'disabled')", left_spaces=-2)
+        
+        print_box_empty()
         
         # Settings
-        print(Colors.bold("⚙️  SETTINGS:"))
-        print(f"   {Colors.info('set')}          - Xem/chỉnh sửa settings")
-        print()
+        set_title = "⚙️  SETTINGS:"
+        print_box_title(Colors.bold(Colors.warning(set_title)), set_title)
+        
+        set1 = f"{Colors.info('set')}          - Xem/chỉnh sửa settings"
+        print_box_line(set1, "set          - Xem/chỉnh sửa settings")
+        
+        print_box_empty()
         
         # Khác
-        print(Colors.bold("🔄 KHÁC:"))
-        print(f"   {Colors.info('l, list')}      - Hiển thị lại danh sách")
-        print(f"   {Colors.info('clear')}        - Xóa màn hình")
-        print()
+        other_title = "🔄 KHÁC:"
+        print_box_title(Colors.bold(Colors.warning(other_title)), other_title)
         
-        print_separator("═", 70, Colors.PRIMARY)
+        other1 = f"{Colors.info('l, list')}      - Hiển thị lại danh sách"
+        print_box_line(other1, "l, list      - Hiển thị lại danh sách")
+        
+        other2 = f"{Colors.info('clear')}        - Xóa màn hình"
+        print_box_line(other2, "clear        - Xóa màn hình")
+        
+        print("  " + Colors.primary("╚" + "═" * content_width + "╝"))
         print()
     
     def show_tool_help(self, tool: str) -> bool:

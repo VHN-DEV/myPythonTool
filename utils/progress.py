@@ -92,10 +92,15 @@ class ProgressBar:
         if self.prefix:
             output_parts.append(Colors.info(self.prefix))
         
-        # Colorize progress bar
+        # Colorize progress bar với design đẹp hơn
         filled_part = Colors.success(self.fill * filled_length)
-        empty_part = Colors.muted('-' * (self.length - filled_length))
-        colored_bar = f'|{filled_part}{empty_part}|'
+        empty_part = Colors.muted('─' * (self.length - filled_length))
+        # Thêm gradient effect
+        if filled_length > 0:
+            # Last character có thể là một nửa nếu cần
+            colored_bar = f'{Colors.primary("╞")}{filled_part}{empty_part}{Colors.primary("╡")}'
+        else:
+            colored_bar = f'{Colors.primary("╞")}{empty_part}{Colors.primary("╡")}'
         output_parts.append(colored_bar)
         
         if self.show_percentage:
@@ -158,11 +163,12 @@ class ProgressBar:
         """
         self.update(self.total, message)
         
-        # Hiển thị tổng thời gian
+        # Hiển thị tổng thời gian với box đẹp
         total_time = time.time() - self.start_time
         time_str = self._format_time(total_time)
-        print(Colors.success(f"✅ {message}"))
-        print(Colors.muted(f"⏱️  Tổng thời gian: {time_str}"))
+        print()
+        print(Colors.success(f"  ✅ {Colors.bold(message)}"))
+        print(Colors.muted(f"  ⏱️  Tổng thời gian: {Colors.info(time_str)}"))
 
 
 class Spinner:

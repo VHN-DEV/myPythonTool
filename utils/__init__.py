@@ -55,6 +55,15 @@ from .logger import (
     log_operation
 )
 
+from .ui import (
+    print_success_box,
+    print_error_box,
+    print_warning_box,
+    print_info_box,
+    print_table,
+    print_steps
+)
+
 # Backward compatibility: Import từ common nếu ai đó vẫn import trực tiếp
 # from .common import *  # DEPRECATED - sẽ xóa trong tương lai
 
@@ -93,6 +102,14 @@ __all__ = [
     'log_warning',
     'log_debug',
     'log_success',
-    'log_operation'
+    'log_operation',
+    
+    # UI components
+    'print_success_box',
+    'print_error_box',
+    'print_warning_box',
+    'print_info_box',
+    'print_table',
+    'print_steps'
 ]
 
