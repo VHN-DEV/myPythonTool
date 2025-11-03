@@ -30,13 +30,17 @@
 
 **myPythonTool** là bộ công cụ Python được thiết kế để giúp bạn tiết kiệm thời gian trong các công việc xử lý file hàng ngày:
 
-- 🖼️ Xử lý hình ảnh chuyên nghiệp
+- 🖼️ Xử lý hình ảnh chuyên nghiệp (nén, resize, watermark)
+- 🎬 Xử lý video (convert, compress, trim)
+- 📄 Xử lý PDF (merge, split, compress)
 - 🔄 Quản lý file Git thông minh
+- 🔌 Quản lý SSH Server nhanh chóng
 - 📁 Tổ chức file tự động
 - 🧹 Dọn dẹp và tối ưu hóa hệ thống
 - 🔍 Tìm kiếm và thay thế mạnh mẽ
 - 💾 Backup và nén dữ liệu
 - 🌍 Hỗ trợ encoding đa ngôn ngữ
+- 🐧 Tự động hóa setup server Linux
 
 **Giao diện menu tiếng Việt** giúp bạn dễ dàng sử dụng mà không cần nhớ lệnh phức tạp!
 
@@ -48,6 +52,7 @@
 - Nén ảnh thông minh với quality tùy chỉnh
 - Resize giữ nguyên tỉ lệ hoặc kích thước cụ thể
 - Chuyển đổi định dạng (JPG, PNG, WEBP)
+- Thêm watermark (text/logo) hàng loạt
 - Giới hạn dung lượng tối đa tự động
 
 ### 🔄 Quản lý Git Thông Minh
@@ -67,6 +72,18 @@
 - Tìm và thay thế text trong nhiều file
 - Hỗ trợ Regular Expression
 - Preview trước khi thay đổi
+
+### 🔌 Quản lý SSH Server
+- Lưu cấu hình server vào JSON
+- Kết nối nhanh bằng SSH key hoặc password
+- Quản lý nhiều server cùng lúc
+- Tự động phát hiện SSH key mặc định
+
+### 🐧 Tự động hóa Setup Server
+- Cài đặt và cấu hình Nginx, PHP, MySQL
+- Tạo và quản lý virtual host
+- Tự động hóa setup LEMP/LAMP stack
+- Quản lý nhiều site trên 1 server
 
 ### 🧹 Dọn Dẹp Thông Minh
 - Xóa file tạm và cache tự động
@@ -132,22 +149,35 @@ python __main__.py
 ### Menu sẽ hiển thị:
 
 ```
-===== Danh sách tool =====
-0. Thoát
-1. Sao lưu và nén thư mục (có timestamp)
-2. Dọn dẹp file tạm, cache và file rác
-3. Nén và chỉnh sửa ảnh (resize, đổi format)
-4. Sao chép file thay đổi theo Git commit
-5. Tìm và xóa file trùng lặp
-6. Giải nén file (ZIP, RAR, 7Z, TAR)
-7. Sắp xếp file (theo loại/ngày/extension)
-8. Tìm và thay thế text trong nhiều file
-9. Tạo sơ đồ cây thư mục dự án
-10. Đổi tên file hàng loạt (prefix/suffix/số thứ tự)
-11. Chuyển đổi encoding file text (UTF-8, ANSI...)
-===========================
+╔══════════════════════════════════════════════════════════╗
+║                  MY PYTHON TOOLS                         ║
+║              Bộ công cụ Python tiện ích                  ║
+║                                                          ║
+║         Nhập 'h' hoặc 'help' để xem hướng dẫn            ║
+╚══════════════════════════════════════════════════════════╝
 
-Chọn số để chạy tool:
+============================================================
+                   DANH SÁCH TOOL
+============================================================
+⭐ 1. Quản lý và kết nối SSH Server nhanh chóng
+  2. Sao lưu và nén thư mục (có timestamp)
+  3. Dọn dẹp file tạm, cache và file rác
+  4. Nén và chỉnh sửa ảnh (resize, đổi format)
+  5. Sao chép file thay đổi theo Git commit
+  6. Tìm và xóa file trùng lặp
+  7. Giải nén file (ZIP, RAR, 7Z, TAR)
+  8. Sắp xếp file (theo loại/ngày/extension)
+  9. Tìm và thay thế text trong nhiều file
+  10. Tạo sơ đồ cây thư mục dự án
+  11. Thêm watermark vào ảnh (text/logo hàng loạt)
+  12. Xử lý PDF (merge, split, compress, convert)
+  13. Đổi tên file hàng loạt (prefix/suffix/số thứ tự)
+  14. Chuyển đổi encoding file text (UTF-8, ANSI...)
+  15. Xử lý video (convert, compress, trim, extract audio)
+  16. Quản lý và cài đặt dự án (Linux/Ubuntu)
+============================================================
+
+>>> Chọn tool (h=help, q=quit):
 ```
 
 **Đơn giản vậy thôi!** 🎉
@@ -203,17 +233,22 @@ python -c "import PIL, chardet; print('✅ Cài đặt thành công!')"
 
 | STT | Tên Tool | Mô tả chức năng | Thích hợp cho |
 |-----|----------|----------------|---------------|
-| 1 | [backup-folder.py](tools/backup-folder/README.md) | Sao lưu và nén thư mục với timestamp | Backup dự án, tài liệu |
-| 2 | [clean-temp-files.py](tools/clean-temp-files/README.md) | Dọn dẹp file tạm, cache và file rác | Giải phóng dung lượng |
-| 3 | [compress-images.py](tools/compress-images/README.md) | Nén và chỉnh sửa ảnh (resize, đổi format) | Web developer, nhiếp ảnh |
-| 4 | [copy-changed-files.py](tools/copy-changed-files/README.md) | Sao chép file thay đổi theo Git commit | Upload lên server |
-| 5 | [duplicate-finder.py](tools/duplicate-finder/README.md) | Tìm và xóa file trùng lặp | Dọn dẹp ổ cứng |
-| 6 | [extract-archive.py](tools/extract-archive/README.md) | Giải nén file (ZIP, RAR, 7Z, TAR) | Giải nén hàng loạt |
-| 7 | [file-organizer.py](tools/file-organizer/README.md) | Sắp xếp file theo loại/ngày/extension | Tổ chức Downloads |
-| 8 | [find-and-replace.py](tools/find-and-replace/README.md) | Tìm và thay thế text trong nhiều file | Refactor code |
-| 9 | [generate-tree.py](tools/generate-tree/README.md) | Tạo sơ đồ cây thư mục dự án | Documentation |
-| 10 | [rename-files.py](tools/rename-files/README.md) | Đổi tên file hàng loạt (prefix/suffix/số thứ tự) | Đổi tên ảnh, video |
-| 11 | [text-encoding-converter.py](tools/text-encoding-converter/README.md) | Chuyển đổi encoding file text (UTF-8, ANSI...) | Fix lỗi tiếng Việt |
+| 1 | [backup-folder.py](tools/py/backup-folder/README.md) | Sao lưu và nén thư mục với timestamp | Backup dự án, tài liệu |
+| 2 | [clean-temp-files.py](tools/py/clean-temp-files/README.md) | Dọn dẹp file tạm, cache và file rác | Giải phóng dung lượng |
+| 3 | [compress-images.py](tools/py/compress-images/README.md) | Nén và chỉnh sửa ảnh (resize, đổi format) | Web developer, nhiếp ảnh |
+| 4 | [copy-changed-files.py](tools/py/copy-changed-files/README.md) | Sao chép file thay đổi theo Git commit | Upload lên server |
+| 5 | [duplicate-finder.py](tools/py/duplicate-finder/README.md) | Tìm và xóa file trùng lặp | Dọn dẹp ổ cứng |
+| 6 | [extract-archive.py](tools/py/extract-archive/README.md) | Giải nén file (ZIP, RAR, 7Z, TAR) | Giải nén hàng loạt |
+| 7 | [file-organizer.py](tools/py/file-organizer/README.md) | Sắp xếp file theo loại/ngày/extension | Tổ chức Downloads |
+| 8 | [find-and-replace.py](tools/py/find-and-replace/README.md) | Tìm và thay thế text trong nhiều file | Refactor code |
+| 9 | [generate-tree.py](tools/py/generate-tree/README.md) | Tạo sơ đồ cây thư mục dự án | Documentation |
+| 10 | [image-watermark.py](tools/py/image-watermark/) | Thêm watermark vào ảnh (text/logo hàng loạt) | Bảo vệ bản quyền ảnh |
+| 11 | [pdf-tools.py](tools/py/pdf-tools/) | Xử lý PDF (merge, split, compress, convert) | Quản lý tài liệu PDF |
+| 12 | [rename-files.py](tools/py/rename-files/README.md) | Đổi tên file hàng loạt (prefix/suffix/số thứ tự) | Đổi tên ảnh, video |
+| 13 | [ssh-manager.py](tools/py/ssh-manager/README.md) | Quản lý và kết nối SSH Server nhanh chóng | DevOps, quản trị server |
+| 14 | [text-encoding-converter.py](tools/py/text-encoding-converter/README.md) | Chuyển đổi encoding file text (UTF-8, ANSI...) | Fix lỗi tiếng Việt |
+| 15 | [video-converter.py](tools/py/video-converter/) | Xử lý video (convert, compress, trim, extract audio) | Editor video, YouTube |
+| 16 | [setup-project-linux.py](tools/sh/setup-project-linux/) | Quản lý và cài đặt dự án (Linux/Ubuntu) | DevOps, server setup |
 
 ---
 
@@ -221,17 +256,22 @@ python -c "import PIL, chardet; print('✅ Cài đặt thành công!')"
 
 Nội dung chi tiết đã được tách sang README riêng của từng tool:
 
-- Compress Images: xem `tools/compress-images/README.md`
-- Copy Changed Files: xem `tools/copy-changed-files/README.md`
-- Rename Files: xem `tools/rename-files/README.md`
-- Backup Folder: xem `tools/backup-folder/README.md`
-- Find and Replace: xem `tools/find-and-replace/README.md`
-- Generate Tree: xem `tools/generate-tree/README.md`
-- Clean Temp Files: xem `tools/clean-temp-files/README.md`
-- Extract Archive: xem `tools/extract-archive/README.md`
-- Duplicate Finder: xem `tools/duplicate-finder/README.md`
-- File Organizer: xem `tools/file-organizer/README.md`
-- Text Encoding Converter: xem `tools/text-encoding-converter/README.md`
+- **Backup Folder:** xem `tools/py/backup-folder/README.md`
+- **Clean Temp Files:** xem `tools/py/clean-temp-files/README.md`
+- **Compress Images:** xem `tools/py/compress-images/README.md`
+- **Copy Changed Files:** xem `tools/py/copy-changed-files/README.md`
+- **Duplicate Finder:** xem `tools/py/duplicate-finder/README.md`
+- **Extract Archive:** xem `tools/py/extract-archive/README.md`
+- **File Organizer:** xem `tools/py/file-organizer/README.md`
+- **Find and Replace:** xem `tools/py/find-and-replace/README.md`
+- **Generate Tree:** xem `tools/py/generate-tree/README.md`
+- **Image Watermark:** xem `tools/py/image-watermark/` (xem `doc.py` để biết thêm)
+- **PDF Tools:** xem `tools/py/pdf-tools/` (xem `doc.py` để biết thêm)
+- **Rename Files:** xem `tools/py/rename-files/README.md`
+- **SSH Manager:** xem `tools/py/ssh-manager/README.md`
+- **Text Encoding Converter:** xem `tools/py/text-encoding-converter/README.md`
+- **Video Converter:** xem `tools/py/video-converter/` (xem `doc.py` để biết thêm)
+- **Setup Project Linux:** xem `tools/sh/setup-project-linux/` (xem `doc.py` để biết thêm)
 
 **Chức năng:**
 - ✅ Nén ảnh với quality tùy chỉnh (1-100)
@@ -1060,6 +1100,133 @@ Xác nhận? (YES để xác nhận): YES
 - Chuyển project cũ sang UTF-8
 - Chuẩn hóa encoding cho toàn bộ project
 - Fix file PHP/HTML cũ bị lỗi font
+
+---
+
+### 12. 🖼️ Image Watermark - Thêm watermark vào ảnh
+
+**Chức năng:**
+- ✅ Thêm text watermark hàng loạt
+- ✅ Thêm logo/image watermark
+- ✅ Tùy chỉnh vị trí (top-left, center, bottom-right...)
+- ✅ Tùy chỉnh opacity (độ trong suốt)
+- ✅ Tùy chỉnh kích thước và màu sắc
+- ✅ Xử lý nhiều định dạng (JPG, PNG, WEBP)
+
+**Cách sử dụng:**
+
+```bash
+python tools/py/image-watermark/image-watermark.py
+```
+
+**Use case phổ biến:**
+- Bảo vệ bản quyền ảnh trước khi đăng online
+- Thêm logo công ty vào ảnh sản phẩm
+- Watermark hàng loạt cho stock photos
+- Thêm copyright cho portfolio
+
+---
+
+### 13. 📄 PDF Tools - Xử lý PDF
+
+**Chức năng:**
+- ✅ Merge nhiều PDF thành 1 file
+- ✅ Split PDF thành nhiều file nhỏ
+- ✅ Compress PDF giảm dung lượng
+- ✅ Convert PDF sang image (JPG, PNG)
+- ✅ Extract text từ PDF
+- ✅ Rotate pages
+
+**Cách sử dụng:**
+
+```bash
+python tools/py/pdf-tools/pdf-tools.py
+```
+
+**Use case phổ biến:**
+- Gộp nhiều PDF thành 1 file
+- Tách PDF theo trang để gửi email
+- Nén PDF để upload nhanh hơn
+- Chuyển PDF sang ảnh để preview
+
+---
+
+### 14. 🔌 SSH Manager - Quản lý SSH Server
+
+**Chức năng:**
+- ✅ Lưu cấu hình server vào JSON
+- ✅ Kết nối nhanh bằng SSH key hoặc password
+- ✅ Thêm/sửa/xóa server
+- ✅ Quản lý nhiều server cùng lúc
+- ✅ Tự động phát hiện SSH key mặc định
+- ✅ Hỗ trợ custom port
+
+**Cách sử dụng:**
+
+```bash
+python tools/py/ssh-manager/ssh-manager.py
+```
+
+**Use case phổ biến:**
+- Quản lý nhiều VPS/hosting
+- Kết nối nhanh không cần nhớ IP/port
+- Quản lý server dev/staging/production
+- Team work với shared config
+
+**📖 Chi tiết:** Xem [README.md](tools/py/ssh-manager/README.md) để biết thêm
+
+---
+
+### 15. 🎬 Video Converter - Xử lý video
+
+**Chức năng:**
+- ✅ Convert định dạng (MP4, AVI, MOV, MKV...)
+- ✅ Compress video giảm dung lượng
+- ✅ Trim video (cắt đoạn)
+- ✅ Extract audio từ video
+- ✅ Resize video (giảm resolution)
+- ✅ Thay đổi bitrate, FPS
+
+**Cách sử dụng:**
+
+```bash
+python tools/py/video-converter/video-converter.py
+```
+
+**Use case phổ biến:**
+- Chuyển đổi video để upload lên website
+- Nén video để tiết kiệm dung lượng
+- Cắt clip ngắn từ video dài
+- Extract nhạc từ video YouTube
+- Tối ưu video cho mobile
+
+---
+
+### 16. 🐧 Setup Project Linux - Cài đặt dự án Linux
+
+**Chức năng:**
+- ✅ Cài đặt và cấu hình Nginx
+- ✅ Cài đặt PHP (nhiều phiên bản)
+- ✅ Cài đặt MySQL/MariaDB
+- ✅ Cài đặt Node.js, Composer, Yarn
+- ✅ Tạo và quản lý virtual host
+- ✅ Quản lý OpenVPN
+- ✅ Tự động hóa setup server
+
+**Cách sử dụng:**
+
+```bash
+python tools/sh/setup-project-linux/setup-project-linux.py
+```
+
+**Lưu ý:** Tool này chạy bash script, yêu cầu bash shell (Git Bash trên Windows hoặc WSL)
+
+**Use case phổ biến:**
+- Setup server mới từ đầu
+- Cấu hình LEMP/LAMP stack
+- Deploy dự án PHP/Laravel
+- Quản lý nhiều site trên 1 server
+- Tự động hóa DevOps tasks
 
 ---
 

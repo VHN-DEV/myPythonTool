@@ -7,6 +7,8 @@ Mục đích: Tập trung các hàm format dữ liệu và hiển thị UI
 Lý do: Tách riêng logic format để dễ maintain và test
 """
 
+from .colors import Colors, print_colored, print_success, print_error, print_warning, print_info
+
 
 def format_size(size_bytes: int) -> str:
     """
@@ -30,31 +32,61 @@ def format_size(size_bytes: int) -> str:
     return f"{size_bytes:.2f} PB"
 
 
-def print_header(title: str, width: int = 60) -> None:
+def print_header(title: str, width: int = 60, color: str = None) -> None:
     """
     In header đẹp cho tool
     
     Args:
         title: Tiêu đề tool
         width: Độ rộng của header
+        color: Màu sắc cho header (từ Colors)
     
     Mục đích: Tạo giao diện đồng nhất cho tất cả tools
     """
-    print("=" * width)
-    print(f"  {title.upper()}")
-    print("=" * width)
+    separator = "═" * width
+    title_line = f"  {title.upper()}"
+    
+    if color:
+        print_colored(separator, color)
+        print_colored(title_line, color)
+        print_colored(separator, color)
+    else:
+        print(separator)
+        print(title_line)
+        print(separator)
     print()
 
 
-def print_separator(char: str = "=", width: int = 60) -> None:
+def print_separator(char: str = "=", width: int = 60, color: str = None) -> None:
     """
     In đường phân cách
     
     Args:
         char: Ký tự phân cách
         width: Độ rộng
+        color: Màu sắc cho separator (từ Colors)
     """
-    print(char * width)
+    separator = char * width
+    if color:
+        print_colored(separator, color)
+    else:
+        print(separator)
+
+
+def print_section(title: str, width: int = 60, color: str = Colors.PRIMARY) -> None:
+    """
+    In section header đẹp
+    
+    Args:
+        title: Tiêu đề section
+        width: Độ rộng
+        color: Màu sắc
+    """
+    print()
+    print_separator("─", width, color)
+    print_colored(f"  {title}", color)
+    print_separator("─", width, color)
+    print()
 
 
 def pluralize(count: int, singular: str, plural: str = None) -> str:

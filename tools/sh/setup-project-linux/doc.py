@@ -21,23 +21,33 @@ HELP_TEXT = """
 
 🔧 CHỨC NĂNG CHÍNH:
 
+Tool cung cấp menu tương tác để chọn một trong 4 chức năng chính:
+
 1. App Management (app.sh)
    - Quản lý services (Nginx, PHP-FPM)
    - Chạy các scripts trong thư mục run/
    - Khởi động/dừng/restart services
+   - Kiểm tra trạng thái services
+   - Quản lý virtual hosts Nginx
 
 2. SSH Connection (connect-ssh.sh)
    - Kết nối nhanh đến các SSH servers đã cấu hình
    - Quản lý danh sách kết nối trong thư mục connect/
+   - Tự động liệt kê các kết nối SSH có sẵn
+   - Hỗ trợ sshpass cho kết nối tự động
 
-3. Install App (install-app.sh)
+3. Install Application (install-app.sh)
    - Cài đặt ứng dụng từ file .deb, AppImage
-   - Quản lý ứng dụng trong thư mục Downloads
+   - Quản lý ứng dụng trong thư mục Downloads và add-app/
    - Tự động thiết lập quyền thực thi
+   - Tạo desktop entries cho AppImage
+   - Tự động fix dependencies cho .deb packages
 
-4. Installs (installs.sh)
+4. Install Environment (installs.sh)
    - Cài đặt các công cụ và môi trường phát triển
-   - Bao gồm: Node.js, PHP, Nginx, MySQL, Composer, etc.
+   - Bao gồm: Node.js, PHP, Nginx, MySQL, Composer, Git, etc.
+   - Tổ chức scripts cài đặt trong thư mục run-install/
+   - Dễ dàng mở rộng với scripts cài đặt mới
 
 📁 CẤU TRÚC THƯ MỤC:
 
@@ -62,10 +72,30 @@ tools/sh/setup-project-linux/
 
 💡 CÁCH SỬ DỤNG:
 
-1. Chạy tool từ menu chính
-2. Chọn chức năng cần dùng
+1. Chạy tool từ menu chính:
+   ```bash
+   python tools/sh/setup-project-linux/setup-project-linux.py
+   ```
+
+2. Chọn chức năng từ menu:
+   - [1] App Management - Quản lý services và scripts
+   - [2] SSH Connection - Kết nối SSH servers
+   - [3] Install Application - Cài đặt ứng dụng
+   - [4] Install Environment - Cài đặt môi trường phát triển
+   - [0] Thoát
+
 3. Tool sẽ tự động chạy shell script tương ứng
 4. Làm theo hướng dẫn trong shell script
+5. Sau khi hoàn thành, có thể chọn tiếp tục hoặc thoát
+
+✨ TÍNH NĂNG MỚI:
+
+- ✅ Menu tương tác đẹp mắt và dễ sử dụng
+- ✅ Tự động phát hiện và chuyển đổi đường dẫn cho Windows (Git Bash/WSL)
+- ✅ Validation và error handling tốt hơn
+- ✅ Hỗ trợ cả Git Bash, WSL và bash native trên Linux/macOS
+- ✅ Kiểm tra bash availability trước khi chạy
+- ✅ Cho phép tiếp tục hoặc thoát sau mỗi thao tác
 
 ⚠️  LƯU Ý:
 
@@ -74,6 +104,7 @@ tools/sh/setup-project-linux/
 - Các shell scripts phải có quyền thực thi (chmod +x)
 - Tool tự động cấp quyền thực thi khi chạy (trên Linux/macOS)
 - Trên Windows, Git Bash tự xử lý quyền thực thi
+- Đường dẫn Windows sẽ tự động chuyển đổi sang format Unix khi cần
 
 📚 LIÊN KẾT:
 

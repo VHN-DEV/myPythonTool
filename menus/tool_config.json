@@ -6,6 +6,8 @@
     "video-converter.py"
   ],
   "recent": [
+    "scan-malware.py",
+    "json-formatter.py",
     "video-converter.py",
     "setup-project-linux.py",
     "compress-images.py",
@@ -13,12 +15,20 @@
     "clean-temp-files.py",
     "copy-changed-files.py",
     "duplicate-finder.py",
-    "extract-archive.py",
-    "file-organizer.py",
-    "find-and-replace.py"
+    "extract-archive.py"
   ],
   "settings": {
     "show_descriptions": true,
     "max_recent": 10
-  }
+  },
+  "disabled_tools": [
+    "bootstrap.py",
+    "font-generator.py",
+    "gitlab-commits-export.py",
+    "optimize-image.py",
+    "pdf-tools.py",
+    "rename-files.py",
+    "search-replace.py",
+    "xampp-project-manager.py"
+  ]
 }

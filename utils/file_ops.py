@@ -93,15 +93,20 @@ def get_folder_size(folder_path: str) -> int:
     - Duyệt qua tất cả file trong thư mục và thư mục con
     - Cộng dồn kích thước của từng file
     - Bỏ qua file không tồn tại hoặc không có quyền truy cập
+    - Sử dụng Path và generator để tối ưu memory
     """
     total_size = 0
+    folder = Path(folder_path)
+    
+    if not folder.exists() or not folder.is_dir():
+        return 0
+    
     try:
-        for dirpath, dirnames, filenames in os.walk(folder_path):
-            for filename in filenames:
-                file_path = os.path.join(dirpath, filename)
+        # Sử dụng Path.rglob() thay vì os.walk() để tối ưu hơn
+        for file_path in folder.rglob('*'):
+            if file_path.is_file():
                 try:
-                    if os.path.exists(file_path):
-                        total_size += os.path.getsize(file_path)
+                    total_size += file_path.stat().st_size
                 except (OSError, PermissionError):
                     # Bỏ qua file không có quyền truy cập
                     pass
