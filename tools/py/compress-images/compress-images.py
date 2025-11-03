@@ -80,6 +80,10 @@ def compress_single_image(
         if resize_width or resize_height:
             orig_w, orig_h = img.size
             
+            # Kiểm tra kích thước hợp lệ (tránh division by zero)
+            if orig_w == 0 or orig_h == 0:
+                return False, f"Ảnh có kích thước không hợp lệ: {orig_w}x{orig_h}", old_size, old_size
+            
             if resize_width and resize_height:
                 # Resize theo đúng width & height nhập vào
                 new_size = (resize_width, resize_height)
