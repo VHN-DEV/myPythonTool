@@ -25,6 +25,10 @@
     "bootstrap.py",
     "optimize-image.py",
     "search-replace.py",
-    "setup-project-linux.py"
+    "setup-project-linux.py",
+    "optimize-shrinkpdf.py",
+    "docker-setup-laravel.py",
+    "docker-setup.py",
+    "wordpress_auto_install.py"
   ]
 }

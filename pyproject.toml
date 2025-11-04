@@ -89,7 +89,12 @@ all = [
 
 # Cấu hình setuptools
 [tool.setuptools]
-packages = ["menus", "tools", "utils"]
+# Tự động tìm tất cả packages (bao gồm cả namespace packages trong tools/)
+packages = {find = {}}
+
+# Bao gồm cả các subpackages trong tools/
+[tool.setuptools.package-dir]
+"" = "."
 
 [tool.setuptools.package-data]
 "*" = ["*.json", "*.md", "*.txt"]

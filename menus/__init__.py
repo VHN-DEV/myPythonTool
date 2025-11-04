@@ -564,8 +564,10 @@ def main():
                 try:
                     idx_str = args or (command[3:].lstrip() if command.startswith('off') else "")
                     if not idx_str:
+                        # Sử dụng displayed_tools_order nếu có (khi hiển thị theo category)
+                        displayed_tools = getattr(manager, 'displayed_tools_order', tools)
                         print(Colors.warning("⚠️  Vui lòng nhập số thứ tự tool cần vô hiệu hóa"))
-                        print(Colors.info(f"💡 Sử dụng số từ 1 đến {len(tools)} (ví dụ: off 1 hoặc off 1 2 3)"))
+                        print(Colors.info(f"💡 Sử dụng số từ 1 đến {len(displayed_tools)} (ví dụ: off 1 hoặc off 1 2 3)"))
                         continue
                     
                     # Parse nhiều số (hỗ trợ cả space và comma)
@@ -587,25 +589,26 @@ def main():
                     # Xử lý từng số
                     deactivated_count = 0
                     invalid_numbers = []
+                    
+                    # Sử dụng displayed_tools_order nếu có (khi hiển thị theo category)
+                    # Nếu không có, dùng tools gốc (khi hiển thị flat list)
+                    displayed_tools = getattr(manager, 'displayed_tools_order', tools)
+                    
                     for idx in numbers:
-                        if 1 <= idx <= len(tools):
-                            tool = tools[idx - 1]
-                            # Deactivate tool (không in thông báo ngay)
+                        if 1 <= idx <= len(displayed_tools):
+                            tool = displayed_tools[idx - 1]
+                            # Deactivate tool - sử dụng method của manager để tự động xóa khỏi favorites/recent
                             if tool not in manager.config['disabled_tools']:
-                                manager.config['disabled_tools'].append(tool)
+                                manager.deactivate_tool(tool)
                                 deactivated_count += 1
-                                tool_name = manager.get_tool_display_name(tool)
-                                print(Colors.warning(f"⚠️  Đã vô hiệu hóa: {Colors.bold(tool_name)}"))
                             else:
                                 tool_name = manager.get_tool_display_name(tool)
                                 print(Colors.warning(f"ℹ️  Tool đã bị vô hiệu hóa: {tool_name}"))
                         else:
                             invalid_numbers.append(idx)
                     
-                    # Lưu config nếu có thay đổi
+                    # Refresh tools list sau khi disable
                     if deactivated_count > 0:
-                        manager._save_config()
-                        # Refresh tools list
                         tools = manager.get_tool_list()
                         print()
                         print(Colors.success(f"📊 Đã vô hiệu hóa {deactivated_count} tool(s)"))
@@ -618,7 +621,7 @@ def main():
                     
                     if invalid_numbers:
                         print(Colors.error(f"❌ Số không hợp lệ: {', '.join(map(str, invalid_numbers))}"))
-                        print(Colors.info(f"💡 Vui lòng nhập số từ 1 đến {len(tools)}"))
+                        print(Colors.info(f"💡 Vui lòng nhập số từ 1 đến {len(displayed_tools)}"))
                         
                 except Exception as e:
                     print(Colors.error(f"❌ Lỗi: {e}"))
