@@ -23,12 +23,8 @@
   },
   "disabled_tools": [
     "bootstrap.py",
-    "font-generator.py",
-    "gitlab-commits-export.py",
     "optimize-image.py",
-    "pdf-tools.py",
-    "rename-files.py",
     "search-replace.py",
-    "xampp-project-manager.py"
+    "setup-project-linux.py"
   ]
 }

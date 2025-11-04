@@ -11,6 +11,8 @@ import json
 import sys
 import shutil
 import re
+import stat
+import time
 from pathlib import Path
 from typing import List, Dict, Optional
 
@@ -169,6 +171,73 @@ def clone_project(source: str, project_name: str, htdocs_path: str):
         return False
 
 
+def remove_readonly(func, path, exc_info):
+    """
+    Helper function để xóa thuộc tính read-only trên Windows
+    Sử dụng với shutil.rmtree onerror parameter
+    """
+    try:
+        # Thử xóa thuộc tính read-only
+        os.chmod(path, stat.S_IWRITE)
+        # Thử xóa lại
+        func(path)
+    except Exception:
+        # Nếu vẫn lỗi, bỏ qua file/thư mục đó
+        pass
+
+
+def robust_rmtree(path: str, max_retries: int = 3, retry_delay: float = 0.5) -> bool:
+    """
+    Xóa thư mục một cách mạnh mẽ, xử lý các vấn đề quyền trên Windows
+    
+    Args:
+        path: Đường dẫn thư mục cần xóa
+        max_retries: Số lần thử lại tối đa
+        retry_delay: Thời gian chờ giữa các lần thử (giây)
+    
+    Returns:
+        True nếu xóa thành công, False nếu thất bại
+    """
+    for attempt in range(max_retries):
+        try:
+            # Thử xóa với handler để xử lý read-only files
+            shutil.rmtree(path, onerror=remove_readonly)
+            return True
+        except PermissionError as e:
+            if attempt < max_retries - 1:
+                # Thử xóa thuộc tính read-only của toàn bộ thư mục trước
+                try:
+                    for root, dirs, files in os.walk(path):
+                        for d in dirs:
+                            dir_path = os.path.join(root, d)
+                            try:
+                                os.chmod(dir_path, stat.S_IWRITE)
+                            except Exception:
+                                pass
+                        for f in files:
+                            file_path = os.path.join(root, f)
+                            try:
+                                os.chmod(file_path, stat.S_IWRITE)
+                            except Exception:
+                                pass
+                except Exception:
+                    pass
+                
+                time.sleep(retry_delay)
+                continue
+            else:
+                # Lần thử cuối cùng thất bại
+                raise e
+        except Exception as e:
+            if attempt < max_retries - 1:
+                time.sleep(retry_delay)
+                continue
+            else:
+                raise e
+    
+    return False
+
+
 def delete_project(project_name: str, htdocs_path: str):
     """Xóa dự án"""
     project_path = os.path.join(htdocs_path, project_name)
@@ -183,14 +252,20 @@ def delete_project(project_name: str, htdocs_path: str):
         confirm = input("Xac nhan xoa? (YES de xac nhan): ").strip()
         
         if confirm == "YES":
-            shutil.rmtree(project_path)
-            print(f"[OK] Da xoa du an: {project_name}")
-            return True
+            # Sử dụng hàm xóa mạnh mẽ hơn
+            if robust_rmtree(project_path):
+                print(f"[OK] Da xoa du an: {project_name}")
+                return True
+            else:
+                print(f"[X] Khong the xoa du an: {project_name}")
+                return False
         else:
             print("Da huy")
             return False
     except Exception as e:
         print(f"[X] Lỗi xóa dự án: {e}")
+        print(f"[i] Co the file/folder dang duoc su dung boi chuong trinh khac")
+        print(f"[i] Hoac khong co quyen xoa (can quyen Administrator)")
         return False
 
 
