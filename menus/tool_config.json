@@ -6,12 +6,12 @@
     "video-converter.py"
   ],
   "recent": [
+    "compress-images.py",
     "qr-code.py",
     "scan-malware.py",
     "json-formatter.py",
     "video-converter.py",
     "setup-project-linux.py",
-    "compress-images.py",
     "backup-folder.py",
     "clean-temp-files.py",
     "copy-changed-files.py",

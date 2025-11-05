@@ -12,7 +12,7 @@ import sys
 import datetime
 import argparse
 from pathlib import Path
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple, List, Dict
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
 # Thêm thư mục cha vào sys.path để import utils
@@ -164,7 +164,7 @@ def batch_compress_images(
     resize_height: Optional[int] = None,
     use_multiprocessing: bool = True,
     max_workers: Optional[int] = None
-) -> Tuple[int, int, int, int]:
+) -> Tuple[int, int, int, int, List[Dict]]:
     """
     Nén ảnh hàng loạt
     
@@ -181,13 +181,14 @@ def batch_compress_images(
         max_workers: Số workers (None = auto)
     
     Returns:
-        tuple: (success_count, error_count, total_old_size, total_new_size)
+        tuple: (success_count, error_count, total_old_size, total_new_size, file_details)
+        file_details: List các dict chứa thông tin chi tiết từng file
     
     Giải thích:
     - Quét tất cả ảnh trong thư mục
     - Xử lý song song với multiprocessing (nếu enabled)
     - Hiển thị progress bar
-    - Trả về thống kê
+    - Trả về thống kê và danh sách chi tiết từng file
     """
     # Bước 1: Lấy danh sách ảnh
     image_extensions = ['.jpg', '.jpeg', '.png', '.webp', '.bmp', '.gif', '.tiff']
@@ -199,7 +200,7 @@ def batch_compress_images(
     
     if not image_files:
         print("❌ Không tìm thấy ảnh nào!")
-        return 0, 0, 0, 0
+        return 0, 0, 0, 0, []
     
     print(f"📸 Tìm thấy {len(image_files)} ảnh\n")
     log_info(f"Bắt đầu nén {len(image_files)} ảnh")
@@ -238,6 +239,7 @@ def batch_compress_images(
     error_count = 0
     total_old_size = 0
     total_new_size = 0
+    file_details = []  # List để lưu thông tin chi tiết từng file
     
     progress = ProgressBar(len(tasks), prefix="Đang xử lý:")
     
@@ -273,15 +275,41 @@ def batch_compress_images(
                         success_count += 1
                         total_old_size += old_size
                         total_new_size += new_size
+                        # Lưu thông tin chi tiết
+                        reduction = ((old_size - new_size) / old_size) * 100 if old_size > 0 else 0
+                        file_details.append({
+                            'filename': filename,
+                            'old_size': old_size,
+                            'new_size': new_size,
+                            'reduction': reduction,
+                            'status': 'success'
+                        })
                         progress.update(message=f"✅ {filename}")
                         log_info(f"Nén thành công: {filename} - {message}")
                     else:
                         error_count += 1
+                        file_details.append({
+                            'filename': filename,
+                            'old_size': old_size if old_size > 0 else os.path.getsize(task['input_path']) if os.path.exists(task['input_path']) else 0,
+                            'new_size': 0,
+                            'reduction': 0,
+                            'status': 'error',
+                            'error': message
+                        })
                         progress.update(message=f"❌ {filename}: {message}")
                         log_error(f"Lỗi nén {filename}: {message}")
                 
                 except Exception as e:
                     error_count += 1
+                    old_size_temp = os.path.getsize(task['input_path']) if os.path.exists(task['input_path']) else 0
+                    file_details.append({
+                        'filename': filename,
+                        'old_size': old_size_temp,
+                        'new_size': 0,
+                        'reduction': 0,
+                        'status': 'error',
+                        'error': str(e)
+                    })
                     progress.update(message=f"❌ {filename}: {str(e)}")
                     log_error(f"Exception khi nén {filename}: {str(e)}")
     else:
@@ -304,16 +332,90 @@ def batch_compress_images(
                 success_count += 1
                 total_old_size += old_size
                 total_new_size += new_size
+                # Lưu thông tin chi tiết
+                reduction = ((old_size - new_size) / old_size) * 100 if old_size > 0 else 0
+                file_details.append({
+                    'filename': filename,
+                    'old_size': old_size,
+                    'new_size': new_size,
+                    'reduction': reduction,
+                    'status': 'success'
+                })
                 progress.update(message=f"✅ {filename}")
                 log_info(f"Nén thành công: {filename} - {message}")
             else:
                 error_count += 1
+                file_details.append({
+                    'filename': filename,
+                    'old_size': old_size if old_size > 0 else os.path.getsize(task['input_path']) if os.path.exists(task['input_path']) else 0,
+                    'new_size': 0,
+                    'reduction': 0,
+                    'status': 'error',
+                    'error': message
+                })
                 progress.update(message=f"❌ {filename}: {message}")
                 log_error(f"Lỗi nén {filename}: {message}")
     
     progress.finish()
     
-    return success_count, error_count, total_old_size, total_new_size
+    return success_count, error_count, total_old_size, total_new_size, file_details
+
+
+def print_detailed_statistics(file_details: List[Dict]):
+    """
+    Hiển thị bảng thống kê chi tiết từng file ảnh đã nén
+    
+    Args:
+        file_details: List các dict chứa thông tin chi tiết từng file
+    
+    Giải thích:
+    - Sắp xếp theo tên file
+    - Hiển thị dạng bảng với: tên file, dung lượng gốc, dung lượng mới, tỷ lệ giảm
+    """
+    if not file_details:
+        return
+    
+    print(f"\n{'='*80}")
+    print("📊 THỐNG KÊ CHI TIẾT TỪNG FILE ẢNH")
+    print(f"{'='*80}\n")
+    
+    # Sắp xếp theo tên file
+    sorted_details = sorted(file_details, key=lambda x: x['filename'].lower())
+    
+    # Tính độ rộng cột (giới hạn tối đa 50 ký tự để bảng không quá rộng)
+    max_filename_len = max(len(d['filename']) for d in sorted_details)
+    max_filename_len = min(max(max_filename_len, 25), 50)  # Tối thiểu 25, tối đa 50 ký tự
+    
+    # In header
+    header = f"{'STT':<5} | {'Tên file':<{max_filename_len}} | {'Dung lượng gốc':<15} | {'Dung lượng mới':<15} | {'Tỷ lệ giảm':<12} | {'Trạng thái'}"
+    print(header)
+    print("-" * len(header))
+    
+    # In từng dòng
+    for idx, detail in enumerate(sorted_details, 1):
+        filename = detail['filename']
+        # Rút ngắn tên file nếu quá dài
+        if len(filename) > max_filename_len:
+            filename = filename[:max_filename_len-3] + "..."
+        
+        old_size_str = format_size(detail['old_size'])
+        new_size_str = format_size(detail['new_size']) if detail['status'] == 'success' else "N/A"
+        
+        if detail['status'] == 'success':
+            reduction_str = f"-{detail['reduction']:.1f}%"
+            status_str = "✅ Thành công"
+        else:
+            reduction_str = "N/A"
+            error_msg = detail.get('error', 'Lỗi không xác định')
+            # Rút ngắn thông báo lỗi để phù hợp với cột
+            if len(error_msg) > 25:
+                error_msg = error_msg[:22] + "..."
+            status_str = f"❌ {error_msg}"
+        
+        row = f"{idx:<5} | {filename:<{max_filename_len}} | {old_size_str:<15} | {new_size_str:<15} | {reduction_str:<12} | {status_str}"
+        print(row)
+    
+    print(f"\n{'='*80}\n")
 
 
 def main_interactive():
@@ -405,12 +507,12 @@ def main_interactive():
     # Xử lý
     print(f"\n🚀 Bắt đầu nén ảnh...\n")
     
-    success, errors, old_size, new_size = batch_compress_images(
+    success, errors, old_size, new_size, file_details = batch_compress_images(
         input_dir, output_dir, quality, optimize, max_size_kb,
         convert_format, resize_width, resize_height, use_multiprocessing
     )
     
-    # Hiển thị kết quả
+    # Hiển thị kết quả tổng quan
     print(f"\n{'='*60}")
     print(f"✅ Hoàn thành!")
     print(f"   - Thành công: {success} ảnh")
@@ -422,6 +524,9 @@ def main_interactive():
         print(f"   - Tiết kiệm: {format_size(old_size - new_size)} ({reduction:.1f}%)")
     print(f"   - Thư mục: {output_dir}")
     print(f"{'='*60}")
+    
+    # Hiển thị thống kê chi tiết từng file
+    print_detailed_statistics(file_details)
     
     log_info(f"Hoàn thành nén: {success} thành công, {errors} lỗi")
 
@@ -443,7 +548,7 @@ def main_cli(args):
         return 1
     
     # Xử lý
-    success, errors, old_size, new_size = batch_compress_images(
+    success, errors, old_size, new_size, file_details = batch_compress_images(
         args.input,
         args.output,
         args.quality,
