@@ -9,6 +9,7 @@ import subprocess
 import os
 import json
 import sys
+import getpass
 from pathlib import Path
 
 # Fix Windows console encoding
@@ -295,6 +296,8 @@ def add_new_server(servers):
         use_key = input("Sử dụng SSH key? (y/N): ").strip().lower()
         
         ssh_key = None
+        password = None
+        
         if use_key == 'y':
             # Hiển thị đường dẫn mặc định nếu có
             default_key = get_default_ssh_key()
@@ -313,13 +316,21 @@ def add_new_server(servers):
                     if confirm != 'y':
                         return False
                 ssh_key = key_path
+        else:
+            # Nếu không dùng SSH key, hỏi có muốn lưu password không
+            save_pass = input("Lưu password trong config? (y/N - khuyến nghị: N): ").strip().lower()
+            if save_pass == 'y':
+                password = getpass.getpass("Nhập password (ẩn): ").strip()
+                if not password:
+                    print("[!] Không nhập password, sẽ để trống")
+                    password = None
         
         new_server = {
             "name": name,
             "user": user,
             "host": host,
             "port": port,
-            "password": None,
+            "password": password,
             "ssh_key": ssh_key,
             "description": description
         }
@@ -485,8 +496,12 @@ def edit_server(servers):
                 server['description'] = new_desc
             
             # SSH Key
-            current_key = server.get('ssh_key', 'None')
-            print(f"\nSSH Key hiện tại: {current_key}")
+            current_key = server.get('ssh_key')
+            if current_key:
+                print(f"\nSSH Key hiện tại: {current_key}")
+            else:
+                print(f"\nSSH Key hiện tại: None (không dùng key)")
+            
             change_key = input("Thay đổi SSH key? (y/N): ").strip().lower()
             if change_key == 'y':
                 # Hiển thị đường dẫn mặc định nếu có
@@ -505,6 +520,42 @@ def edit_server(servers):
                     if not os.path.exists(new_key):
                         print(f"[!] Canh bao: Key không tồn tại")
                     server['ssh_key'] = new_key
+            
+            # Password - Luôn cho phép chỉnh sửa, đặc biệt khi không dùng SSH key
+            current_pass = server.get('password')
+            has_ssh_key = bool(server.get('ssh_key'))
+            
+            if current_pass:
+                pass_display = '*' * min(len(current_pass), 8) + (f" ({len(current_pass)} ký tự)" if len(current_pass) > 8 else "")
+            else:
+                pass_display = "None (chưa lưu)"
+            
+            # Hiển thị thông báo rõ ràng hơn khi không dùng SSH key
+            if not has_ssh_key:
+                print(f"\n[*] Server này không dùng SSH key")
+                print(f"Password hiện tại: {pass_display}")
+                print("[i] Bạn có thể lưu password để tiện kết nối (không khuyến nghị)")
+            else:
+                print(f"\nPassword hiện tại: {pass_display}")
+                print("[i] Server này dùng SSH key, password chỉ để backup")
+            
+            change_pass = input("\nThay đổi password? (y/N): ").strip().lower()
+            if change_pass == 'y':
+                if current_pass:
+                    prompt_text = "Nhập password mới (ẩn, Enter để xóa): "
+                else:
+                    prompt_text = "Nhập password để lưu (ẩn, Enter để bỏ qua): "
+                
+                new_pass = getpass.getpass(prompt_text).strip()
+                if new_pass:
+                    server['password'] = new_pass
+                    print("[OK] Đã cập nhật password")
+                else:
+                    server['password'] = None
+                    if current_pass:
+                        print("[OK] Đã xóa password")
+                    else:
+                        print("[i] Không lưu password")
             
             if save_servers(servers):
                 print(f"\n[OK] Da luu thay doi!")
