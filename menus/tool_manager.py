@@ -17,6 +17,7 @@ from utils.colors import Colors
 from utils.format import print_header, print_separator
 from utils.categories import group_tools_by_category, get_category_info
 from utils.helpers import highlight_keyword, strip_ansi
+from utils.logger import log_error_to_file
 
 
 class ToolManager:
@@ -655,6 +656,16 @@ class ToolManager:
         tool_path = self._find_tool_path(tool)
         
         if not tool_path or not tool_path.exists():
+            error_msg = FileNotFoundError(f"Tool not found: {tool}")
+            log_file = log_error_to_file(
+                error=error_msg,
+                tool_name=tool,
+                context="Tool file not found"
+            )
+            if log_file:
+                print()
+                print(Colors.warning(f"📝 Lỗi đã được ghi vào file: {log_file}"))
+            
             print(Colors.error(f"❌ Tool không tồn tại: {tool}"))
             return 1
         
@@ -666,11 +677,29 @@ class ToolManager:
         print()
         
         try:
+            # Chạy tool bình thường để người dùng thấy output trực tiếp
             result = subprocess.run(["python", str(tool_path)])
+            
+            # Nếu tool chạy thành công (exit code 0), không cần log
+            # Nếu tool chạy thất bại (exit code != 0), log lỗi
+            if result.returncode != 0:
+                # Log lỗi vào file
+                error_msg = Exception(f"Tool exited with code {result.returncode}")
+                log_file = log_error_to_file(
+                    error=error_msg,
+                    tool_name=tool_display_name,
+                    context=f"Tool execution failed with exit code {result.returncode}. Check console output above for details."
+                )
+                if log_file:
+                    print()
+                    print(Colors.warning(f"📝 Lỗi đã được ghi vào file: {log_file}"))
             
             print()
             print_separator("═", 70, Colors.SUCCESS)
-            print(Colors.success(f"  ✅ Tool đã chạy xong!"))
+            if result.returncode == 0:
+                print(Colors.success(f"  ✅ Tool đã chạy xong!"))
+            else:
+                print(Colors.error(f"  ❌ Tool đã kết thúc với lỗi (code: {result.returncode})"))
             print_separator("═", 70, Colors.SUCCESS)
             print()
             
@@ -685,6 +714,16 @@ class ToolManager:
             return 130
             
         except Exception as e:
+            # Log lỗi vào file
+            log_file = log_error_to_file(
+                error=e,
+                tool_name=tool_display_name,
+                context="Exception occurred while running tool"
+            )
+            if log_file:
+                print()
+                print(Colors.warning(f"📝 Lỗi đã được ghi vào file: {log_file}"))
+            
             print()
             print(Colors.error(f"❌ Lỗi khi chạy tool: {e}"))
             return 1
@@ -701,6 +740,16 @@ class ToolManager:
         app_sh = script_dir / "app.sh"
         
         if not app_sh.exists():
+            error_msg = FileNotFoundError(f"File app.sh not found at {app_sh}")
+            log_file = log_error_to_file(
+                error=error_msg,
+                tool_name=self.get_tool_display_name('setup-project-linux.py'),
+                context="setup-project-linux: File app.sh not found"
+            )
+            if log_file:
+                print()
+                print(Colors.warning(f"📝 Lỗi đã được ghi vào file: {log_file}"))
+            
             print(f"❌ Không tìm thấy file app.sh!")
             print(f"   Đường dẫn: {app_sh}")
             return 1
@@ -744,6 +793,16 @@ class ToolManager:
                     bash_cmd = [bash_path]
             
             if not bash_cmd:
+                error_msg = FileNotFoundError("Bash not found. On Windows, need Git Bash or WSL")
+                log_file = log_error_to_file(
+                    error=error_msg,
+                    tool_name=self.get_tool_display_name('setup-project-linux.py'),
+                    context="setup-project-linux: Bash command not found"
+                )
+                if log_file:
+                    print()
+                    print(Colors.warning(f"📝 Lỗi đã được ghi vào file: {log_file}"))
+                
                 print("❌ Không tìm thấy bash!")
                 print("   Trên Windows, cần cài Git Bash hoặc WSL")
                 return 1
@@ -781,6 +840,16 @@ class ToolManager:
             return 130
             
         except Exception as e:
+            # Log lỗi vào file
+            log_file = log_error_to_file(
+                error=e,
+                tool_name=self.get_tool_display_name('setup-project-linux.py'),
+                context="setup-project-linux: Exception occurred while running bash script"
+            )
+            if log_file:
+                print()
+                print(Colors.warning(f"📝 Lỗi đã được ghi vào file: {log_file}"))
+            
             print()
             print(Colors.error(f"❌ Lỗi khi chạy tool: {e}"))
             return 1
@@ -1217,6 +1286,9 @@ class ToolManager:
         
         other2 = f"{Colors.info('clear')}        - Xóa màn hình"
         print_box_line(other2, "clear        - Xóa màn hình")
+        
+        other3 = f"{Colors.info('log')}          - Xem và quản lý file log"
+        print_box_line(other3, "log          - Xem và quản lý file log")
         
         print("  " + Colors.primary("╚" + "═" * content_width + "╝"))
         print()

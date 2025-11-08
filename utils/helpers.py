@@ -124,6 +124,7 @@ def format_tips() -> List[str]:
         "💡 Tip: Nhập 'clear' để xóa màn hình",
         "💡 Tip: Dùng 'f' để xem tất cả favorites",
         "💡 Tip: Nhập 'set' để xem settings",
+        "💡 Tip: Nhập 'log' để xem logs",
     ]
     
     return tips

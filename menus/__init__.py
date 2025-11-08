@@ -12,6 +12,7 @@ import sys
 import re
 import subprocess
 from pathlib import Path
+from datetime import datetime
 
 # Fix Windows console encoding - Improved
 if sys.platform == 'win32':
@@ -34,6 +35,7 @@ from .tool_manager import ToolManager
 from utils.colors import Colors
 from utils.format import print_separator
 from utils.helpers import print_welcome_tip, print_command_suggestions, suggest_command
+from utils.logger import clear_logs, get_log_files
 
 
 def safe_print(text, fallback_text=None):
@@ -111,6 +113,273 @@ def _run_create_tool_script(manager):
         print(Colors.error(f"❌ Lỗi khi chạy script: {e}"))
         print()
         input(Colors.muted("Nhấn Enter để quay lại..."))
+
+
+def _view_log_file(log_file_path: str):
+    """Hiển thị nội dung file log"""
+    try:
+        log_path = Path(log_file_path)
+        if not log_path.exists():
+            print(Colors.error(f"❌ File log không tồn tại: {log_file_path}"))
+            return
+        
+        print()
+        print_separator("─", 70, Colors.INFO)
+        print(Colors.bold(f"📄 NỘI DUNG FILE LOG: {log_path.name}"))
+        print_separator("─", 70, Colors.INFO)
+        print()
+        
+        # Đọc và hiển thị nội dung file
+        with open(log_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Hiển thị nội dung (giới hạn số dòng để tránh quá dài)
+        lines = content.split('\n')
+        max_lines = 100  # Giới hạn hiển thị 100 dòng đầu tiên
+        
+        if len(lines) > max_lines:
+            print(Colors.warning(f"⚠️  File quá dài, chỉ hiển thị {max_lines} dòng đầu tiên (tổng: {len(lines)} dòng)"))
+            print()
+            for i, line in enumerate(lines[:max_lines], 1):
+                print(line)
+            print()
+            print(Colors.muted(f"... (còn {len(lines) - max_lines} dòng nữa)"))
+        else:
+            print(content)
+        
+        print()
+        print_separator("─", 70, Colors.INFO)
+        print()
+        input(Colors.muted("Nhấn Enter để quay lại..."))
+        
+    except Exception as e:
+        print()
+        print(Colors.error(f"❌ Lỗi khi đọc file log: {e}"))
+        print()
+        input(Colors.muted("Nhấn Enter để quay lại..."))
+
+
+def _show_logs_menu(manager):
+    """Hiển thị menu quản lý logs"""
+    while True:
+        # Lấy danh sách log files
+        try:
+            log_files = get_log_files()
+        except Exception as e:
+            # Debug: nếu có lỗi, hiển thị lỗi để debug
+            print()
+            print(Colors.error(f"❌ Lỗi khi lấy danh sách log files: {e}"))
+            import traceback
+            traceback.print_exc()
+            print()
+            input(Colors.muted("Nhấn Enter để quay lại..."))
+            break
+        
+        print()
+        print_separator("─", 70, Colors.INFO)
+        print(Colors.bold("📋 QUẢN LÝ LOG FILES"))
+        print_separator("─", 70, Colors.INFO)
+        print()
+        
+        if not log_files:
+            print(Colors.info("ℹ️  Không có file log nào"))
+            print()
+            print(Colors.muted("💡 Các file log sẽ được tạo tự động khi có lỗi xảy ra"))
+            print()
+            input(Colors.muted("Nhấn Enter để quay lại..."))
+            break
+        
+        print(Colors.info(f"📊 Tìm thấy {len(log_files)} file log:"))
+        print()
+        
+        for i, log_file in enumerate(log_files, 1):
+            file_path = Path(log_file)
+            file_name = file_path.name
+            file_size = file_path.stat().st_size
+            
+            # Format file size
+            if file_size < 1024:
+                size_str = f"{file_size} B"
+            elif file_size < 1024 * 1024:
+                size_str = f"{file_size / 1024:.1f} KB"
+            else:
+                size_str = f"{file_size / (1024 * 1024):.1f} MB"
+            
+            # Format thời gian sửa đổi
+            mtime = datetime.fromtimestamp(file_path.stat().st_mtime)
+            time_str = mtime.strftime('%Y-%m-%d %H:%M:%S')
+            
+            print(f"   {Colors.info(str(i))}. {Colors.secondary(file_name)}")
+            print(f"      📅 {Colors.muted(time_str)} | 📦 {Colors.muted(size_str)}")
+            print()
+        
+        print_separator("─", 70, Colors.INFO)
+        print()
+        print(Colors.bold("📝 Lệnh:"))
+        print(f"   • Nhập {Colors.info('số')} để xem nội dung file log")
+        print(f"   • Nhập {Colors.info('d [số]')} hoặc {Colors.info('d[số]')} để xóa file log (ví dụ: d 1, d1, d 1 2 3)")
+        print(f"   • Nhập {Colors.info('clear')} để xóa tất cả file log")
+        print(f"   • Nhập {Colors.info('q')} hoặc {Colors.info('0')} để quay lại")
+        print()
+        
+        user_input = input(f"{Colors.primary('Nhập lệnh')}: ").strip()
+        
+        if not user_input:
+            continue
+        
+        # Parse command
+        # Hỗ trợ cả "d1" và "d 1"
+        user_input_lower = user_input.lower().strip()
+        
+        # Quay lại
+        if user_input_lower in ['q', 'quit', '0', 'exit']:
+            break
+        
+        # Xóa file log - kiểm tra pattern "d[số]" hoặc "d [số]"
+        if user_input_lower.startswith('d'):
+            # Loại bỏ 'd' và lấy phần còn lại
+            rest = user_input_lower[1:].strip()
+            if not rest:
+                print()
+                print(Colors.warning("⚠️  Vui lòng nhập số thứ tự file log cần xóa (ví dụ: d 1 hoặc d1)"))
+                print()
+                input(Colors.muted("Nhấn Enter để tiếp tục..."))
+                continue
+            
+            # Parse nhiều số (hỗ trợ cả space và comma)
+            numbers_str = re.split(r'[,\s]+', rest)
+            numbers = []
+            for num_str in numbers_str:
+                if num_str.strip():
+                    try:
+                        num = int(num_str.strip())
+                        numbers.append(num)
+                    except ValueError:
+                        print(Colors.error(f"❌ Số không hợp lệ: {num_str}"))
+            
+            if not numbers:
+                print()
+                print(Colors.error("❌ Không có số hợp lệ nào"))
+                print()
+                input(Colors.muted("Nhấn Enter để tiếp tục..."))
+                continue
+            
+            # Xóa các file log
+            deleted_count = 0
+            invalid_numbers = []
+            deleted_files = []
+            
+            for idx in numbers:
+                if 1 <= idx <= len(log_files):
+                    log_file = log_files[idx - 1]
+                    file_path = Path(log_file)
+                    
+                    # Đảm bảo đường dẫn là tuyệt đối
+                    if not file_path.is_absolute():
+                        # Nếu là đường dẫn tương đối, tìm project root
+                        from utils.logger import _get_project_root
+                        project_root = _get_project_root()
+                        file_path = project_root / log_file
+                    
+                    file_name = file_path.name
+                    
+                    # Kiểm tra file có tồn tại không
+                    if not file_path.exists():
+                        print(Colors.warning(f"⚠️  File không tồn tại: {file_name} (đường dẫn: {file_path})"))
+                        continue
+                    
+                    try:
+                        # Xóa file
+                        file_path.unlink()
+                        # Kiểm tra lại xem file đã bị xóa chưa
+                        if file_path.exists():
+                            print(Colors.error(f"❌ File vẫn tồn tại sau khi xóa: {file_name}"))
+                        else:
+                            deleted_count += 1
+                            deleted_files.append(file_name)
+                    except PermissionError as e:
+                        print(Colors.error(f"❌ Không có quyền xóa file {file_name}: {e}"))
+                    except Exception as e:
+                        print(Colors.error(f"❌ Không thể xóa file {file_name}: {e}"))
+                        import traceback
+                        traceback.print_exc()
+                else:
+                    invalid_numbers.append(idx)
+            
+            # Thông báo kết quả
+            if deleted_count > 0:
+                print()
+                print(Colors.success(f"✅ Đã xóa {deleted_count} file log:"))
+                for file_name in deleted_files:
+                    print(f"   • {Colors.secondary(file_name)}")
+                print()
+                input(Colors.muted("Nhấn Enter để tiếp tục..."))
+                
+                # Refresh danh sách log files
+                log_files = get_log_files()
+                if not log_files:
+                    # Không còn file log nào, quay lại menu chính
+                    print()
+                    print(Colors.info("ℹ️  Đã xóa hết file log, quay lại menu chính..."))
+                    print()
+                    break
+                # Nếu còn file, tiếp tục vòng lặp để hiển thị lại menu
+                continue
+            
+            if invalid_numbers:
+                print()
+                print(Colors.error(f"❌ Số không hợp lệ: {', '.join(map(str, invalid_numbers))}"))
+                print(Colors.info(f"💡 Vui lòng nhập số từ 1 đến {len(log_files)}"))
+                print()
+                input(Colors.muted("Nhấn Enter để tiếp tục..."))
+        
+        # Xem file log
+        elif user_input_lower.isdigit():
+            try:
+                idx = int(user_input_lower)
+                if 1 <= idx <= len(log_files):
+                    _view_log_file(log_files[idx - 1])
+                else:
+                    print()
+                    print(Colors.error(f"❌ Số không hợp lệ (phải từ 1 đến {len(log_files)})"))
+                    print()
+                    input(Colors.muted("Nhấn Enter để tiếp tục..."))
+            except ValueError:
+                print()
+                print(Colors.error("❌ Số không hợp lệ"))
+                print()
+                input(Colors.muted("Nhấn Enter để tiếp tục..."))
+            
+        
+        # Xóa tất cả file log
+        elif user_input_lower == 'clear':
+            print()
+            confirm = input(Colors.warning("⚠️  Bạn có chắc chắn muốn xóa TẤT CẢ file log? (yes/no): ")).strip().lower()
+            if confirm in ['yes', 'y', 'có', 'c']:
+                deleted_count = clear_logs()
+                if deleted_count > 0:
+                    print()
+                    print(Colors.success(f"✅ Đã xóa {deleted_count} file log"))
+                    print()
+                    input(Colors.muted("Nhấn Enter để quay lại..."))
+                    break  # Quay lại menu chính
+                else:
+                    print()
+                    print(Colors.warning("⚠️  Không xóa được file log nào"))
+                    print()
+                    input(Colors.muted("Nhấn Enter để tiếp tục..."))
+            else:
+                print()
+                print(Colors.info("ℹ️  Đã hủy xóa log"))
+                print()
+                input(Colors.muted("Nhấn Enter để tiếp tục..."))
+        
+        else:
+            print()
+            print(Colors.error(f"❌ Lệnh không hợp lệ: {user_input_lower}"))
+            print(Colors.info("💡 Sử dụng: [số] để xem, d [số] hoặc d[số] để xóa, clear để xóa tất cả"))
+            print()
+            input(Colors.muted("Nhấn Enter để tiếp tục..."))
 
 
 def _show_settings_menu(manager):
@@ -244,15 +513,33 @@ def _run_tool_loop(manager, tool, tools):
             break
         
         except Exception as e:
-            # Xử lý lỗi khác
+            # Xử lý lỗi khác và log vào file
+            from utils.logger import log_error_to_file
+            
             try:
+                # Log lỗi vào file
+                tool_name = tool if 'tool' in locals() else "Unknown"
+                log_file = log_error_to_file(
+                    error=e,
+                    tool_name=tool_name,
+                    context="Exception occurred in tool loop"
+                )
+                if log_file:
+                    print()
+                    print(Colors.warning(f"📝 Lỗi đã được ghi vào file: {log_file}"))
+                
                 print()
                 print(Colors.error(f"❌ Lỗi khi chạy tool: {e}"))
                 print(Colors.info("🔄 Quay lại menu chính..."))
                 print()
                 manager.display_menu(tools)
-            except Exception:
-                print(f"\nLỗi: {str(e)}")
+            except Exception as ex:
+                print(f"\nLỗi: {str(ex)}")
+                # Log cả exception này nữa nếu có thể
+                try:
+                    log_error_to_file(ex, "Error handler", "Failed to handle error in tool loop")
+                except:
+                    pass
             break
 
 
@@ -385,10 +672,48 @@ def main():
             elif command in ['l', 'list']:
                 manager.display_menu(tools)
             
-            # Clear
+            # Clear screen
             elif command == 'clear':
                 os.system('cls' if os.name == 'nt' else 'clear')
                 manager.display_menu(tools)
+            
+            # Clear logs
+            elif command in ['clear-log', 'clearlog', 'clear-logs']:
+                print()
+                print_separator("─", 70, Colors.INFO)
+                print(Colors.bold("🗑️  XÓA LOG FILES"))
+                print_separator("─", 70, Colors.INFO)
+                print()
+                
+                # Lấy danh sách log files
+                log_files = get_log_files()
+                
+                if not log_files:
+                    print(Colors.info("ℹ️  Không có file log nào để xóa"))
+                    print()
+                else:
+                    print(Colors.info(f"📊 Tìm thấy {len(log_files)} file log:"))
+                    for i, log_file in enumerate(log_files[:10], 1):  # Hiển thị tối đa 10 file đầu tiên
+                        file_name = Path(log_file).name
+                        print(f"   {i}. {Colors.secondary(file_name)}")
+                    if len(log_files) > 10:
+                        print(f"   ... và {len(log_files) - 10} file khác")
+                    print()
+                    
+                    # Xác nhận xóa
+                    confirm = input(Colors.warning("⚠️  Bạn có chắc chắn muốn xóa tất cả file log? (yes/no): ")).strip().lower()
+                    if confirm in ['yes', 'y', 'có', 'c']:
+                        deleted_count = clear_logs()
+                        if deleted_count > 0:
+                            print()
+                            print(Colors.success(f"✅ Đã xóa {deleted_count} file log"))
+                        else:
+                            print()
+                            print(Colors.warning("⚠️  Không xóa được file log nào"))
+                    else:
+                        print()
+                        print(Colors.info("ℹ️  Đã hủy xóa log"))
+                    print()
             
             # Search
             elif command in ['s', 'search'] or command.startswith('/'):
@@ -646,6 +971,10 @@ def main():
             elif command == 'set':
                 _show_settings_menu(manager)
             
+            # Logs
+            elif command == 'log' or command == 'logs':
+                _show_logs_menu(manager)
+            
             # Hiển thị hướng dẫn tool (pattern: số+h, ví dụ: 1h, 4h)
             elif command.endswith('h') and len(command) > 1 and command[:-1].isdigit():
                 try:
@@ -686,7 +1015,7 @@ def main():
                 print(Colors.error(f"❌ Lệnh không hợp lệ: {command}"))
                 
                 # Gợi ý commands
-                valid_commands = ['h', 'help', 'q', 'quit', 'l', 'list', 's', 'search', 'f', 'r', 'set', 'clear']
+                valid_commands = ['h', 'help', 'q', 'quit', 'l', 'list', 's', 'search', 'f', 'r', 'set', 'log', 'clear', 'clear-log']
                 suggestions = suggest_command(command, valid_commands)
                 if suggestions:
                     print_command_suggestions(command, suggestions)
@@ -704,15 +1033,32 @@ def main():
             sys.exit(0)
         
         except Exception as e:
-            # Xử lý các lỗi khác
+            # Xử lý các lỗi khác và log vào file
+            from utils.logger import log_error_to_file
+            
             try:
+                # Log lỗi vào file
+                log_file = log_error_to_file(
+                    error=e,
+                    tool_name="Main menu",
+                    context="Exception occurred in main menu loop"
+                )
+                if log_file:
+                    print()
+                    print(Colors.warning(f"📝 Lỗi đã được ghi vào file: {log_file}"))
+                
                 print()
                 print(Colors.error(f"❌ Lỗi: {e}"))
                 import traceback
                 traceback.print_exc()
-            except Exception:
+            except Exception as ex:
                 # Nếu không print được do encoding, dùng ASCII
-                print(f"\nLỗi: {str(e)}")
+                print(f"\nLỗi: {str(ex)}")
+                # Log cả exception này nữa nếu có thể
+                try:
+                    log_error_to_file(ex, "Error handler", "Failed to handle error in main menu")
+                except:
+                    pass
 
 
 if __name__ == "__main__":
