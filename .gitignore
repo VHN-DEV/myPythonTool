@@ -31,6 +31,7 @@ env/
 *.swp
 *.swo
 *~
+*.code-workspace
 
 # OS
 .DS_Store
@@ -44,7 +45,13 @@ logs/
 output/
 
 # Config riêng (có thể chứa thông tin nhạy cảm)
-tools/ssh-manager/ssh_config.json
+tools/py/ssh-manager/ssh_config.json
+tools/py/database-manager/database_config.json
+
+# Environment variables
+.env
+.env.*
+!.env.example
 
 # Backup metadata
 backup_metadata.json

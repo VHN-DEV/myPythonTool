@@ -1,54 +1,202 @@
-# Copy Changed Files - Sao chep file thay doi theo Git
+# Copy Changed Files - Sao chép file thay đổi theo Git
 
-Mo ta ngan gon: Copy file theo commit range, giu nguyen cau truc thu muc, bo qua file da xoa, tao danh sach file da copy, verify commit truoc khi thuc hien.
+## Mô tả
 
-## Cach su dung
+Tool sao chép file thay đổi từ Git repository theo commit range. Giữ nguyên cấu trúc thư mục, bỏ qua file đã xóa, tạo danh sách file đã copy, và verify commit ID trước khi thực hiện.
+
+## Tính năng
+
+✅ Copy file theo commit range
+✅ Giữ nguyên cấu trúc thư mục
+✅ Bỏ qua file đã xóa
+✅ Tạo danh sách file đã copy
+✅ Verify commit ID trước khi thực hiện
+✅ Tự động tạo thư mục output
+✅ Hiển thị tiến trình chi tiết
+
+## Yêu cầu
+
+- **Git repository**: Thư mục phải là Git repository
+- **Git installed**: Cần cài đặt Git trên hệ thống
+
+## Cách sử dụng
+
+### Chạy từ menu chính
 
 ```bash
-python tools/copy-changed-files.py
+myptool
+# Chọn tool "copy-changed-files"
 ```
 
-## Vi du
+### Chạy trực tiếp
 
-```
-Nhap duong dan du an: C:\xampp\htdocs\my-ecommerce
-Nhap commit ID bat dau (vd: 9d172f6): 9d172f6
-Nhap commit ID ket thuc (Enter = HEAD): [Enter]
+```bash
+python tools/py/copy-changed-files/copy-changed-files.py
 ```
 
-Ket qua mau:
+## Hướng dẫn chi tiết
+
+### 1. Nhập đường dẫn dự án
+
+Nhập đường dẫn dự án (Git repository) (vd: `C:\xampp\htdocs\my-ecommerce`)
+
+### 2. Nhập commit ID
+
+1. **Commit ID bắt đầu**: Nhập commit hash (vd: `9d172f6` hoặc `9d172f6a1b2c3d4e5f6...`)
+2. **Commit ID kết thúc**: Nhập commit hash hoặc Enter để dùng `HEAD` (commit mới nhất)
+
+### 3. Verify commit ID
+
+Tool sẽ kiểm tra commit ID có hợp lệ không trước khi thực hiện.
+
+### 4. Lấy danh sách file thay đổi
+
+Tool sẽ:
+1. Lấy danh sách file thay đổi từ Git
+2. Hiển thị số lượng file tìm thấy
+3. Hiển thị danh sách file (preview)
+
+### 5. Copy file
+
+Tool sẽ:
+1. Tạo thư mục output: `changed-files-export`
+2. Copy file và giữ nguyên cấu trúc thư mục
+3. Tạo file danh sách: `danh-sach-file-thay-doi.txt`
+4. Hiển thị tiến trình và kết quả
+
+## Ví dụ
+
+### Copy file từ commit cụ thể đến HEAD
 
 ```
-🔍 Kiem tra commit ID...
-✓ Commit ID hop le!
+Nhập đường dẫn dự án: C:\xampp\htdocs\my-ecommerce
+Nhập commit ID bắt đầu (vd: 9d172f6): 9d172f6
+Nhập commit ID kết thúc (Enter = HEAD): [Enter]
 
-📂 Dang lay danh sach file thay doi tu commit 9d172f6 den HEAD...
-✓ Tim thay 15 file da thay doi
+🔍 Kiểm tra commit ID...
+✓ Commit ID hợp lệ!
 
-📋 Dang copy file...
+📂 Đang lấy danh sách file thay đổi từ commit 9d172f6 đến HEAD...
+✓ Tìm thấy 15 file đã thay đổi
+
+📋 Danh sách file (preview):
+   - src/components/Header.jsx
+   - src/styles/main.css
+   - public/index.html
+   - api/products.php
+   ... (11 file khác)
+
+🚀 Bắt đầu copy file...
+
+📋 Đang copy file...
 ✓ [OK] src/components/Header.jsx
 ✓ [OK] src/styles/main.css
 ✓ [OK] public/index.html
 ✓ [OK] api/products.php
-... (11 file khac)
+✓ [OK] config/database.php
+✓ [OK] assets/images/logo.png
+... (9 file khác)
 
 ===================================================
-✓ Hoan tat!
-- Da copy: 15 file
-- Bo qua: 0 file
-- Thu muc xuat: changed-files-export
-- Danh sach file: changed-files-export/danh-sach-file-thay-doi.txt
+✓ Hoàn tất!
+- Đã copy: 15 file
+- Bỏ qua: 0 file
+- Thư mục xuất: changed-files-export
+- Danh sách file: changed-files-export/danh-sach-file-thay-doi.txt
+
+🚀 Bạn có thể upload toàn bộ thư mục 'changed-files-export' lên server bằng FileZilla!
 ===================================================
 ```
 
-## Yeu cau
-- Thu muc phai la Git repository va co it nhat 1 commit
-- Commit ID hop le
+### Copy file giữa 2 commit
 
-## Use case pho bien
-- Upload file thay doi len shared hosting
-- Tao package update
-- Kiem tra truoc khi deploy
-- Backup file quan trong da thay doi
+```
+Nhập commit ID bắt đầu: abc1234
+Nhập commit ID kết thúc: def5678
 
+🔍 Kiểm tra commit ID...
+✓ Commit ID hợp lệ!
 
+📂 Đang lấy danh sách file thay đổi từ commit abc1234 đến def5678...
+✓ Tìm thấy 8 file đã thay đổi
+
+✅ Hoàn thành! Đã copy 8 file.
+```
+
+## Cấu trúc output
+
+Sau khi copy, thư mục `changed-files-export` sẽ có cấu trúc:
+
+```
+changed-files-export/
+├── src/
+│   ├── components/
+│   │   └── Header.jsx
+│   └── styles/
+│       └── main.css
+├── public/
+│   └── index.html
+├── api/
+│   └── products.php
+├── config/
+│   └── database.php
+└── danh-sach-file-thay-doi.txt
+```
+
+File `danh-sach-file-thay-doi.txt` chứa danh sách đầy đủ các file đã copy.
+
+## Tips
+
+### Commit ID:
+- **Short hash**: Có thể dùng hash ngắn (7 ký tự đầu)
+- **Full hash**: Có thể dùng hash đầy đủ
+- **HEAD**: Dùng để chỉ commit mới nhất
+
+### Verify:
+- **Kiểm tra trước**: Tool tự động kiểm tra commit ID trước khi thực hiện
+- **Lỗi**: Nếu commit ID không hợp lệ, tool sẽ báo lỗi và dừng
+
+### Upload:
+- **FileZilla**: Upload toàn bộ thư mục `changed-files-export` lên server
+- **FTP**: Sử dụng FTP client để upload
+- **SCP**: Sử dụng SCP để upload (Linux)
+
+## Use case phổ biến
+
+- Upload file thay đổi lên shared hosting (không có Git)
+- Tạo package update cho khách hàng
+- Kiểm tra file đã sửa trước khi deploy
+- Backup file quan trọng đã thay đổi
+- Deploy từng phần (chỉ deploy file thay đổi)
+
+## Lưu ý
+
+- **Git repository**: Thư mục phải là Git repository
+- **Commit ID**: Commit ID phải hợp lệ và tồn tại
+- **File đã xóa**: File đã xóa sẽ bị bỏ qua
+- **Cấu trúc**: Cấu trúc thư mục được giữ nguyên
+- **Overwrite**: File đã tồn tại sẽ bị ghi đè
+
+## Ví dụ thực tế
+
+### Deploy lên shared hosting
+
+```
+Project: my-ecommerce (Git repo)
+Commit từ: abc1234
+Commit đến: HEAD
+→ Copy 15 file thay đổi
+→ Upload lên server bằng FileZilla
+→ Deploy thành công!
+```
+
+### Tạo package update
+
+```
+Project: my-app (Git repo)
+Commit từ: version-1.0
+Commit đến: version-1.1
+→ Copy 25 file thay đổi
+→ Tạo package update
+→ Gửi cho khách hàng
+```
