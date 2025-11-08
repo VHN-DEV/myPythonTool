@@ -119,7 +119,10 @@ pip install -e .
 myptool
 ```
 
-📖 **Chi tiết:** Xem [INSTALL.md](docs/INSTALL.md) để biết thêm cách cài đặt khác
+📖 **Chi tiết:** 
+- Xem [INSTALL.md](docs/INSTALL.md) để biết thêm cách cài đặt khác
+- Xem [PORTABILITY.md](docs/PORTABILITY.md) để biết cách di chuyển dự án sang máy khác
+- Xem [Hướng dẫn cho Linux/macOS](docs/PORTABILITY.md#-hướng-dẫn-cho-linuxmacos) nếu bạn dùng Linux/macOS
 
 ---
 

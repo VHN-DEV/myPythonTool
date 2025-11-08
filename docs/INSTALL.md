@@ -53,16 +53,24 @@ myptool
 
 Nếu không muốn dùng pip, có thể dùng batch file:
 
-### Bước 1: Sửa file `myptool.bat`
+### Bước 1: Chạy từ thư mục project
 
-Mở file `myptool.bat`, tìm dòng:
 ```batch
-set "TOOL_DIR=D:\myPythonTool"
+cd D:\myPythonTool
+scripts\myptool.bat
 ```
 
-Sửa đường dẫn cho đúng với máy bạn.
+**Lưu ý:** File `myptool.bat` đã được cập nhật để **tự động phát hiện đường dẫn**, không cần hardcode nữa!
 
-### Bước 2: Copy vào thư mục trong PATH
+### Bước 2: (Tùy chọn) Copy vào thư mục trong PATH
+
+Nếu muốn chạy từ bất kỳ đâu, set biến môi trường:
+
+```batch
+setx MYPYTHONTOOL_DIR "D:\myPythonTool"
+```
+
+Sau đó copy file vào PATH:
 
 **Cách nhanh** (cần quyền Admin):
 ```bash
