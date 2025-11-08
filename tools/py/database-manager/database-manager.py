@@ -25,7 +25,7 @@ if sys.platform == 'win32':
 def print_header():
     """In header của tool"""
     print("=" * 70)
-    print("  TOOL QUAN LY DATABASE MYSQL")
+    print("  TOOL QUẢN LÝ DATABASE MYSQL")
     print("=" * 70)
     print()
 
@@ -436,7 +436,7 @@ def show_connections_menu(config):
     """Hiển thị menu quản lý connections"""
     while True:
         print("\n" + "=" * 70)
-        print("  QUAN LY KET NOI DATABASE")
+        print("  QUẢN LÝ KẾT NỐI DATABASE")
         print("=" * 70)
         
         connections = config.get('connections', [])
@@ -451,16 +451,16 @@ def show_connections_menu(config):
             print("\n[!] Chưa có kết nối nào")
         
         print("\n" + "-" * 70)
-        print("LENH:")
-        print("  a - Them ket noi moi")
-        print("  e [so] - Sua ket noi")
-        print("  d [so] - Xoa ket noi")
-        print("  t [so] - Test ket noi")
-        print("  s [so] - Dat lam mac dinh")
-        print("  0 - Quay lai")
+        print("LỆNH:")
+        print("  a - Thêm kết nối mới")
+        print("  e [số] - Sửa kết nối")
+        print("  d [số] - Xóa kết nối")
+        print("  t [số] - Test kết nối")
+        print("  s [số] - Đặt làm mặc định")
+        print("  0 - Quay lại")
         print("=" * 70)
         
-        choice = input("\nChon lenh: ").strip().lower()
+        choice = input("\nChọn lệnh: ").strip().lower()
         
         if choice == '0':
             break
@@ -473,9 +473,9 @@ def show_connections_menu(config):
                 if 0 <= idx < len(connections):
                     edit_connection(config, connections, idx)
                 else:
-                    print("[X] So thu tu khong hop le!")
+                    print("[X] Số thứ tự không hợp lệ!")
             except ValueError:
-                print("[X] Vui long nhap so hop le!")
+                print("[X] Vui lòng nhập số hợp lệ!")
         elif choice.startswith('d '):
             idx_str = choice.replace('d ', '').strip()
             try:
@@ -483,9 +483,9 @@ def show_connections_menu(config):
                 if 0 <= idx < len(connections):
                     delete_connection(config, connections, idx)
                 else:
-                    print("[X] So thu tu khong hop le!")
+                    print("[X] Số thứ tự không hợp lệ!")
             except ValueError:
-                print("[X] Vui long nhap so hop le!")
+                print("[X] Vui lòng nhập số hợp lệ!")
         elif choice.startswith('t '):
             idx_str = choice.replace('t ', '').strip()
             try:
@@ -497,9 +497,9 @@ def show_connections_menu(config):
                     else:
                         print(f"[X] {test_connection_result[1]}")
                 else:
-                    print("[X] So thu tu khong hop le!")
+                    print("[X] Số thứ tự không hợp lệ!")
             except ValueError:
-                print("[X] Vui long nhap so hop le!")
+                print("[X] Vui lòng nhập số hợp lệ!")
         elif choice.startswith('s '):
             idx_str = choice.replace('s ', '').strip()
             try:
@@ -507,11 +507,11 @@ def show_connections_menu(config):
                 if 0 <= idx < len(connections):
                     config['default_connection'] = idx
                     save_config(config)
-                    print(f"[OK] Da dat '{connections[idx]['name']}' lam ket noi mac dinh")
+                    print(f"[OK] Đã đặt '{connections[idx]['name']}' làm kết nối mặc định")
                 else:
-                    print("[X] So thu tu khong hop le!")
+                    print("[X] Số thứ tự không hợp lệ!")
             except ValueError:
-                print("[X] Vui long nhap so hop le!")
+                print("[X] Vui lòng nhập số hợp lệ!")
         else:
             print("[X] Lenh khong hop le!")
 
@@ -519,13 +519,13 @@ def show_connections_menu(config):
 def add_connection(config, connections):
     """Thêm kết nối mới"""
     print("\n" + "=" * 70)
-    print("  THEM KET NOI MOI")
+    print("  THÊM KẾT NỐI MỚI")
     print("=" * 70)
     
     try:
-        name = input("\nTen ket noi: ").strip()
+        name = input("\nTên kết nối: ").strip()
         if not name:
-            print("[X] Ten ket noi khong duoc de trong!")
+            print("[X] Tên kết nối không được để trống!")
             return
         
         host = input("Host (mặc định: localhost): ").strip() or 'localhost'
@@ -533,17 +533,17 @@ def add_connection(config, connections):
         try:
             port = int(port)
         except ValueError:
-            print("[X] Port phai la so!")
+            print("[X] Port phải là số!")
             return
         
         user = input("Username (mặc định: root): ").strip() or 'root'
-        password = input("Password (Enter de de trong): ").strip()
+        password = input("Password (Enter để để trống): ").strip()
         
-        xampp_path = input(f"Duong dan XAMPP (mặc định: {config.get('default_xampp_path', r'C:\xampp')}): ").strip()
+        xampp_path = input(f"Đường dẫn XAMPP (mặc định: {config.get('default_xampp_path', r'C:\xampp')}): ").strip()
         if not xampp_path:
             xampp_path = config.get('default_xampp_path', r'C:\xampp')
         
-        default_db = input("Database mac dinh (Enter de de trong): ").strip()
+        default_db = input("Database mặc định (Enter để để trống): ").strip()
         
         new_connection = {
             'name': name,
@@ -559,12 +559,12 @@ def add_connection(config, connections):
         config['connections'] = connections
         
         if save_config(config):
-            print(f"\n[OK] Da them ket noi: {name}")
+            print(f"\n[OK] Đã thêm kết nối: {name}")
         else:
-            print("[X] Loi luu config!")
+            print("[X] Lỗi lưu config!")
             connections.pop()
     except Exception as e:
-        print(f"[X] Loi: {e}")
+        print(f"[X] Lỗi: {e}")
 
 
 def edit_connection(config, connections, idx):
@@ -572,12 +572,12 @@ def edit_connection(config, connections, idx):
     conn = connections[idx]
     
     print("\n" + "=" * 70)
-    print(f"  SUA KET NOI: {conn['name']}")
+    print(f"  SỬA KẾT NỐI: {conn['name']}")
     print("=" * 70)
-    print("(Nhan Enter de giu nguyen gia tri cu)\n")
+    print("(Nhấn Enter để giữ nguyên giá trị cũ)\n")
     
     try:
-        new_name = input(f"Ten ket noi [{conn['name']}]: ").strip()
+        new_name = input(f"Tên kết nối [{conn['name']}]: ").strip()
         if new_name:
             conn['name'] = new_name
         
@@ -590,41 +590,41 @@ def edit_connection(config, connections, idx):
             try:
                 conn['port'] = int(new_port)
             except ValueError:
-                print("[!] Port khong hop le, giu nguyen gia tri cu")
+                print("[!] Port không hợp lệ, giữ nguyên giá trị cũ")
         
         new_user = input(f"Username [{conn['user']}]: ").strip()
         if new_user:
             conn['user'] = new_user
         
-        new_password = input("Password (Enter de giu nguyen, 'none' de xoa): ").strip()
+        new_password = input("Password (Enter để giữ nguyên, 'none' để xóa): ").strip()
         if new_password:
             if new_password.lower() == 'none':
                 conn['password'] = ''
             else:
                 conn['password'] = new_password
         
-        new_xampp = input(f"Duong dan XAMPP [{conn.get('xampp_path', '')}]: ").strip()
+        new_xampp = input(f"Đường dẫn XAMPP [{conn.get('xampp_path', '')}]: ").strip()
         if new_xampp:
             conn['xampp_path'] = new_xampp
         
-        new_db = input(f"Database mac dinh [{conn.get('default_db', '')}]: ").strip()
+        new_db = input(f"Database mặc định [{conn.get('default_db', '')}]: ").strip()
         if new_db:
             conn['default_db'] = new_db
         
         if save_config(config):
-            print(f"\n[OK] Da luu thay doi!")
+            print(f"\n[OK] Đã lưu thay đổi!")
         else:
-            print("[X] Loi luu config!")
+            print("[X] Lỗi lưu config!")
     except Exception as e:
-        print(f"[X] Loi: {e}")
+        print(f"[X] Lỗi: {e}")
 
 
 def delete_connection(config, connections, idx):
     """Xóa kết nối"""
     conn = connections[idx]
     
-    print(f"\n[!] Ban sap xoa ket noi: {conn['name']}")
-    confirm = input("Xac nhan xoa? (YES de xac nhan): ").strip()
+    print(f"\n[!] Bạn sắp xóa kết nối: {conn['name']}")
+    confirm = input("Xác nhận xóa? (YES để xác nhận): ").strip()
     
     if confirm == "YES":
         connections.pop(idx)
@@ -642,12 +642,12 @@ def delete_connection(config, connections, idx):
             config['default_connection'] -= 1
         
         if save_config(config):
-            print(f"\n[OK] Da xoa ket noi: {conn['name']}")
+            print(f"\n[OK] Đã xóa kết nối: {conn['name']}")
         else:
-            print("[X] Loi luu config!")
+            print("[X] Lỗi lưu config!")
             connections.insert(idx, conn)
     else:
-        print("[*] Da huy")
+        print("[*] Đã hủy")
 
 
 def show_databases_menu(connection, config):
@@ -665,18 +665,18 @@ def show_databases_menu(connection, config):
             for idx, db in enumerate(databases, start=1):
                 print(f"  {idx}. {db}")
         else:
-            print("[!] Khong tim thay database nao hoac khong the ket noi")
+            print("[!] Không tìm thấy database nào hoặc không thể kết nối")
         
         print("\n" + "-" * 70)
-        print("LENH:")
-        print("  [so] - Chon database")
-        print("  b [so] - Backup database")
+        print("LỆNH:")
+        print("  [số] - Chọn database")
+        print("  b [số] - Backup database")
         print("  r - Restore database")
-        print("  q - Chay SQL query")
-        print("  0 - Quay lai")
+        print("  q - Chạy SQL query")
+        print("  0 - Quay lại")
         print("=" * 70)
         
-        choice = input("\nChon lenh: ").strip().lower()
+        choice = input("\nChọn lệnh: ").strip().lower()
         
         if choice == '0':
             break
@@ -687,9 +687,9 @@ def show_databases_menu(connection, config):
                 if 0 <= idx < len(databases):
                     backup_db_menu(connection, databases[idx], config)
                 else:
-                    print("[X] So thu tu khong hop le!")
+                    print("[X] Số thứ tự không hợp lệ!")
             except ValueError:
-                print("[X] Vui long nhap so hop le!")
+                print("[X] Vui lòng nhập số hợp lệ!")
         elif choice == 'r':
             restore_db_menu(connection, config)
         elif choice == 'q':
@@ -700,9 +700,9 @@ def show_databases_menu(connection, config):
                 if 0 <= idx < len(databases):
                     show_tables_menu(connection, databases[idx], config)
                 else:
-                    print("[X] So thu tu khong hop le!")
+                    print("[X] Số thứ tự không hợp lệ!")
             except ValueError:
-                print("[X] Lenh khong hop le!")
+                print("[X] Lệnh không hợp lệ!")
 
 
 def backup_db_menu(connection, database, config):
@@ -719,7 +719,7 @@ def backup_db_menu(connection, database, config):
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     backup_file = os.path.join(backup_dir, f'{database}_{timestamp}.sql')
     
-    print(f"[>] Dang backup...")
+    print(f"[>] Đang backup...")
     success, message = backup_database(connection, database, backup_file)
     
     if success:
@@ -728,7 +728,7 @@ def backup_db_menu(connection, database, config):
     else:
         print(f"[X] {message}")
     
-    input("\nNhan Enter de tiep tuc...")
+    input("\nNhấn Enter để tiếp tục...")
 
 
 def restore_db_menu(connection, config):
@@ -750,14 +750,14 @@ def restore_db_menu(connection, config):
                 file_size = os.path.getsize(file_path) / (1024 * 1024)
                 print(f"  {idx}. {file} ({file_size:.2f} MB)")
         else:
-            print("\n[!] Khong co file backup nao")
+            print("\n[!] Không có file backup nào")
     else:
-        print(f"\n[!] Thu muc backup khong ton tai: {backup_dir}")
+        print(f"\n[!] Thư mục backup không tồn tại: {backup_dir}")
     
-    backup_file = input("\nNhap duong dan file SQL (hoac ten file): ").strip().strip('"')
+    backup_file = input("\nNhập đường dẫn file SQL (hoặc tên file): ").strip().strip('"')
     
     if not backup_file:
-        print("[*] Da huy")
+        print("[*] Đã hủy")
         return
     
     # Nếu chỉ là tên file, tìm trong thư mục backup
@@ -765,25 +765,25 @@ def restore_db_menu(connection, config):
         backup_file = os.path.join(backup_dir, backup_file)
     
     if not os.path.exists(backup_file):
-        print(f"[X] File khong ton tai: {backup_file}")
-        input("\nNhan Enter de tiep tuc...")
+        print(f"[X] File không tồn tại: {backup_file}")
+        input("\nNhấn Enter để tiếp tục...")
         return
     
-    database = input("Nhap ten database de restore (se tao moi neu chua co): ").strip()
+    database = input("Nhập tên database để restore (sẽ tạo mới nếu chưa có): ").strip()
     if not database:
-        print("[X] Ten database khong duoc de trong!")
-        input("\nNhan Enter de tiep tuc...")
+        print("[X] Tên database không được để trống!")
+        input("\nNhấn Enter để tiếp tục...")
         return
     
-    print(f"\n[!] Ban sap restore database '{database}' tu file: {backup_file}")
-    print("[!] CANH BAO: Database hien tai se bi ghi de!")
-    confirm = input("Xac nhan? (YES de xac nhan): ").strip()
+    print(f"\n[!] Bạn sắp restore database '{database}' từ file: {backup_file}")
+    print("[!] CẢNH BÁO: Database hiện tại sẽ bị ghi đè!")
+    confirm = input("Xác nhận? (YES để xác nhận): ").strip()
     
     if confirm != "YES":
-        print("[*] Da huy")
+        print("[*] Đã hủy")
         return
     
-    print(f"\n[>] Dang restore...")
+    print(f"\n[>] Đang restore...")
     success, message = restore_database(connection, database, backup_file)
     
     if success:
@@ -791,22 +791,22 @@ def restore_db_menu(connection, config):
     else:
         print(f"[X] {message}")
     
-    input("\nNhan Enter de tiep tuc...")
+    input("\nNhấn Enter để tiếp tục...")
 
 
 def query_menu(connection, config):
     """Menu chạy SQL query"""
     print("\n" + "=" * 70)
-    print("  CHAY SQL QUERY")
+    print("  CHẠY SQL QUERY")
     print("=" * 70)
     
-    database = input("\nNhap ten database: ").strip()
+    database = input("\nNhập tên database: ").strip()
     if not database:
-        print("[X] Ten database khong duoc de trong!")
+        print("[X] Tên database không được để trống!")
         return
     
-    print("\nNhap SQL query (ket thuc bang ';'):")
-    print("(Nhan Enter de ket thuc nhap, 'exit' de thoat)")
+    print("\nNhập SQL query (kết thúc bằng ';'):")
+    print("(Nhấn Enter để kết thúc nhập, 'exit' để thoát)")
     
     query_lines = []
     while True:
@@ -819,24 +819,24 @@ def query_menu(connection, config):
             query_lines.append(line)
     
     if not query_lines:
-        print("[*] Khong co query nao")
+        print("[*] Không có query nào")
         return
     
     query = ' '.join(query_lines)
     
-    print(f"\n[>] Dang chay query...")
+    print(f"\n[>] Đang chạy query...")
     success, output, error = execute_query(connection, database, query)
     
     if success:
         if output:
-            print("\nKet qua:")
+            print("\nKết quả:")
             print(output)
         else:
-            print("[OK] Query da chay thanh cong")
+            print("[OK] Query đã chạy thành công")
     else:
-        print(f"[X] Loi: {error}")
+        print(f"[X] Lỗi: {error}")
     
-    input("\nNhan Enter de tiep tuc...")
+    input("\nNhấn Enter để tiếp tục...")
 
 
 def show_tables_menu(connection, database, config):
@@ -849,21 +849,21 @@ def show_tables_menu(connection, database, config):
         tables = list_tables(connection, database)
         
         if tables:
-            print("\nDanh sach tables:")
+            print("\nDanh sách tables:")
             for idx, table in enumerate(tables, start=1):
                 print(f"  {idx}. {table}")
         else:
-            print("\n[!] Khong co table nao hoac khong the ket noi")
+            print("\n[!] Không có table nào hoặc không thể kết nối")
         
         print("\n" + "-" * 70)
-        print("LENH:")
-        print("  [so] - Xem cau truc table")
-        print("  e [so] - Export table")
-        print("  b - Backup toan bo database")
-        print("  0 - Quay lai")
+        print("LỆNH:")
+        print("  [số] - Xem cấu trúc table")
+        print("  e [số] - Export table")
+        print("  b - Backup toàn bộ database")
+        print("  0 - Quay lại")
         print("=" * 70)
         
-        choice = input("\nChon lenh: ").strip().lower()
+        choice = input("\nChọn lệnh: ").strip().lower()
         
         if choice == '0':
             break
@@ -874,9 +874,9 @@ def show_tables_menu(connection, database, config):
                 if 0 <= idx < len(tables):
                     export_table_menu(connection, database, tables[idx], config)
                 else:
-                    print("[X] So thu tu khong hop le!")
+                    print("[X] Số thứ tự không hợp lệ!")
             except ValueError:
-                print("[X] Vui long nhap so hop le!")
+                print("[X] Vui lòng nhập số hợp lệ!")
         elif choice == 'b':
             backup_db_menu(connection, database, config)
         else:
@@ -885,15 +885,15 @@ def show_tables_menu(connection, database, config):
                 if 0 <= idx < len(tables):
                     structure = get_table_structure(connection, database, tables[idx])
                     if structure:
-                        print(f"\nCau truc table '{tables[idx]}':")
+                        print(f"\nCấu trúc table '{tables[idx]}':")
                         print(structure)
                     else:
-                        print("[X] Khong the lay cau truc table")
-                    input("\nNhan Enter de tiep tuc...")
+                        print("[X] Không thể lấy cấu trúc table")
+                    input("\nNhấn Enter để tiếp tục...")
                 else:
-                    print("[X] So thu tu khong hop le!")
+                    print("[X] Số thứ tự không hợp lệ!")
             except ValueError:
-                print("[X] Lenh khong hop le!")
+                print("[X] Lệnh không hợp lệ!")
 
 
 def export_table_menu(connection, database, table, config):
@@ -919,7 +919,7 @@ def export_table_menu(connection, database, table, config):
     else:
         print(f"[X] {message}")
     
-    input("\nNhan Enter de tiep tuc...")
+    input("\nNhấn Enter để tiếp tục...")
 
 
 def main():
@@ -930,13 +930,13 @@ def main():
     connections = config.get('connections', [])
     
     if not connections:
-        print("[!] Chua co ket noi nao. Vui long them ket noi truoc.")
+        print("[!] Chưa có kết nối nào. Vui lòng thêm kết nối trước.")
         show_connections_menu(config)
         config = load_config()
         connections = config.get('connections', [])
         
         if not connections:
-            print("\n[!] Van chua co ket noi. Thoat tool.")
+            print("\n[!] Vẫn chưa có kết nối. Thoát tool.")
             return
     
     while True:
@@ -949,24 +949,24 @@ def main():
         current_connection = connections[default_idx]
         
         print("\n" + "=" * 70)
-        print("  MENU CHINH")
+        print("  MENU CHÍNH")
         print("=" * 70)
-        print(f"\nKet noi hien tai: {current_connection['name']}")
+        print(f"\nKết nối hiện tại: {current_connection['name']}")
         print(f"Host: {current_connection['host']}:{current_connection['port']}")
         print(f"User: {current_connection['user']}")
         
         print("\n" + "-" * 70)
-        print("LENH:")
-        print("  1 - Quan ly databases")
-        print("  2 - Quan ly ket noi")
-        print("  s - Cai dat")
-        print("  0 - Thoat")
+        print("LỆNH:")
+        print("  1 - Quản lý databases")
+        print("  2 - Quản lý kết nối")
+        print("  s - Cài đặt")
+        print("  0 - Thoát")
         print("=" * 70)
         
-        choice = input("\nChon lenh: ").strip().lower()
+        choice = input("\nChọn lệnh: ").strip().lower()
         
         if choice == '0':
-            print("\n[*] Thoat tool")
+            print("\n[*] Thoát tool")
             break
         elif choice == '1':
             show_databases_menu(current_connection, config)
@@ -978,51 +978,51 @@ def main():
             show_settings_menu(config)
             config = load_config()  # Reload config
         else:
-            print("[X] Lenh khong hop le!")
+            print("[X] Lệnh không hợp lệ!")
 
 
 def show_settings_menu(config):
     """Hiển thị menu cài đặt"""
     while True:
         print("\n" + "=" * 70)
-        print("  CAI DAT")
+        print("  CÀI ĐẶT")
         print("=" * 70)
-        print(f"\n1. Duong dan XAMPP mac dinh: {config.get('default_xampp_path', 'Chua cau hinh')}")
-        print(f"2. Thu muc backup: {config.get('backup_folder', 'database_backups')}")
-        print("\n0. Quay lai")
+        print(f"\n1. Đường dẫn XAMPP mặc định: {config.get('default_xampp_path', 'Chưa cấu hình')}")
+        print(f"2. Thư mục backup: {config.get('backup_folder', 'database_backups')}")
+        print("\n0. Quay lại")
         print("=" * 70)
         
-        choice = input("\nChon muc can chinh sua (so): ").strip()
+        choice = input("\nChọn mục cần chỉnh sửa (số): ").strip()
         
         if choice == '0':
             break
         elif choice == '1':
-            new_path = input("Nhap duong dan XAMPP mac dinh: ").strip().strip('"')
+            new_path = input("Nhập đường dẫn XAMPP mặc định: ").strip().strip('"')
             if new_path:
                 config['default_xampp_path'] = new_path
                 save_config(config)
-                print("[OK] Da cap nhat!")
+                print("[OK] Đã cập nhật!")
             else:
-                print("[X] Duong dan khong hop le!")
+                print("[X] Đường dẫn không hợp lệ!")
         elif choice == '2':
-            new_folder = input("Nhap ten thu muc backup: ").strip()
+            new_folder = input("Nhập tên thư mục backup: ").strip()
             if new_folder:
                 config['backup_folder'] = new_folder
                 save_config(config)
-                print("[OK] Da cap nhat!")
+                print("[OK] Đã cập nhật!")
             else:
-                print("[X] Ten thu muc khong hop le!")
+                print("[X] Tên thư mục không hợp lệ!")
         else:
-            print("[X] Lua chon khong hop le!")
+            print("[X] Lựa chọn không hợp lệ!")
 
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n[X] Da huy!")
+        print("\n\n[X] Đã hủy!")
     except Exception as e:
-        print(f"\n[X] Loi: {e}")
+        print(f"\n[X] Lỗi: {e}")
         import traceback
         traceback.print_exc()
 
