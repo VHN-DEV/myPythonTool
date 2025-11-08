@@ -1,4 +1,4 @@
-# Website Performance Checker - Kiểm tra hiệu năng website
+# Website Performance Checker - Kiểm tra hiệu năng dự án website
 
 Mô tả ngắn gọn: Tool kiểm tra và phân tích hiệu năng website, phát hiện các vấn đề và đưa ra gợi ý tối ưu hóa. Hỗ trợ kiểm tra CSS, JavaScript, hình ảnh, HTML, PHP và cấu hình cache.
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Tool: Kiểm tra hiệu năng website
+Tool: Kiểm tra hiệu năng dự án website
 Mục đích: Phân tích và đưa ra gợi ý tối ưu hóa hiệu năng cho dự án website
 """
 
@@ -343,7 +343,7 @@ def generate_report(project_path, config, analysis_results, issues, output_file)
     
     report = []
     report.append("=" * 80)
-    report.append("  BÁO CÁO KIỂM TRA HIỆU NĂNG WEBSITE")
+    report.append("  BÁO CÁO Kiểm tra hiệu năng dự án website")
     report.append("=" * 80)
     report.append(f"\n📁 Dự án: {project_path}")
     report.append(f"📅 Thời gian: {timestamp}")
