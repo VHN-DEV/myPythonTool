@@ -197,40 +197,78 @@ def get_default_servers():
     return servers
 
 
-def connect_server(server):
+def test_ssh_key_connection(server):
     """
-    Kết nối đến SSH server
+    Kiểm tra SSH key có kết nối được không
     
     Args:
-        server (dict): Thông tin server cần kết nối
+        server (dict): Thông tin server
     
-    Giải thích:
-    - Bước 1: Xác định phương thức kết nối (key/password)
-    - Bước 2: Tạo command SSH phù hợp
-    - Bước 3: Thực thi kết nối
+    Return:
+        bool: True nếu kết nối thành công, False nếu không
     """
-    print(f"\n[>] Dang ket noi den {server['name']}...")
-    print(f"   User: {server['user']}")
-    print(f"   Host: {server['host']}")
-    print(f"   Port: {server['port']}")
+    if not server.get("ssh_key") or not os.path.exists(server["ssh_key"]):
+        return False
     
-    # Kiểm tra SSH key có tồn tại không
-    if server.get("ssh_key"):
-        if not os.path.exists(server["ssh_key"]):
-            print(f"[X] Lỗi: Không tìm thấy SSH key tại: {server['ssh_key']}")
-            return
-        
-        # Kết nối bằng SSH key
-        print(f"   Auth: SSH Key ({server['ssh_key']})")
+    # Test kết nối với SSH key (không tương tác, timeout ngắn)
+    test_cmd = [
+        "ssh",
+        "-i", server["ssh_key"],
+        "-o", "ConnectTimeout=5",
+        "-o", "BatchMode=yes",
+        "-o", "StrictHostKeyChecking=no",
+        f"{server['user']}@{server['host']}",
+        "-p", str(server["port"]),
+        "echo 'test'"
+    ]
+    
+    try:
+        result = subprocess.run(
+            test_cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=10
+        )
+        return result.returncode == 0
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        return False
+
+
+def connect_with_password(server):
+    """
+    Kết nối SSH bằng password (tự động hoặc thủ công)
+    
+    Args:
+        server (dict): Thông tin server
+    """
+    password = server.get("password")
+    
+    # Kiểm tra xem có sshpass không (Linux/Mac)
+    has_sshpass = False
+    try:
+        subprocess.run(["sshpass", "-V"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        has_sshpass = True
+    except FileNotFoundError:
+        pass
+    
+    if password and has_sshpass:
+        # Tự động nhập password bằng sshpass
+        print(f"   Auth: Password (tự động với sshpass)")
         cmd = [
+            "sshpass",
+            "-p", password,
             "ssh",
-            "-i", server["ssh_key"],
             f"{server['user']}@{server['host']}",
-            "-p", str(server["port"])
+            "-p", str(server["port"]),
+            "-o", "StrictHostKeyChecking=no"
         ]
     else:
-        # Mặc định SSH (sẽ hỏi password hoặc dùng key mặc định)
-        print(f"   Auth: Mặc định (key hoặc password)")
+        # Nhập password thủ công
+        if password:
+            print(f"   Auth: Password (có trong config, nhập thủ công)")
+            print(f"   [i] Password: {password[:3]}...{password[-3:] if len(password) > 6 else '***'}")
+        else:
+            print(f"   Auth: Password (SSH sẽ hỏi password)")
         cmd = [
             "ssh",
             f"{server['user']}@{server['host']}",
@@ -240,7 +278,6 @@ def connect_server(server):
     print("\n" + "=" * 60)
     
     try:
-        # Thực thi lệnh SSH
         subprocess.run(cmd)
         print("\n" + "=" * 60)
         print("[OK] Da ngat ket noi SSH")
@@ -251,6 +288,106 @@ def connect_server(server):
     except Exception as e:
         print("\n" + "=" * 60)
         print(f"[X] Lỗi kết nối: {e}")
+
+
+def connect_server(server):
+    """
+    Kết nối đến SSH server
+    
+    Args:
+        server (dict): Thông tin server cần kết nối
+    
+    Giải thích:
+    - Bước 1: Xác định phương thức kết nối (key/password)
+    - Bước 2: Thử SSH key trước (nếu có)
+    - Bước 3: Nếu SSH key fail, tự động fallback sang password
+    - Ưu tiên: SSH key > Password (nếu có cả 2 thì dùng SSH key, nếu key fail thì dùng password)
+    """
+    print(f"\n[>] Dang ket noi den {server['name']}...")
+    print(f"   User: {server['user']}")
+    print(f"   Host: {server['host']}")
+    print(f"   Port: {server['port']}")
+    
+    # Kiểm tra SSH key có tồn tại không - ƯU TIÊN SSH KEY
+    has_ssh_key = bool(server.get("ssh_key"))
+    has_password = bool(server.get("password"))
+    
+    if has_ssh_key:
+        if not os.path.exists(server["ssh_key"]):
+            print(f"[X] Lỗi: Không tìm thấy SSH key tại: {server['ssh_key']}")
+            if has_password:
+                print(f"[i] Fallback: Chuyển sang dùng password...")
+                connect_with_password(server)
+            else:
+                print(f"[i] Server không có password, SSH sẽ hỏi password khi kết nối")
+                cmd = [
+                    "ssh",
+                    f"{server['user']}@{server['host']}",
+                    "-p", str(server["port"])
+                ]
+                print("\n" + "=" * 60)
+                try:
+                    subprocess.run(cmd)
+                    print("\n" + "=" * 60)
+                    print("[OK] Da ngat ket noi SSH")
+                except Exception as e:
+                    print("\n" + "=" * 60)
+                    print(f"[X] Lỗi kết nối: {e}")
+            return
+        
+        # Kiểm tra SSH key có kết nối được không
+        print(f"   Auth: SSH Key ({server['ssh_key']})")
+        if has_password:
+            print(f"   [i] Server có cả password, đang kiểm tra SSH key...")
+        
+        # Test SSH key connection
+        if test_ssh_key_connection(server):
+            # SSH key hoạt động, kết nối bằng SSH key
+            print(f"   [OK] SSH key hợp lệ, đang kết nối...")
+            cmd = [
+                "ssh",
+                "-i", server["ssh_key"],
+                f"{server['user']}@{server['host']}",
+                "-p", str(server["port"])
+            ]
+            print("\n" + "=" * 60)
+            
+            try:
+                subprocess.run(cmd)
+                print("\n" + "=" * 60)
+                print("[OK] Da ngat ket noi SSH")
+            except FileNotFoundError:
+                print("\n" + "=" * 60)
+                print("[X] Lỗi: Không tìm thấy lệnh 'ssh'")
+                print("[i] Cai dat OpenSSH hoac su dung Git Bash")
+            except Exception as e:
+                print("\n" + "=" * 60)
+                print(f"[X] Lỗi kết nối: {e}")
+        else:
+            # SSH key không kết nối được, fallback sang password
+            print(f"   [!] SSH key không kết nối được hoặc không hợp lệ")
+            if has_password:
+                print(f"   [i] Fallback: Tự động chuyển sang dùng password...")
+                connect_with_password(server)
+            else:
+                print(f"   [i] Server không có password, thử kết nối trực tiếp...")
+                cmd = [
+                    "ssh",
+                    "-i", server["ssh_key"],
+                    f"{server['user']}@{server['host']}",
+                    "-p", str(server["port"])
+                ]
+                print("\n" + "=" * 60)
+                try:
+                    subprocess.run(cmd)
+                    print("\n" + "=" * 60)
+                    print("[OK] Da ngat ket noi SSH")
+                except Exception as e:
+                    print("\n" + "=" * 60)
+                    print(f"[X] Lỗi kết nối: {e}")
+    else:
+        # Không có SSH key, dùng password
+        connect_with_password(server)
 
 
 def add_new_server(servers):
@@ -697,7 +834,20 @@ def main():
         if servers:
             # Hiển thị danh sách server
             for idx, server in enumerate(servers, start=1):
-                auth_method = "[Key]" if server.get("ssh_key") else "[Pass]"
+                has_key = bool(server.get("ssh_key"))
+                has_pass = bool(server.get("password"))
+                
+                # Xác định phương thức xác thực hiển thị (ưu tiên SSH key)
+                if has_key:
+                    if has_pass:
+                        auth_method = "[Key*+Pass]"  # Có cả 2, ưu tiên Key
+                    else:
+                        auth_method = "[Key]"
+                elif has_pass:
+                    auth_method = "[Pass]"
+                else:
+                    auth_method = "[None]"  # Không có cả 2
+                
                 desc = f" - {server.get('description', '')}" if server.get('description') else ""
                 print(f"{idx}. {auth_method} {server['name']}{desc}")
                 print(f"   -> {server['user']}@{server['host']}:{server['port']}")
