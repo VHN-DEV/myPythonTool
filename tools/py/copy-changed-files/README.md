@@ -12,6 +12,7 @@ Tool sao chép file thay đổi từ Git repository theo commit range. Giữ ngu
 ✅ Tạo danh sách file đã copy
 ✅ Verify commit ID trước khi thực hiện
 ✅ Tự động tạo thư mục output
+✅ Cấu hình vị trí thư mục output (lưu trong config)
 ✅ Hiển thị tiến trình chi tiết
 ✅ Liệt kê dự án trong htdocs và cho phép chọn
 ✅ Cho phép nhập đường dẫn dự án tùy chỉnh
@@ -71,10 +72,24 @@ Tool sẽ:
 2. Hiển thị số lượng file tìm thấy
 3. Hiển thị danh sách file (preview)
 
-### 5. Copy file
+### 5. Cấu hình thư mục output
+
+Tool sẽ hỏi bạn về vị trí thư mục output:
+- **Lần đầu chạy**: Tool sẽ hỏi bạn nhập đường dẫn thư mục output
+- **Các lần sau**: Tool sẽ sử dụng đường dẫn đã lưu trong config, nhưng bạn có thể thay đổi
+- **Lưu config**: Bạn có thể chọn lưu đường dẫn làm mặc định cho các lần sau
+
+**Ví dụ đường dẫn:**
+- `changed-files-export` - Thư mục trong thư mục hiện tại (mặc định)
+- `C:\exports\changed-files` - Đường dẫn tuyệt đối
+- `./exports` - Thư mục exports trong thư mục hiện tại
+
+**File config:** `copy-changed-files_config.json` (tự động tạo trong thư mục tool)
+
+### 6. Copy file
 
 Tool sẽ:
-1. Tạo thư mục output: `changed-files-export`
+1. Tạo thư mục output theo cấu hình
 2. Copy file và giữ nguyên cấu trúc thư mục
 3. Tạo file danh sách: `danh-sach-file-thay-doi.txt`
 4. Hiển thị tiến trình và kết quả
@@ -202,6 +217,36 @@ File `danh-sach-file-thay-doi.txt` chứa danh sách đầy đủ các file đã
 - Backup file quan trọng đã thay đổi
 - Deploy từng phần (chỉ deploy file thay đổi)
 
+## Cấu hình
+
+### File config
+
+Tool tự động tạo file `copy-changed-files_config.json` trong thư mục tool để lưu cấu hình.
+
+**Cấu trúc file config:**
+```json
+{
+  "output_folder": "changed-files-export"
+}
+```
+
+**Cách cấu hình:**
+
+1. **Tự động**: Khi chạy tool lần đầu, tool sẽ hỏi và cho phép lưu đường dẫn
+2. **Thủ công**: Tạo file `copy-changed-files_config.json` dựa trên `copy-changed-files_config.example.json`
+
+**Ví dụ cấu hình:**
+```json
+{
+  "output_folder": "C:\\exports\\changed-files"
+}
+```
+
+**Lưu ý:**
+- Đường dẫn có thể là tuyệt đối hoặc tương đối
+- Nếu không có config, tool sẽ hỏi bạn mỗi lần chạy
+- Bạn có thể thay đổi đường dẫn mỗi lần chạy mà không cần sửa file config
+
 ## Lưu ý
 
 - **Git repository**: Thư mục phải là Git repository
@@ -209,6 +254,7 @@ File `danh-sach-file-thay-doi.txt` chứa danh sách đầy đủ các file đã
 - **File đã xóa**: File đã xóa sẽ bị bỏ qua
 - **Cấu trúc**: Cấu trúc thư mục được giữ nguyên
 - **Overwrite**: File đã tồn tại sẽ bị ghi đè
+- **Config**: File config được tạo tự động, bạn có thể chỉnh sửa thủ công
 
 ## Ví dụ thực tế
 

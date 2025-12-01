@@ -6,16 +6,16 @@
     "video-converter.py"
   ],
   "recent": [
-    "git-push-source.py",
     "copy-changed-files.py",
+    "generate-tree.py",
+    "git-push-source.py",
     "compress-images.py",
     "qr-code.py",
     "scan-malware.py",
     "json-formatter.py",
     "video-converter.py",
     "setup-project-linux.py",
-    "backup-folder.py",
-    "clean-temp-files.py"
+    "backup-folder.py"
   ],
   "settings": {
     "show_descriptions": false,
