@@ -143,6 +143,23 @@ def verify_commit(commit_id, project_path):
     return success
 
 
+def normalize_commit_id(commit_id, project_path):
+    """
+    Chuẩn hóa commit ID về full hash để so sánh
+
+    Args:
+        commit_id (str): Commit ID (có thể là short hash, HEAD, etc.)
+        project_path (Path): Đường dẫn đến dự án
+
+    Returns:
+        str: Full commit hash, hoặc None nếu không hợp lệ
+    """
+    success, output = run_git_command(['git', 'rev-parse', commit_id], cwd=project_path)
+    if success:
+        return output.strip()
+    return None
+
+
 def get_changed_files(commit_start, commit_end, project_path):
     """
     Bước 3: Lấy danh sách các file đã thay đổi
@@ -209,7 +226,7 @@ def copy_files(changed_files, output_folder, project_path):
         project_path (Path): Đường dẫn đến dự án
 
     Returns:
-        tuple: (copied_count, skipped_count)
+        tuple: (copied_count, skipped_count, copied_file_paths)
 
     Giải thích:
     - Duyệt qua từng file trong danh sách
@@ -217,9 +234,11 @@ def copy_files(changed_files, output_folder, project_path):
     - Tạo thư mục cha nếu chưa có
     - Copy file giữ nguyên cấu trúc thư mục
     - Đếm số file đã copy và bỏ qua
+    - Thu thập danh sách đường dẫn file đã copy (đường dẫn tuyệt đối)
     """
     copied_count = 0
     skipped_count = 0
+    copied_file_paths = []
 
     for file_path in changed_files:
         # Đường dẫn file gốc (trong thư mục dự án)
@@ -236,12 +255,15 @@ def copy_files(changed_files, output_folder, project_path):
             # Copy file
             shutil.copy2(source_path, destination_path)
             print(f"✓ [OK] {file_path}")
+            
+            # Lưu đường dẫn tuyệt đối của file đã copy
+            copied_file_paths.append(str(destination_path.resolve()))
             copied_count += 1
         else:
             print(f"⚠️  [SKIP] {file_path} (file không tồn tại)")
             skipped_count += 1
 
-    return copied_count, skipped_count
+    return copied_count, skipped_count, copied_file_paths
 
 
 def save_file_list(changed_files, output_folder):
@@ -264,7 +286,7 @@ def save_file_list(changed_files, output_folder):
     return str(list_file)
 
 
-def print_summary(copied_count, skipped_count, output_folder, list_file):
+def print_summary(copied_count, skipped_count, output_folder, list_file, copied_file_paths):
     """
     Bước 7: In thông tin tổng kết
 
@@ -273,10 +295,12 @@ def print_summary(copied_count, skipped_count, output_folder, list_file):
         skipped_count (int): Số file đã bỏ qua
         output_folder (str): Thư mục export
         list_file (str): Đường dẫn file danh sách
+        copied_file_paths (list): Danh sách đường dẫn file đã copy
 
     Giải thích:
     - Hiển thị thông tin tổng kết cho người dùng
     - Hướng dẫn cách upload lên server
+    - Hiển thị danh sách đường dẫn file đã copy
     """
     print("\n" + "=" * 50)
     print("✓ Hoàn tất!")
@@ -285,6 +309,14 @@ def print_summary(copied_count, skipped_count, output_folder, list_file):
     print(f"- Thư mục xuất: {output_folder}")
     print(f"- Danh sách file: {list_file}")
     print("\n🚀 Bạn có thể upload toàn bộ thư mục '{}' lên server bằng FileZilla!".format(output_folder))
+    print("\n" + "=" * 50)
+    print("📁 ĐƯỜNG DẪN CÁC FILE ĐÃ SAO CHÉP:")
+    print("=" * 50)
+    if copied_file_paths:
+        for i, file_path in enumerate(copied_file_paths, 1):
+            print(f"{i}. {file_path}")
+    else:
+        print("Không có file nào được sao chép.")
     print("=" * 50)
     print()
 
@@ -321,12 +353,25 @@ def main():
 
     print("✓ Commit ID hợp lệ!\n")
 
+    # Chuẩn hóa commit ID để so sánh
+    normalized_start = normalize_commit_id(commit_start, project_path)
+    normalized_end = normalize_commit_id(commit_end, project_path)
+    
+    # Nếu commit bắt đầu và kết thúc giống nhau, tự động so sánh với commit trước đó
+    if normalized_start and normalized_end and normalized_start == normalized_end:
+        print(f"ℹ️  Phát hiện commit bắt đầu và kết thúc giống nhau ({commit_start})")
+        print(f"💡 Tự động so sánh với commit trước đó ({commit_start}^) để lấy file thay đổi trong commit này...")
+        print()
+        commit_start = f"{commit_start}^"
+    
     # Bước 4: Lấy danh sách file thay đổi
     print(f"📂 Đang lấy danh sách file thay đổi từ commit {commit_start} đến {commit_end}...")
     changed_files = get_changed_files(commit_start, commit_end, project_path)
 
     if not changed_files:
         print("❌ Không có file nào thay đổi!")
+        if normalized_start == normalized_end:
+            print("💡 Commit này không có file nào thay đổi so với commit trước đó.")
         sys.exit(0)
 
     print(f"✓ Tìm thấy {len(changed_files)} file đã thay đổi\n")
@@ -337,13 +382,13 @@ def main():
 
     # Bước 6: Copy files
     print("📋 Đang copy file...\n")
-    copied_count, skipped_count = copy_files(changed_files, output_folder, project_path)
+    copied_count, skipped_count, copied_file_paths = copy_files(changed_files, output_folder, project_path)
 
     # Bước 7: Lưu danh sách file
     list_file = save_file_list(changed_files, output_folder)
 
     # Bước 8: In tổng kết
-    print_summary(copied_count, skipped_count, output_folder, list_file)
+    print_summary(copied_count, skipped_count, output_folder, list_file, copied_file_paths)
 
 
 # Chạy script
