@@ -104,14 +104,24 @@ def compress_single_image(
             if target_format == "JPG":
                 target_format = "JPEG"
             
-            # Convert sang RGB nếu cần thiết cho JPEG
-            if target_format == "JPEG" and img.mode in ("RGBA", "LA", "P"):
-                # Tạo background trắng
-                background = Image.new("RGB", img.size, (255, 255, 255))
-                if img.mode == "P":
-                    img = img.convert("RGBA")
-                background.paste(img, mask=img.split()[-1] if img.mode == "RGBA" else None)
-                img = background
+            # Convert sang RGB nếu cần thiết cho JPEG hoặc WEBP (nếu không cần alpha)
+            if target_format in ["JPEG", "WEBP"] and img.mode in ("RGBA", "LA", "P"):
+                # Với WEBP, kiểm tra xem có alpha channel thực sự không
+                if target_format == "WEBP" and img.mode == "RGBA":
+                    # Kiểm tra xem alpha channel có trong suốt không
+                    alpha = img.split()[3]
+                    has_transparency = any(pixel < 255 for pixel in alpha.getdata())
+                    
+                    if not has_transparency:
+                        # Không có transparency thực sự, convert sang RGB để nhanh hơn
+                        img = img.convert("RGB")
+                else:
+                    # Tạo background trắng cho JPEG hoặc các mode khác
+                    background = Image.new("RGB", img.size, (255, 255, 255))
+                    if img.mode == "P":
+                        img = img.convert("RGBA")
+                    background.paste(img, mask=img.split()[-1] if img.mode == "RGBA" else None)
+                    img = background
         else:
             target_format = original_format or "JPEG"
         
@@ -128,17 +138,48 @@ def compress_single_image(
         if target_format in ['JPEG', 'WEBP']:
             save_kwargs['quality'] = quality
         
+        # Tối ưu WEBP: thêm method parameter để tăng tốc độ
+        # method: 0-6, 6 = nhanh nhất (ít nén), 0 = chậm nhất (nén tốt nhất)
+        # Dùng method=6 để tăng tốc độ xử lý
+        if target_format == 'WEBP':
+            save_kwargs['method'] = 6  # Tối ưu cho tốc độ
+            # Tắt optimize cho WEBP khi có max_size_kb để tăng tốc độ
+            # (vì chúng ta đã tự động điều chỉnh quality rồi)
+            if max_size_kb:
+                save_kwargs['optimize'] = False
+        
         img.save(output_path, **save_kwargs)
         
-        # Bước 6: Nếu có max_size_kb, giảm dần quality
+        # Bước 6: Nếu có max_size_kb, giảm dần quality (tối ưu hóa)
         if max_size_kb and target_format in ['JPEG', 'WEBP']:
             current_quality = quality
             max_size_bytes = max_size_kb * 1024
+            current_size = os.path.getsize(output_path)
             
-            while os.path.getsize(output_path) > max_size_bytes and current_quality > 10:
-                current_quality -= 5
-                save_kwargs['quality'] = current_quality
-                img.save(output_path, **save_kwargs)
+            # Nếu file đã nhỏ hơn yêu cầu, bỏ qua
+            if current_size <= max_size_bytes:
+                pass
+            else:
+                # Tối ưu: dùng binary search approach thay vì linear
+                # Bước 1: Giảm nhanh quality với step lớn để tìm khoảng
+                min_quality = 10
+                max_quality = current_quality
+                
+                # Giảm nhanh với step 10-15 để tìm khoảng gần đúng
+                while current_size > max_size_bytes and current_quality > min_quality:
+                    current_quality = max(min_quality, current_quality - 15)
+                    save_kwargs['quality'] = current_quality
+                    img.save(output_path, **save_kwargs)
+                    current_size = os.path.getsize(output_path)
+                
+                # Bước 2: Nếu vẫn chưa đạt, tinh chỉnh với step nhỏ hơn
+                if current_size > max_size_bytes and current_quality > min_quality:
+                    # Tìm quality tối ưu với step nhỏ hơn
+                    while current_size > max_size_bytes and current_quality > min_quality:
+                        current_quality = max(min_quality, current_quality - 5)
+                        save_kwargs['quality'] = current_quality
+                        img.save(output_path, **save_kwargs)
+                        current_size = os.path.getsize(output_path)
         
         new_size = os.path.getsize(output_path)
         

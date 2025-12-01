@@ -20,43 +20,152 @@ def print_header():
     print()
 
 
-def get_project_path():
+def get_default_htdocs_path():
     """
-    Hỏi người dùng nhập đường dẫn dự án
-
+    Lấy đường dẫn htdocs mặc định
+    
     Returns:
-        Path: Đường dẫn đến thư mục dự án
-
-    Giải thích:
-    - Nhận đường dẫn từ người dùng
-    - Kiểm tra đường dẫn có tồn tại không
-    - Kiểm tra có phải là Git repository không
-    - Trả về Path object nếu hợp lệ
+        str: Đường dẫn htdocs mặc định (C:\\xampp\\htdocs)
     """
-    project_path_input = input("Nhập đường dẫn dự án (ví dụ: C:\\xampp\\htdocs\\mitsuheavy-ecommerce): ").strip()
+    return r"C:\xampp\htdocs"
 
-    if not project_path_input:
-        print("❌ Lỗi: Bạn phải nhập đường dẫn dự án!")
-        sys.exit(1)
 
-    # Chuyển đổi sang Path object
-    project_path = Path(project_path_input).resolve()
+def list_projects(htdocs_path):
+    """
+    Liệt kê các dự án trong thư mục htdocs
+    
+    Args:
+        htdocs_path (str): Đường dẫn thư mục htdocs
+        
+    Returns:
+        list: Danh sách tên dự án
+    """
+    projects = []
+    
+    if not os.path.exists(htdocs_path):
+        return projects
+    
+    try:
+        for item in os.listdir(htdocs_path):
+            item_path = os.path.join(htdocs_path, item)
+            if os.path.isdir(item_path):
+                # Bỏ qua các thư mục đặc biệt
+                if item.lower() not in ['cgi-bin', 'webalizer', 'usage']:
+                    projects.append(item)
+    except Exception as e:
+        print(f"⚠️  Lỗi đọc thư mục htdocs: {e}")
+    
+    return sorted(projects)
 
+
+def validate_git_repository(project_path):
+    """
+    Kiểm tra đường dẫn có phải là Git repository không
+    
+    Args:
+        project_path (Path): Đường dẫn đến dự án
+        
+    Returns:
+        bool: True nếu là Git repository hợp lệ, False nếu không
+    """
     # Kiểm tra đường dẫn có tồn tại không
     if not project_path.exists():
         print(f"❌ Lỗi: Đường dẫn '{project_path}' không tồn tại!")
-        sys.exit(1)
+        return False
 
     # Kiểm tra có phải là thư mục không
     if not project_path.is_dir():
         print(f"❌ Lỗi: '{project_path}' không phải là thư mục!")
-        sys.exit(1)
+        return False
 
     # Kiểm tra có phải là Git repository không
     git_dir = project_path / ".git"
     if not git_dir.exists():
         print(f"❌ Lỗi: '{project_path}' không phải là Git repository!")
         print("💡 Đảm bảo thư mục đã được khởi tạo Git: git init")
+        return False
+
+    return True
+
+
+def get_project_path():
+    """
+    Hỏi người dùng chọn dự án từ htdocs hoặc nhập đường dẫn tùy chỉnh
+
+    Returns:
+        Path: Đường dẫn đến thư mục dự án
+
+    Giải thích:
+    - Thử tìm và liệt kê các dự án trong htdocs
+    - Cho phép người dùng chọn dự án theo số thứ tự
+    - Hoặc cho phép nhập đường dẫn tùy chỉnh
+    - Kiểm tra đường dẫn có tồn tại không
+    - Kiểm tra có phải là Git repository không
+    - Trả về Path object nếu hợp lệ
+    """
+    # Thử lấy danh sách dự án từ htdocs
+    htdocs_path = get_default_htdocs_path()
+    projects = list_projects(htdocs_path)
+    
+    # Hiển thị danh sách dự án nếu có
+    if projects and os.path.exists(htdocs_path):
+        print("\n" + "=" * 60)
+        print("  DANH SACH DU AN TRONG HTDOCS")
+        print("=" * 60)
+        print(f"📁 Đường dẫn: {htdocs_path}\n")
+        
+        for idx, project in enumerate(projects, start=1):
+            project_path = os.path.join(htdocs_path, project)
+            # Kiểm tra xem có phải Git repo không để hiển thị icon
+            git_check = Path(project_path) / ".git"
+            git_icon = "✓" if git_check.exists() else "⚠️"
+            print(f"  {idx}. {git_icon} {project}")
+        
+        print("\n" + "-" * 60)
+        print("HƯỚNG DẪN:")
+        print("  [số]      - Chọn dự án theo số thứ tự")
+        print("  [đường dẫn] - Nhập đường dẫn dự án tùy chỉnh")
+        print("=" * 60)
+        print()
+        
+        choice = input("Chọn dự án hoặc nhập đường dẫn: ").strip().strip('"')
+        
+        if not choice:
+            print("❌ Lỗi: Bạn phải chọn dự án hoặc nhập đường dẫn!")
+            sys.exit(1)
+        
+        # Kiểm tra xem có phải là số không
+        try:
+            project_idx = int(choice)
+            if 1 <= project_idx <= len(projects):
+                # Chọn dự án từ danh sách
+                selected_project = projects[project_idx - 1]
+                project_path_input = os.path.join(htdocs_path, selected_project)
+                print(f"✓ Đã chọn dự án: {selected_project}")
+            else:
+                print(f"❌ Lỗi: Số thứ tự không hợp lệ! Vui lòng chọn từ 1 đến {len(projects)}")
+                sys.exit(1)
+        except ValueError:
+            # Không phải số, coi như đường dẫn tùy chỉnh
+            project_path_input = choice
+    else:
+        # Không có dự án trong htdocs hoặc htdocs không tồn tại
+        if not os.path.exists(htdocs_path):
+            print(f"ℹ️  Không tìm thấy thư mục htdocs tại: {htdocs_path}")
+        else:
+            print(f"ℹ️  Không tìm thấy dự án nào trong: {htdocs_path}")
+        print()
+        project_path_input = input("Nhập đường dẫn dự án (ví dụ: C:\\xampp\\htdocs\\mitsuheavy-ecommerce): ").strip().strip('"')
+        
+        if not project_path_input:
+            print("❌ Lỗi: Bạn phải nhập đường dẫn dự án!")
+            sys.exit(1)
+
+    # Chuyển đổi sang Path object
+    project_path = Path(project_path_input).resolve()
+
+    # Kiểm tra và validate Git repository
+    if not validate_git_repository(project_path):
         sys.exit(1)
 
     print(f"✓ Dự án hợp lệ: {project_path}")

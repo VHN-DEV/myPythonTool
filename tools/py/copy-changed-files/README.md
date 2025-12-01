@@ -13,6 +13,8 @@ Tool sao chép file thay đổi từ Git repository theo commit range. Giữ ngu
 ✅ Verify commit ID trước khi thực hiện
 ✅ Tự động tạo thư mục output
 ✅ Hiển thị tiến trình chi tiết
+✅ Liệt kê dự án trong htdocs và cho phép chọn
+✅ Cho phép nhập đường dẫn dự án tùy chỉnh
 
 ## Yêu cầu
 
@@ -36,9 +38,22 @@ python tools/py/copy-changed-files/copy-changed-files.py
 
 ## Hướng dẫn chi tiết
 
-### 1. Nhập đường dẫn dự án
+### 1. Chọn dự án hoặc nhập đường dẫn
 
-Nhập đường dẫn dự án (Git repository) (vd: `C:\xampp\htdocs\my-ecommerce`)
+Tool sẽ tự động tìm và liệt kê các dự án trong thư mục htdocs (`C:\xampp\htdocs`). Bạn có thể:
+
+**Cách 1: Chọn dự án từ danh sách**
+- Nhập số thứ tự của dự án (ví dụ: `1`, `2`, `3`)
+- Tool sẽ tự động lấy đường dẫn đầy đủ
+
+**Cách 2: Nhập đường dẫn tùy chỉnh**
+- Nhập đường dẫn đầy đủ đến dự án (ví dụ: `C:\xampp\htdocs\my-ecommerce`)
+- Hoặc đường dẫn bất kỳ đến Git repository
+
+**Lưu ý:**
+- Tool sẽ hiển thị icon `✓` cho dự án là Git repository
+- Tool sẽ hiển thị icon `⚠️` cho dự án không phải Git repository
+- Nếu không tìm thấy htdocs hoặc không có dự án, tool sẽ yêu cầu nhập đường dẫn thủ công
 
 ### 2. Nhập commit ID
 
@@ -69,7 +84,25 @@ Tool sẽ:
 ### Copy file từ commit cụ thể đến HEAD
 
 ```
-Nhập đường dẫn dự án: C:\xampp\htdocs\my-ecommerce
+============================================================
+  DANH SACH DU AN TRONG HTDOCS
+============================================================
+📁 Đường dẫn: C:\xampp\htdocs
+
+  1. ✓ my-ecommerce
+  2. ✓ my-blog
+  3. ⚠️ test-project
+
+------------------------------------------------------------
+HƯỚNG DẪN:
+  [số]      - Chọn dự án theo số thứ tự
+  [đường dẫn] - Nhập đường dẫn dự án tùy chỉnh
+============================================================
+
+Chọn dự án hoặc nhập đường dẫn: 1
+✓ Đã chọn dự án: my-ecommerce
+✓ Dự án hợp lệ: C:\xampp\htdocs\my-ecommerce
+
 Nhập commit ID bắt đầu (vd: 9d172f6): 9d172f6
 Nhập commit ID kết thúc (Enter = HEAD): [Enter]
 

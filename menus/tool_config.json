@@ -6,6 +6,7 @@
     "video-converter.py"
   ],
   "recent": [
+    "copy-changed-files.py",
     "compress-images.py",
     "qr-code.py",
     "scan-malware.py",
@@ -14,7 +15,6 @@
     "setup-project-linux.py",
     "backup-folder.py",
     "clean-temp-files.py",
-    "copy-changed-files.py",
     "duplicate-finder.py"
   ],
   "settings": {
