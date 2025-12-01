@@ -242,6 +242,7 @@ def batch_compress_images(
     file_details = []  # List để lưu thông tin chi tiết từng file
     
     progress = ProgressBar(len(tasks), prefix="Đang xử lý:")
+    progress.update(0)  # Hiển thị progress bar ngay từ đầu
     
     if use_multiprocessing and len(tasks) > 1:
         # Xử lý song song với multiprocessing
