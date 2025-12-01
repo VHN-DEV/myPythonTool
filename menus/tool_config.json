@@ -6,6 +6,7 @@
     "video-converter.py"
   ],
   "recent": [
+    "git-push-source.py",
     "copy-changed-files.py",
     "compress-images.py",
     "qr-code.py",
@@ -14,8 +15,7 @@
     "video-converter.py",
     "setup-project-linux.py",
     "backup-folder.py",
-    "clean-temp-files.py",
-    "duplicate-finder.py"
+    "clean-temp-files.py"
   ],
   "settings": {
     "show_descriptions": false,
